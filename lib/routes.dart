@@ -27,7 +27,7 @@ import 'package:medicare/views/ui/extra_pages/pricing_screen.dart';
 import 'package:medicare/views/ui/extra_pages/time_line_screen.dart';
 import 'package:medicare/views/ui/forms/basic_input_screen.dart';
 import 'package:medicare/views/ui/forms/custom_option_screen.dart';
-import 'package:medicare/views/ui/forms/editor_screen.dart';
+//import 'package:medicare/views/ui/forms/editor_screen.dart';
 import 'package:medicare/views/ui/forms/file_upload_screen.dart';
 import 'package:medicare/views/ui/forms/mask_screen.dart';
 import 'package:medicare/views/ui/forms/slider_screen.dart';

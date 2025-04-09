@@ -53,8 +53,10 @@ class AuthLayout extends StatelessWidget {
           alignment: AlignmentDirectional.center,
           children: [
             AnimateGradient(
-              primaryColors: [Colors.brown, Colors.grey],
-              secondaryColors: [Colors.grey, Colors.brown],
+              //primaryColors: [Colors.brown, Colors.grey],
+              primaryColors: [Color(0xFFAA236E), Color(0XFF35639D)],
+              //secondaryColors: [Colors.grey, Colors.brown],
+              secondaryColors: [Color(0XFF35639D), Color(0xFFAA236E)],
             ),
             MyFlex(
               wrapAlignment: WrapAlignment.center,

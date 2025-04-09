@@ -12,6 +12,8 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:url_strategy/url_strategy.dart';
 
+import 'package:blix_essentials/blix_essentials.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
@@ -19,6 +21,9 @@ Future<void> main() async {
   await LocalStorage.init();
   AppStyle.init();
   await ThemeCustomizer.init();
+  
+  BlixDBManager.setBaseUrl("https://blixdev.com/eva_admin/");
+  BlixDBManager.setPhpLocalUrl("phps/");
 
   runApp(ChangeNotifierProvider<AppNotifier>(
     create: (context) => AppNotifier(),

@@ -2,6 +2,8 @@ import 'package:medicare/model/user.dart';
 
 import '../storage/local_storage.dart';
 
+import 'package:blix_essentials/blix_essentials.dart';
+
 class AuthService {
   static bool isLoggedIn = false;
 
@@ -10,7 +12,29 @@ class AuthService {
 
   static Future<Map<String, String>?> loginUser(
       Map<String, dynamic> data) async {
-    await Future.delayed(Duration(seconds: 1));
+    final response = await BlixDBManager.httpPost(
+      "check_password.php",
+      params: {
+        "email": data['email'],//"test@mail.com",
+        "password": data['password'],//"T3s7P4S5w0rd",
+        "salt": "quesalado",
+      },
+      debug: true,
+    );
+    if (response.errors.isNotEmpty) {
+      return {"email": "Hubo un error con el servidor,"
+          " intenta de nuevo más tarde."};
+    }
+
+    if (response.response == "1") {
+      isLoggedIn = true;
+      await LocalStorage.setLoggedInUser(true);
+      return null;
+    }
+
+    return {"password": "Correo o contraseña inválidos."};
+
+    /*await Future.delayed(Duration(seconds: 1));
     if (data['email'] != dummyUser.email) {
       return {"email": "This email is not registered"};
     } else if (data['password'] != "1234567") {
@@ -19,6 +43,6 @@ class AuthService {
 
     isLoggedIn = true;
     await LocalStorage.setLoggedInUser(true);
-    return null;
+    return null;*/
   }
 }

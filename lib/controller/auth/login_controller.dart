@@ -17,7 +17,7 @@ class LoginController extends MyController {
   void onInit() {
     basicValidator.addField('email', required: true, label: "Email", validators: [MyEmailValidator()], controller: TextEditingController(text: _dummyEmail));
 
-    basicValidator.addField('password', required: true, label: "Password", validators: [MyLengthValidator(min: 6, max: 10)], controller: TextEditingController(text: _dummyPassword));
+    basicValidator.addField('password', required: true, label: "Password", validators: [MyLengthValidator(min: 8, max: 20)], controller: TextEditingController(text: _dummyPassword));
     super.onInit();
   }
 

@@ -80,11 +80,12 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                     if (!widget.isCondensed)
                       Flexible(
                         fit: FlexFit.loose,
-                        child: MyText.displayMedium(
-                          "Medicare",
+                        child: Image.asset(Images.logoMedium, height: 110, fit: BoxFit.cover),
+                        /*MyText.displayMedium(
+                          "Medicars",
                           style: GoogleFonts.raleway(fontSize: 24, fontWeight: FontWeight.w800, color: contentTheme.primary, letterSpacing: .5),
                           maxLines: 1,
-                        ),
+                        ),*/
                       )
                   ],
                 ),

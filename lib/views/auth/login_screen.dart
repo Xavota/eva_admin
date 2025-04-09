@@ -43,9 +43,9 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 children: [
                   MyText.headlineSmall("LogIn", fontWeight: 600),
                   MySpacing.height(20),
-                  MyText.bodySmall("Welcome back! Please enter your details.", muted: true),
+                  MyText.bodySmall("Bienvenido al panel de administración!\nPor favor ingrese sus credenciales.", muted: true),
                   MySpacing.height(20),
-                  MyText.labelMedium("Email Address", fontWeight: 600, muted: true),
+                  MyText.labelMedium("Correo Electrónico", fontWeight: 600, muted: true),
                   MySpacing.height(8),
                   TextFormField(
                       validator: controller.basicValidator.getValidation('email'),
@@ -61,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                           isCollapsed: true,
                           floatingLabelBehavior: FloatingLabelBehavior.never)),
                   MySpacing.height(20),
-                  MyText.labelMedium("Password", fontWeight: 600, muted: true),
+                  MyText.labelMedium("Contraseña", fontWeight: 600, muted: true),
                   MySpacing.height(8),
                   TextFormField(
                     validator: controller.basicValidator.getValidation('password'),
@@ -70,25 +70,28 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     obscureText: !controller.showPassword,
                     style: MyTextStyle.bodySmall(),
                     decoration: InputDecoration(
-                        labelText: "Password",
-                        labelStyle: MyTextStyle.bodySmall(xMuted: true),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        prefixIcon: const Icon(
-                          LucideIcons.lock,
+                      labelText: "Password",
+                      labelStyle: MyTextStyle.bodySmall(xMuted: true),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      prefixIcon: const Icon(
+                        LucideIcons.lock,
+                        size: 20,
+                      ),
+                      suffixIcon: InkWell(
+                        onTap: controller.onChangeShowPassword,
+                        child: Icon(
+                          controller.showPassword ? LucideIcons.eye : LucideIcons.eye_off,
                           size: 20,
                         ),
-                        suffixIcon: InkWell(
-                          onTap: controller.onChangeShowPassword,
-                          child: Icon(
-                            controller.showPassword ? LucideIcons.eye : LucideIcons.eye_off,
-                            size: 20,
-                          ),
-                        ),
-                        contentPadding: MySpacing.all(16),
-                        isCollapsed: true,
-                        floatingLabelBehavior: FloatingLabelBehavior.never),
+                      ),
+                      contentPadding: MySpacing.all(16),
+                      isCollapsed: true,
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                    ),
                   ),
-                  Row(
+                  MySpacing.height(10),
+                  MyText.bodySmall("* Para restablecer tu contraseña, contacta al equipo de desarrollo.", fontWeight: 600, muted: true),
+                  /*Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       InkWell(
@@ -122,7 +125,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         child: MyText.labelMedium('Forgot password?', fontWeight: 600, muted: true),
                       ),
                     ],
-                  ),
+                  ),*/
                   MySpacing.height(28),
                   Center(
                     child: MyButton.rounded(
@@ -141,7 +144,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                                 )
                               : Container(),
                           if (controller.loading) MySpacing.width(16),
-                          MyText.labelMedium('Login',fontWeight: 600, color: contentTheme.onPrimary),
+                          MyText.labelMedium('Ingresar',fontWeight: 600, color: contentTheme.onPrimary),
                         ],
                       ),
                     ),
@@ -152,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       elevation: 0,
                       padding: MySpacing.x(16),
                       splashColor: contentTheme.secondary.withOpacity(0.1),
-                      child: MyText.labelMedium('I haven\'t account', color: contentTheme.secondary),
+                      child: MyText.labelMedium('No tengo una cuenta', color: contentTheme.secondary),
                     ),
                   ),
                 ],

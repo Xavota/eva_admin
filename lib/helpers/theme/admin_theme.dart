@@ -38,8 +38,10 @@ class LeftBarTheme {
     this.background = const Color(0xffffffff),
     this.onBackground = const Color(0xff313a46),
     this.labelColor = const Color(0xff6c757d),
-    this.activeItemColor = const Color(0xffDCA47C),
-    this.activeItemBackground = const Color(0x4cDCA47C),
+    //this.activeItemColor = const Color(0xffDCA47C),
+    this.activeItemColor = const Color(0xff35639D),
+    //this.activeItemBackground = const Color(0x4cDCA47C),
+    this.activeItemBackground = const Color(0x4c35639D),
   });
 
   //--------------------------------------  Left Bar Theme ----------------------------------------//
@@ -131,7 +133,8 @@ class ContentTheme {
   }
 
   ContentTheme({
-    this.primary = const Color(0xffDCA47C),
+    //this.primary = const Color(0xffDCA47C),
+    this.primary = const Color(0xff35639D),
     this.secondary = const Color(0xff6c757d),
     this.success = const Color(0xff00be82),
     this.danger = const Color(0xffdc3545),

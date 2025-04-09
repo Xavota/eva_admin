@@ -3,6 +3,9 @@ import 'dart:math';
 class Images {
   /// WebApps Logo ///
   static String logoSmall = 'assets/logo/logo_small.png';
+  static String logoMedium = 'assets/logo/logo_medium.png';
+  static String logoBig = 'assets/logo/logo_big.png';
+  static String logoOg = 'assets/logo/logo_eva.png';
 
   /// Background ///
   static String background = 'assets/images/dummy/dummy_1.jpg';

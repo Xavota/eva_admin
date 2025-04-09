@@ -30,13 +30,14 @@ class MyLengthValidator implements MyFieldValidatorRule<String> {
         return null;
       }
       if (exact != null && value.length != exact!) {
-        return short ? "Need $exact characters" : "Need exact $exact characters";
+        //return short ? "Need $exact characters" : "Need exact $exact characters";
+        return short ? "Necesita $exact caracteres" : "Necesita extactamente $exact caracteres";
       }
       if (min != null && value.length < min!) {
-        return short ? "Need $min characters" : "Longer than $min characters";
+        return short ? "Mínimo $exact caracteres" : "Necesita al menos $min caracteres";
       }
       if (max != null && value.length > max!) {
-        return short ? "Only $max characters" : "Lesser than $max characters";
+        return short ? "Máximo $max caracteres" : "Tiene que ser menor a $max caracteres";
       }
     }
     return null;
