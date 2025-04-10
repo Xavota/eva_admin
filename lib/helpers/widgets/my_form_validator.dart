@@ -32,7 +32,7 @@ class MyFormValidator {
       }
 
       if (required && (value == null || (value.toString().isEmpty))) {
-        return "$label is required";
+        return "$label es obligatorio";
       }
       for (MyFieldValidatorRule validator in validators) {
         String? validationError = validator.validate(value, required, getData());

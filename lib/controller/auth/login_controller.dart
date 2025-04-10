@@ -10,14 +10,14 @@ class LoginController extends MyController {
 
   bool showPassword = false, loading = false, isChecked = false;
 
-  final String _dummyEmail = "trendx@getappui.com";
-  final String _dummyPassword = "1234567";
+  //final String _dummyEmail = "trendx@getappui.com";
+  //final String _dummyPassword = "1234567";
 
   @override
   void onInit() {
-    basicValidator.addField('email', required: true, label: "Email", validators: [MyEmailValidator()], controller: TextEditingController(text: _dummyEmail));
+    basicValidator.addField('email', required: true, label: "Correo electrónico", validators: [MyEmailValidator()], controller: TextEditingController());
 
-    basicValidator.addField('password', required: true, label: "Password", validators: [MyLengthValidator(min: 8, max: 20)], controller: TextEditingController(text: _dummyPassword));
+    basicValidator.addField('password', required: true, label: "Contraseña", validators: [MyLengthValidator(min: 8, max: 20)], controller: TextEditingController());
     super.onInit();
   }
 

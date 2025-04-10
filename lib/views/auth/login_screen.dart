@@ -48,18 +48,20 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                   MyText.labelMedium("Correo Electrónico", fontWeight: 600, muted: true),
                   MySpacing.height(8),
                   TextFormField(
-                      validator: controller.basicValidator.getValidation('email'),
-                      controller: controller.basicValidator.getController('email'),
-                      keyboardType: TextInputType.emailAddress,
-                      style: MyTextStyle.bodySmall(),
-                      decoration: InputDecoration(
-                          labelText: "Email Address",
-                          labelStyle: MyTextStyle.bodySmall(xMuted: true),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                          prefixIcon: const Icon(LucideIcons.mail, size: 20),
-                          contentPadding: MySpacing.all(16),
-                          isCollapsed: true,
-                          floatingLabelBehavior: FloatingLabelBehavior.never)),
+                    validator: controller.basicValidator.getValidation('email'),
+                    controller: controller.basicValidator.getController('email'),
+                    keyboardType: TextInputType.emailAddress,
+                    style: MyTextStyle.bodySmall(),
+                    decoration: InputDecoration(
+                      labelText: "Correo electrónico",
+                      labelStyle: MyTextStyle.bodySmall(xMuted: true),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      prefixIcon: const Icon(LucideIcons.mail, size: 20),
+                      contentPadding: MySpacing.all(16),
+                      isCollapsed: true,
+                      floatingLabelBehavior: FloatingLabelBehavior.never,
+                    ),
+                  ),
                   MySpacing.height(20),
                   MyText.labelMedium("Contraseña", fontWeight: 600, muted: true),
                   MySpacing.height(8),
@@ -70,7 +72,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     obscureText: !controller.showPassword,
                     style: MyTextStyle.bodySmall(),
                     decoration: InputDecoration(
-                      labelText: "Password",
+                      labelText: "Contraseña",
                       labelStyle: MyTextStyle.bodySmall(xMuted: true),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       prefixIcon: const Icon(
@@ -149,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       ),
                     ),
                   ),
-                  Center(
+                  /*Center(
                     child: MyButton.text(
                       onPressed: controller.gotoRegister,
                       elevation: 0,
@@ -157,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                       splashColor: contentTheme.secondary.withOpacity(0.1),
                       child: MyText.labelMedium('No tengo una cuenta', color: contentTheme.secondary),
                     ),
-                  ),
+                  ),*/
                 ],
               ),
             ),
