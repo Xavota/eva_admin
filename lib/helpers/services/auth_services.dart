@@ -39,4 +39,9 @@ class AuthService {
     await LocalStorage.setLoggedInUser(true);
     return null;*/
   }
+
+  static Future<void> logoutUser() async {
+    isLoggedIn = false;
+    await LocalStorage.setLoggedInUser(false);
+  }
 }

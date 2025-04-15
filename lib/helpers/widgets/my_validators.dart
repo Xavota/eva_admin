@@ -54,8 +54,7 @@ class MyDoctorUserNumberValidator extends MyFieldValidatorRule<String> {
     if (value != null && value.isNotEmpty) {
       final userNumber = int.tryParse(value);
       if (userNumber == null || userNumber <= 0 || userNumber > 1000) {
-        return "El número de usuario debería ser un número válido entre 1 y"
-            " 1000 para doctores.";
+        return "Debería ser entre 1 y 1000 para doctores.";
       }
     }
     return null;
@@ -75,11 +74,11 @@ class MyPinValidator extends MyFieldValidatorRule<String> {
       }
     } else if (value != null && value.isNotEmpty) {
       if (value.length != length) {
-        return "El NIP tiene que tener exactamente $length dígitos";
+        return "Debe ser exactamente $length dígitos";
       }
       final pin = int.tryParse(value);
       if (pin == null) {
-        return "El NIP debe ser un número entero válido.";
+        return "Debe ser un número entero válido.";
       }
     }
     return null;

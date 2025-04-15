@@ -136,7 +136,7 @@ class ContentTheme {
     //this.primary = const Color(0xffDCA47C),
     this.primary = const Color(0xff35639D),
     this.secondary = const Color(0xff6c757d),
-    this.success = const Color(0xff00be82),
+    this.success = const Color(0xff009b6a),
     this.danger = const Color(0xffdc3545),
     this.warning = const Color(0xffffc107),
     this.info = const Color(0xff0dcaf0),

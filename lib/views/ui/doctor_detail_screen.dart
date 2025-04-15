@@ -1,3 +1,4 @@
+import 'package:blix_essentials/blix_essentials.dart';
 import 'package:medicare/controller/ui/doctor_detail_controller.dart';
 import 'package:medicare/helpers/utils/ui_mixins.dart';
 import 'package:medicare/helpers/widgets/my_breadcrumb.dart';
@@ -24,6 +25,18 @@ class DoctorDetailScreen extends StatefulWidget {
 
 class _DoctorDetailScreenState extends State<DoctorDetailScreen> with UIMixin {
   DoctorDetailController controller = Get.put(DoctorDetailController());
+
+  @override
+  void initState() {
+    super.initState();
+
+    final String param = Get.parameters['index']!;
+    final int index = int.parse(param);
+    controller.updateDoctorInfo(index).then((_) {
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Layout(
@@ -106,8 +119,8 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen> with UIMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  MyText.bodyMedium("Dr. Nathan Churchill", fontWeight: 600, muted: true, overflow: TextOverflow.ellipsis),
-                  MyText.bodySmall("MBBS, MS - General Surgery, General Physician", fontWeight: 600, muted: true, overflow: TextOverflow.ellipsis),
+                  MyText.bodyMedium("Dr. ${controller.selectedDoctor?.fullName?? "Nobody"}", fontWeight: 600, muted: true, overflow: TextOverflow.ellipsis),
+                  MyText.bodySmall(controller.selectedDoctor?.speciality?? "Does nothing", fontWeight: 600, muted: true, overflow: TextOverflow.ellipsis),
                   MyText.bodySmall("12 Year Experience", fontWeight: 600, muted: true, overflow: TextOverflow.ellipsis),
                   Row(
                     mainAxisSize: MainAxisSize.min,

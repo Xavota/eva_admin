@@ -17,6 +17,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:get/get.dart';
 
+import 'package:blix_essentials/blix_essentials.dart';
+
 class DoctorEditScreen extends StatefulWidget {
   const DoctorEditScreen({super.key});
 
@@ -26,6 +28,17 @@ class DoctorEditScreen extends StatefulWidget {
 
 class _DoctorEditScreenState extends State<DoctorEditScreen> with UIMixin {
   DoctorEditController controller = Get.put(DoctorEditController());
+
+  @override
+  void initState() {
+    super.initState();
+
+    final String param = Get.parameters['index']!;
+    final int index = int.parse(param);
+    controller.updateDoctorInfo(index).then((_) {
+      setState(() {});
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -62,102 +75,146 @@ class _DoctorEditScreenState extends State<DoctorEditScreen> with UIMixin {
                 child: MyContainer(
                   paddingAll: 20,
                   borderRadiusAll: 12,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      MyText.titleMedium("Basic Information", fontWeight: 600),
-                      MySpacing.height(20),
-                      MyFlex(
-                        contentPadding: false,
-                        children: [
-                          MyFlexItem(
-                              sizes: 'lg-6 md-6',
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  commonTextField(title: "First Name", hintText: "First Name", prefixIcon: Icon(LucideIcons.user_round, size: 16), teController: controller.firstNameTE),
-                                  MySpacing.height(20),
-                                  commonTextField(title: "Last Name", hintText: "Last Name", prefixIcon: Icon(LucideIcons.user_round, size: 16), teController: controller.lastNameTE),
-                                  MySpacing.height(20),
-                                  commonTextField(title: "User Name", hintText: "User Name", prefixIcon: Icon(LucideIcons.user_round, size: 16), teController: controller.userNameTE),
-                                  MySpacing.height(20),
-                                  commonTextField(title: "Education", hintText: "Education", prefixIcon: Icon(LucideIcons.graduation_cap, size: 16), teController: controller.educationTE),
-                                  MySpacing.height(20),
-                                  MyText.labelMedium("Department", fontWeight: 600, muted: true),
-                                  MySpacing.height(8),
-                                  DropdownButtonFormField<Department>(
-                                      dropdownColor: contentTheme.background,
-                                      isDense: true,
-                                      value: Department.Dentist,
-                                      style: MyTextStyle.bodySmall(),
-                                      items: Department.values
-                                          .map((category) => DropdownMenuItem<Department>(
-                                                value: category,
-                                                child: MyText.labelMedium(category.name.capitalize!),
-                                              ))
-                                          .toList(),
-                                      icon: Icon(LucideIcons.chevron_down, size: 20),
-                                      decoration: InputDecoration(
-                                          hintText: "Select Department",
-                                          hintStyle: MyTextStyle.bodySmall(xMuted: true),
-                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                                          contentPadding: MySpacing.all(12),
-                                          isCollapsed: true,
-                                          isDense: true,
-                                          prefixIcon: Icon(LucideIcons.circle_plus, size: 16),
-                                          floatingLabelBehavior: FloatingLabelBehavior.never),
-                                      onChanged: controller.basicValidator.onChanged<Object?>('Department')),
-                                  MySpacing.height(20),
-                                  commonTextField(title: "City", hintText: "City", prefixIcon: Icon(LucideIcons.map_pin_house, size: 16), teController: controller.cityTE),
-                                  MySpacing.height(20),
-                                  commonTextField(title: "State/Province", hintText: "State/Province", prefixIcon: Icon(LucideIcons.map, size: 16), teController: controller.stateTE),
-                                  MySpacing.height(20),
-                                  commonTextField(title: "Address", hintText: "Address", prefixIcon: Icon(LucideIcons.map_pin, size: 16), teController: controller.addressTE),
-                                ],
-                              )),
-                          MyFlexItem(
+                  child: Form(
+                    key: controller.basicValidator.formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        MyText.titleMedium("Información básica", fontWeight: 600),
+                        MySpacing.height(20),
+                        MyFlex(
+                          contentPadding: false,
+                          children: [
+                            MyFlexItem(
+                                sizes: 'lg-6 md-6',
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    commonTextField(
+                                      validator: controller.basicValidator.getValidation("userNumber"),
+                                      teController: controller.basicValidator.getController("userNumber"),
+                                      title: "Número de Usuario",
+                                      hintText: "Número de usuario",
+                                      prefixIcon: Icon(Icons.numbers_sharp, size: 16),
+                                      numbered: true,
+                                    ),
+                                    MySpacing.height(20),
+                                    commonTextField(
+                                      validator: controller.basicValidator.getValidation("fullName"),
+                                      teController: controller.basicValidator.getController("fullName"),
+                                      title: "Nombre Completo",
+                                      hintText: "Nombre completo",
+                                      prefixIcon: Icon(LucideIcons.user_round, size: 16),
+                                    ),
+                                    MySpacing.height(20),
+                                    commonTextField(
+                                      validator: controller.basicValidator.getValidation("speciality"),
+                                      teController: controller.basicValidator.getController("speciality"),
+                                      title: "Especialidad",
+                                      hintText: "Especialidad",
+                                      prefixIcon: Icon(LucideIcons.book_check, size: 16),
+                                    ),
+                                    /*commonTextField(title: "First Name", hintText: "First Name", prefixIcon: Icon(LucideIcons.user_round, size: 16), teController: controller.firstNameTE),
+                                    MySpacing.height(20),
+                                    commonTextField(title: "Last Name", hintText: "Last Name", prefixIcon: Icon(LucideIcons.user_round, size: 16), teController: controller.lastNameTE),
+                                    MySpacing.height(20),
+                                    commonTextField(title: "User Name", hintText: "User Name", prefixIcon: Icon(LucideIcons.user_round, size: 16), teController: controller.userNameTE),
+                                    MySpacing.height(20),
+                                    commonTextField(title: "Education", hintText: "Education", prefixIcon: Icon(LucideIcons.graduation_cap, size: 16), teController: controller.educationTE),
+                                    MySpacing.height(20),
+                                    MyText.labelMedium("Department", fontWeight: 600, muted: true),
+                                    MySpacing.height(8),
+                                    DropdownButtonFormField<Department>(
+                                        dropdownColor: contentTheme.background,
+                                        isDense: true,
+                                        value: Department.Dentist,
+                                        style: MyTextStyle.bodySmall(),
+                                        items: Department.values
+                                            .map((category) => DropdownMenuItem<Department>(
+                                                  value: category,
+                                                  child: MyText.labelMedium(category.name.capitalize!),
+                                                ))
+                                            .toList(),
+                                        icon: Icon(LucideIcons.chevron_down, size: 20),
+                                        decoration: InputDecoration(
+                                            hintText: "Select Department",
+                                            hintStyle: MyTextStyle.bodySmall(xMuted: true),
+                                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                                            contentPadding: MySpacing.all(12),
+                                            isCollapsed: true,
+                                            isDense: true,
+                                            prefixIcon: Icon(LucideIcons.circle_plus, size: 16),
+                                            floatingLabelBehavior: FloatingLabelBehavior.never),
+                                        onChanged: controller.basicValidator.onChanged<Object?>('Department')),
+                                    MySpacing.height(20),
+                                    commonTextField(title: "City", hintText: "City", prefixIcon: Icon(LucideIcons.map_pin_house, size: 16), teController: controller.cityTE),
+                                    MySpacing.height(20),
+                                    commonTextField(title: "State/Province", hintText: "State/Province", prefixIcon: Icon(LucideIcons.map, size: 16), teController: controller.stateTE),
+                                    MySpacing.height(20),
+                                    commonTextField(title: "Address", hintText: "Address", prefixIcon: Icon(LucideIcons.map_pin, size: 16), teController: controller.addressTE),*/
+                                  ],
+                                )),
+                            MyFlexItem(
                               sizes: 'lg-6 md-6',
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   commonTextField(
-                                      title: "Mobile Number",
-                                      hintText: "Mobile Number",
-                                      prefixIcon: Icon(LucideIcons.phone_call, size: 16),
-                                      teController: controller.mobileNumberTE,
-                                      numbered: true,
-                                      length: 10),
+                                    validator: controller.basicValidator.getValidation("pin"),
+                                    teController: controller.basicValidator.getController("pin"),
+                                    title: "NIP", hintText: "Nuevo NIP",
+                                    prefixIcon: Icon(LucideIcons.lock, size: 16),
+                                    numbered: true, length: 4,
+                                  ),
+                                  MySpacing.height(20),
+                                  commonTextField(
+                                    validator: controller.basicValidator.getValidation("professionalNumber"),
+                                    teController: controller.basicValidator.getController("professionalNumber"),
+                                    title: "Cédula Profesional",
+                                    hintText: "Cédula profesional",
+                                    prefixIcon: Icon(LucideIcons.shield_plus, size: 16),
+                                    numbered: true, length: 8,
+                                  ),
+                                  /*commonTextField(
+                                    title: "Mobile Number",
+                                    hintText: "Mobile Number",
+                                    prefixIcon: Icon(LucideIcons.phone_call, size: 16),
+                                    teController: controller.mobileNumberTE,
+                                    numbered: true,
+                                    length: 10,
+                                  ),
                                   MySpacing.height(20),
                                   commonTextField(title: "Email Address", hintText: "Email Address", prefixIcon: Icon(LucideIcons.mail, size: 16), teController: controller.emailAddressTE),
                                   MySpacing.height(20),
                                   MyText.bodyMedium("Gender", fontWeight: 600),
                                   MySpacing.height(20),
                                   Wrap(
-                                      spacing: 16,
-                                      children: Gender.values
-                                          .map(
-                                            (gender) => InkWell(
-                                              onTap: () => controller.onChangeGender(gender),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Radio<Gender>(
-                                                    value: gender,
-                                                    activeColor: theme.colorScheme.primary,
-                                                    groupValue: controller.gender,
-                                                    onChanged: (value) => controller.onChangeGender(value),
-                                                    visualDensity: getCompactDensity,
-                                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                                  ),
-                                                  MySpacing.width(8),
-                                                  MyText.labelMedium(
-                                                    gender.name.capitalize!,
-                                                  ),
-                                                ],
-                                              ),
+                                    spacing: 16,
+                                    children: Gender.values
+                                        .map(
+                                          (gender) => InkWell(
+                                            onTap: () => controller.onChangeGender(gender),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Radio<Gender>(
+                                                  value: gender,
+                                                  activeColor: theme.colorScheme.primary,
+                                                  groupValue: controller.gender,
+                                                  onChanged: (value) => controller.onChangeGender(value),
+                                                  visualDensity: getCompactDensity,
+                                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                                ),
+                                                MySpacing.width(8),
+                                                MyText.labelMedium(
+                                                  gender.name.capitalize!,
+                                                ),
+                                              ],
                                             ),
-                                          )
-                                          .toList()),
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
                                   MySpacing.height(20),
                                   commonTextField(title: "Designation", hintText: "Designation", prefixIcon: Icon(LucideIcons.id_card, size: 16), teController: controller.designationTE),
                                   MySpacing.height(20),
@@ -174,33 +231,35 @@ class _DoctorEditScreenState extends State<DoctorEditScreen> with UIMixin {
                                   commonTextField(
                                       title: "Postal Code", hintText: "Postal Code", prefixIcon: Icon(LucideIcons.mailbox, size: 16), teController: controller.postalCodeTE, numbered: true, length: 5),
                                   MySpacing.height(20),
-                                  commonTextField(title: "Start Biography", hintText: "Start Biography", prefixIcon: Icon(LucideIcons.notepad_text, size: 16), teController: controller.biographyTE),
+                                  commonTextField(title: "Start Biography", hintText: "Start Biography", prefixIcon: Icon(LucideIcons.notepad_text, size: 16), teController: controller.biographyTE),*/
                                 ],
-                              )),
-                        ],
-                      ),
-                      MySpacing.height(20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          MyContainer(
-                            onTap: () {},
-                            padding: MySpacing.xy(12, 8),
-                            color: contentTheme.primary,
-                            borderRadiusAll: 8,
-                            child: MyText.labelMedium("Submit", color: contentTheme.onPrimary, fontWeight: 600),
-                          ),
-                          MySpacing.width(20),
-                          MyContainer(
-                            onTap: () {},
-                            padding: MySpacing.xy(12, 8),
-                            borderRadiusAll: 8,
-                            color: contentTheme.secondary.withAlpha(32),
-                            child: MyText.labelMedium("Cancel", color: contentTheme.secondary, fontWeight: 600),
-                          ),
-                        ],
-                      )
-                    ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        MySpacing.height(20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            MyContainer(
+                              onTap: () {},
+                              padding: MySpacing.xy(12, 8),
+                              color: contentTheme.primary,
+                              borderRadiusAll: 8,
+                              child: MyText.labelMedium("Submit", color: contentTheme.onPrimary, fontWeight: 600),
+                            ),
+                            MySpacing.width(20),
+                            MyContainer(
+                              onTap: () {},
+                              padding: MySpacing.xy(12, 8),
+                              borderRadiusAll: 8,
+                              color: contentTheme.secondary.withAlpha(32),
+                              child: MyText.labelMedium("Cancel", color: contentTheme.secondary, fontWeight: 600),
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
               )
@@ -211,13 +270,14 @@ class _DoctorEditScreenState extends State<DoctorEditScreen> with UIMixin {
     );
   }
 
-  Widget commonTextField({String? title, String? hintText, Widget? prefixIcon, void Function()? onTap, TextEditingController? teController, bool numbered = false, int? length}) {
+  Widget commonTextField({String? title, String? hintText, String? Function(String?)? validator, Widget? prefixIcon, void Function()? onTap, TextEditingController? teController, bool numbered = false, int? length}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         MyText.labelMedium(title ?? "", fontWeight: 600, muted: true),
         MySpacing.height(8),
         TextFormField(
+          validator: validator,
           onTap: onTap ?? () {},
           controller: teController,
           keyboardType: numbered ? TextInputType.phone : null,

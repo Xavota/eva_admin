@@ -1,9 +1,11 @@
+import 'package:get/get.dart';
 import 'package:medicare/views/layout/left_bar.dart';
 import 'package:medicare/views/layout/right_bar.dart';
 import 'package:medicare/views/layout/top_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:medicare/controller/layout/layout_controller.dart';
+import 'package:medicare/helpers/services/auth_services.dart';
 import 'package:medicare/helpers/theme/admin_theme.dart';
 import 'package:medicare/helpers/theme/app_style.dart';
 import 'package:medicare/helpers/theme/app_themes.dart';
@@ -17,6 +19,8 @@ import 'package:medicare/helpers/widgets/my_text.dart';
 import 'package:medicare/helpers/widgets/responsive.dart';
 import 'package:medicare/widgets/custom_pop_menu.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+
+import 'package:blix_essentials/blix_essentials.dart';
 
 class Layout extends StatelessWidget {
   final Widget? child;
@@ -264,7 +268,11 @@ class Layout extends StatelessWidget {
             padding: MySpacing.xy(8, 8),
             child: MyButton(
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onPressed: () => {},
+              onPressed: () {
+                Debug.log("layout logout", overrideColor: Colors.greenAccent);
+                AuthService.logoutUser();
+                Get.offAllNamed('/auth/login');
+              },
               borderRadiusAll: AppStyle.buttonRadius.medium,
               padding: MySpacing.xy(8, 4),
               splashColor: contentTheme.danger.withAlpha(28),

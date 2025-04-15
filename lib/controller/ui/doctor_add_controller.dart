@@ -1,3 +1,4 @@
+import 'package:blix_essentials/blix_essentials.dart';
 import 'package:medicare/helpers/widgets/my_form_validator.dart';
 import 'package:medicare/helpers/widgets/my_validators.dart';
 import 'package:medicare/views/my_controller.dart';
@@ -5,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:medicare/db_manager.dart';
+
+import 'package:blix_essentials/blix_essentials.dart';
 
 /*enum Gender {
   male,
@@ -23,16 +26,30 @@ enum Department {
 }*/
 
 class DoctorAddController extends MyController {
+  final manager = DBManager.instance!;
   //Gender gender = Gender.male;
   //DateTime? selectedDate;
   MyFormValidator basicValidator = MyFormValidator();
   bool loading = false;
 
+  int? _currentUserId;
+  int? get currentUserId {
+    if (_currentUserId == null) {
+      calculateUserID().then((_) { Debug.log("Got id", overrideColor: Colors.blue); update(); });
+    }
+    return _currentUserId;
+  }
+
   @override
   void onInit() {
-    basicValidator.addField(
+    /*basicValidator.addField(
       'userNumber', required: true, label: "Número de usuario",
       validators: [MyDoctorUserNumberValidator()],
+      controller: TextEditingController(),
+    );*/
+
+    basicValidator.addField(
+      'userNumber', required: true, label: "Número de Usuario",
       controller: TextEditingController(),
     );
 
@@ -101,5 +118,12 @@ class DoctorAddController extends MyController {
     }
 
     return validationError;
+  }
+
+  Future<int?> calculateUserID() async {
+    _currentUserId = await manager.getLastDoctorID();
+    Debug.log("user id = $_currentUserId", overrideColor: Colors.yellowAccent);
+    update();
+    return _currentUserId;
   }
 }

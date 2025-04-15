@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:medicare/helpers/localizations/language.dart';
+import 'package:medicare/helpers/services/auth_services.dart';
 import 'package:medicare/helpers/theme/app_notifire.dart';
 import 'package:medicare/helpers/theme/app_style.dart';
 import 'package:medicare/helpers/theme/app_themes.dart';
@@ -17,6 +18,8 @@ import 'package:medicare/images.dart';
 import 'package:medicare/widgets/custom_pop_menu.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:provider/provider.dart';
+
+import 'package:blix_essentials/blix_essentials.dart';
 
 class TopBar extends StatefulWidget {
   const TopBar({super.key});
@@ -312,8 +315,11 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
             child: MyButton(
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               onPressed: () {
+                Debug.log("top_bar logout", overrideColor: Colors.greenAccent);
                 languageHideFn?.call();
                 /// TODO: Get.offAll(LoginScreen());
+                AuthService.logoutUser();
+                Get.offAllNamed('/auth/login');
               },
               borderRadiusAll: AppStyle.buttonRadius.medium,
               padding: MySpacing.xy(8, 4),

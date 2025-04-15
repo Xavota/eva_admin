@@ -211,4 +211,24 @@ class MyStringUtils {
       [int minLength = 8, int maxLength = 20]) {
     return text.length >= minLength && text.length <= maxLength;
   }
+
+  static String addZerosAtFront(int number, {int? lengthRequired, int? addedZeros}) {
+    if (lengthRequired != null) {
+      String r = number.toString();
+      int zerosNeeded = lengthRequired - r.length;
+      if (zerosNeeded <= 0) return r;
+      for (int i = 0; i < zerosNeeded; ++i) {
+        r = "0$r";
+      }
+      return r;
+    }
+    else if (addedZeros != null) {
+      String r = number.toString();
+      for (int i = 0; i < addedZeros; ++i) {
+        r = "0$r";
+      }
+      return r;
+    }
+    return number.toString();
+  }
 }
