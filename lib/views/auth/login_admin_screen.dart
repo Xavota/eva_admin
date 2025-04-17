@@ -1,6 +1,9 @@
-import 'package:blix_essentials/blix_essentials.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter/material.dart';
-import 'package:medicare/controller/auth/login_controller.dart';
+
+import 'package:get/get.dart';
+
+import 'package:medicare/controller/auth/login_admin_controller.dart';
 import 'package:medicare/helpers/theme/app_themes.dart';
 import 'package:medicare/helpers/utils/ui_mixins.dart';
 import 'package:medicare/helpers/widgets/my_button.dart';
@@ -8,22 +11,22 @@ import 'package:medicare/helpers/widgets/my_spacing.dart';
 import 'package:medicare/helpers/widgets/my_text.dart';
 import 'package:medicare/helpers/widgets/my_text_style.dart';
 import 'package:medicare/views/layout/auth_layout.dart';
-import 'package:get/get.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+import 'package:blix_essentials/blix_essentials.dart';
+
+class LoginAdminScreen extends StatefulWidget {
+  const LoginAdminScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginAdminScreen> createState() => _LoginAdminScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin, UIMixin {
-  late LoginController controller;
+class _LoginAdminScreenState extends State<LoginAdminScreen> with SingleTickerProviderStateMixin, UIMixin {
+  late LoginAdminController controller;
 
   @override
   void initState() {
-    controller = Get.put(LoginController());
+    controller = Get.put(LoginAdminController());
     super.initState();
   }
 
@@ -147,10 +150,10 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         children: [
                           controller.loading
                               ? SizedBox(
-                                  height: 14,
-                                  width: 14,
-                                  child: CircularProgressIndicator(color: theme.colorScheme.onPrimary, strokeWidth: 1.2),
-                                )
+                            height: 14,
+                            width: 14,
+                            child: CircularProgressIndicator(color: theme.colorScheme.onPrimary, strokeWidth: 1.2),
+                          )
                               : Container(),
                           if (controller.loading) MySpacing.width(16),
                           MyText.labelMedium('Ingresar',fontWeight: 600, color: contentTheme.onPrimary),

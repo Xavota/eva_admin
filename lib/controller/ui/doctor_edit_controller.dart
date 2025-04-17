@@ -1,13 +1,14 @@
 import 'package:medicare/model/doctor_model.dart';
 import 'package:medicare/helpers/widgets/my_form_validator.dart';
 import 'package:medicare/helpers/widgets/my_validators.dart';
-import 'package:medicare/helpers/widgets/my_text_utils.dart';
+//import 'package:medicare/helpers/widgets/my_text_utils.dart';
+import 'package:medicare/helpers/utils/my_string_utils.dart';
 import 'package:medicare/views/my_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+//import 'package:get/get.dart';
 
 import 'package:medicare/db_manager.dart';
-import 'package:blix_essentials/blix_essentials.dart';
+//import 'package:blix_essentials/blix_essentials.dart';
 
 enum Gender {
   male,
@@ -17,10 +18,10 @@ enum Gender {
 }
 
 enum Department {
-  Orthopedic,
-  Radiology,
-  Dentist,
-  Neurology;
+  kOrthopedic,
+  kRadiology,
+  kDentist,
+  kNeurology;
 
   const Department();
 }
@@ -34,6 +35,8 @@ class DoctorEditController extends MyController {
   //List<String> dummyTexts = List.generate(12, (index) => MyTextUtils.getDummyText(60));
   //late TextEditingController firstNameTE, lastNameTE, userNameTE, educationTE, cityTE, stateTE, addressTE, mobileNumberTE, emailAddressTE, designationTE, countryTE, postalCodeTE, biographyTE;
   DoctorModel? selectedDoctor;
+
+  bool loading = false;
 
   @override
   void onInit() {
@@ -54,7 +57,6 @@ class DoctorEditController extends MyController {
 
     basicValidator.addField(
       'userNumber', required: true, label: "Número de usuario",
-      validators: [MyDoctorUserNumberValidator()],
       controller: TextEditingController(),
     );
 
@@ -63,8 +65,8 @@ class DoctorEditController extends MyController {
     ///       PUEDE RECUPERAR ASÍ COMO ASÍ, ENTONCES TIENE QUE SER EN OTRO LADO
     ///       EL CAMBIO DE NIP, DE UNA FORMA MÁS SEGURA.
     basicValidator.addField(
-      'pin', required: true, label: "NIP",
-      validators: [MyPinValidator(length: 4)],
+      'pin', label: "NIP",
+      validators: [MyIntegerValidator(exactLength: 4)],
       controller: TextEditingController(),
     );
 
@@ -98,10 +100,41 @@ class DoctorEditController extends MyController {
     if (docs == null) return;
     selectedDoctor = docs[index];
 
-    basicValidator.getController("userNumber")!.text = selectedDoctor!.userNumber.toString();
+    basicValidator.getController("userNumber")!.text = MyStringUtils.addZerosAtFront(selectedDoctor!.userNumber, lengthRequired: 4);
     basicValidator.getController("professionalNumber")!.text = selectedDoctor!.professionalNumber.toString();
     basicValidator.getController("fullName")!.text = selectedDoctor!.fullName.toString();
     basicValidator.getController("speciality")!.text = selectedDoctor!.speciality.toString();
+
+    update();
+  }
+
+  Future<String?> onUpdate() async {
+    String? validationError;
+
+    if (basicValidator.validateForm()) {
+      loading = true;
+      update();
+      var errors = await DBManager.instance!.updateDoctor(basicValidator.getData());
+      if (errors != null) {
+        if (errors.containsKey("server")) {
+          validationError = errors["server"];
+          errors.remove("server");
+        }
+        if (errors.isNotEmpty) {
+          basicValidator.addErrors(errors);
+          basicValidator.validateForm();
+          basicValidator.clearErrors();
+          validationError = "Hay errores en algunos datos";
+        }
+      }
+      loading = false;
+      update();
+    }
+    else {
+      validationError = "Hay errores en algunos datos";
+    }
+
+    return validationError;
   }
 
   /*void onChangeGender(Gender? value) {

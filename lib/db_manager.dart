@@ -20,13 +20,29 @@ class DBManager {
   }
 
   Future<bool?>
-  validatePassword(String email, String password) async {
+  validatePasswordAdmin(String email, String password) async {
     final response = await BlixDBManager.httpPost(
-      "check_password.php",
+      "check_password_admin.php",
       params: {
         "email": email,//"test@mail.com",
         "password": password,//"T3s7P4S5w0rd",
-        "salt": "quesalado",
+      },
+      debug: true,
+    );
+    if (response.errors.isNotEmpty) {
+      return null;
+    }
+
+    return response.response == "1";
+  }
+
+  Future<bool?>
+  validatePasswordUser(String userNumber, String password) async {
+    final response = await BlixDBManager.httpPost(
+      "check_password_user.php",
+      params: {
+        "userNumber": userNumber,//"test@mail.com",
+        "password": password,//"T3s7P4S5w0rd",
       },
       debug: true,
     );
@@ -73,7 +89,40 @@ class DBManager {
         }
         else {
           r.addAll({"server": "Hubo un error en el servidor."
-              " Intentalo de nuevo mása tarde"});
+              " Intentalo de nuevo más tarde"});
+        }
+      }
+      return r;
+    }
+
+    return null;
+  }
+
+  Future<Map<String, String>?>
+  updateDoctor(Map<String, dynamic> data) async {
+    final response = await BlixDBManager.httpPost(
+      "update_doctor.php",
+      params: {
+        "userNumber": data["userNumber"],
+        "pin": data["pin"],
+        "fullName": data["fullName"],
+        "proNumber": data["professionalNumber"],
+        "speciality": data["speciality"],
+      },
+      debug: true,
+    );
+    if (response.errors.isNotEmpty) {
+      Map<String, String> r = {};
+      for (final e in response.errors) {
+        if (e == "Missing info") {
+          r.addAll({"server": "Información faltante"});
+        }
+        else if (e == "No user") {
+          r.addAll({"userNumber": "Número de inexistente"});
+        }
+        else {
+          r.addAll({"server": "Hubo un error en el servidor."
+              " Intentalo de nuevo más tarde"});
         }
       }
       return r;
@@ -95,11 +144,11 @@ class DBManager {
     return _doctors;
   }
 
-  Future<bool> changeDoctorStatus(int id, bool newStatus) async {
+  Future<bool> changeDoctorStatus(int userNumber, bool newStatus) async {
     final response = await BlixDBManager.httpPost(
       "change_doctor_status.php",
       params: {
-        "id": id.toString(),
+        "number": userNumber.toString(),
         "newStatus": newStatus ? "1" : "0",
       },
       debug: true,

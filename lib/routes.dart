@@ -1,6 +1,7 @@
 import 'package:medicare/helpers/services/auth_services.dart';
 import 'package:medicare/views/auth/forgot_password_screen.dart';
 import 'package:medicare/views/auth/login_screen.dart';
+import 'package:medicare/views/auth/login_admin_screen.dart';
 import 'package:medicare/views/auth/register_account_screen.dart';
 import 'package:medicare/views/auth/reset_password_screen.dart';
 import 'package:medicare/views/ui/appointment_book_screen.dart';
@@ -54,14 +55,24 @@ import 'package:get/get.dart';
 class AuthMiddleware extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
-    return AuthService.isLoggedIn ? null : const RouteSettings(name: '/auth/login');
+    //return AuthService.isLoggedIn || AuthService.isLoggedInAdmin ? null : const RouteSettings(name: '/auth/login');
+    return AuthService.loginType != LoginType.kNone ? null : const RouteSettings(name: '/auth/login');
+  }
+}
+
+class AdminAuthMiddleware extends GetMiddleware {
+  @override
+  RouteSettings? redirect(String? route) {
+    //return AuthService.isLoggedIn ? null : const RouteSettings(name: '/auth/login');
+    return AuthService.loginType == LoginType.kAdmin ? null : const RouteSettings(name: '/auth/login/admin');
   }
 }
 
 getPageRoute() {
   var routes = [
     GetPage(name: '/', page: () => const DashboardScreen(), middlewares: [AuthMiddleware()]),
-    GetPage(name: '/auth/login', page: () => const LoginScreen()),
+    //GetPage(name: '/auth/login', page: () => const LoginScreen()),
+    GetPage(name: '/auth/login', page: () => const LoginAdminScreen()),
     GetPage(name: '/auth/register_account', page: () => const RegisterAccountScreen()),
     GetPage(name: '/auth/forgot_password', page: () => const ForgotPasswordScreen()),
     GetPage(name: '/auth/reset_password', page: () => const ResetPasswordScreen()),

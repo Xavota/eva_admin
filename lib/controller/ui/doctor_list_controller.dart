@@ -37,7 +37,8 @@ class DoctorListController extends MyController {
   }
 
   void goEditDoctorScreen(int index) {
-    Get.toNamed('/admin/doctor/edit/$index');
+    //Get.toNamed('/admin/doctor/edit/$index');
+    Get.offAllNamed('/admin/doctor/edit/$index');
   }
 
   void goDetailDoctorScreen(int index) {
@@ -49,7 +50,7 @@ class DoctorListController extends MyController {
   }
 
   Future<bool> changeDoctorStatus(int index, bool newStatus) async {
-    if (await manager.changeDoctorStatus(_doctors[index].id, newStatus)) {
+    if (await manager.changeDoctorStatus(_doctors[index].userNumber, newStatus)) {
       updateDoctors();
       return true;
     }

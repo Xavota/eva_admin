@@ -2,7 +2,6 @@
 import 'package:medicare/controller/ui/doctor_add_controller.dart';
 //import 'package:medicare/helpers/theme/app_themes.dart';
 import 'package:medicare/helpers/utils/ui_mixins.dart';
-import 'package:medicare/helpers/utils/my_string_utils.dart';
 import 'package:medicare/helpers/widgets/my_breadcrumb.dart';
 import 'package:medicare/helpers/widgets/my_breadcrumb_item.dart';
 import 'package:medicare/helpers/widgets/my_container.dart';
@@ -39,10 +38,6 @@ class _DoctorAddScreenState extends State<DoctorAddScreen> with UIMixin {
         init: controller,
         tag: 'admin_doctor_add_controller',
         builder: (controller) {
-          final id = controller.currentUserId;
-          controller.basicValidator.getController("userNumber")!.text =
-          id == null ? "" : MyStringUtils.addZerosAtFront(id, lengthRequired: 4);
-          Debug.log("Builder $id", overrideColor: Colors.pinkAccent);
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

@@ -5,7 +5,7 @@ import 'package:medicare/helpers/widgets/my_validators.dart';
 import 'package:get/get.dart';
 import 'package:medicare/views/my_controller.dart';
 
-class LoginController extends MyController {
+class LoginAdminController extends MyController {
   MyFormValidator basicValidator = MyFormValidator();
 
   bool showPassword = false, loading = false;//, isChecked = false;
@@ -15,7 +15,7 @@ class LoginController extends MyController {
 
   @override
   void onInit() {
-    basicValidator.addField('userNumber', required: true, label: "Número de usuario", validators: [MyIntegerValidator()], controller: TextEditingController());
+    basicValidator.addField('email', required: true, label: "Correo electrónico", validators: [MyEmailValidator()], controller: TextEditingController());
 
     basicValidator.addField('password', required: true, label: "Contraseña", validators: [MyLengthValidator(min: 8, max: 20)], controller: TextEditingController());
     super.onInit();
@@ -36,7 +36,7 @@ class LoginController extends MyController {
     if (basicValidator.validateForm()) {
       loading = true;
       update();
-      var errors = await AuthService.loginUser(basicValidator.getData());
+      var errors = await AuthService.loginAdmin(basicValidator.getData());
       if (errors != null) {
         if (errors.containsKey("server")) {
           validationError = errors["server"];
@@ -63,13 +63,5 @@ class LoginController extends MyController {
     }
 
     return validationError;
-  }
-
-  void goToForgotPassword() {
-    Get.toNamed('/auth/forgot_password');
-  }
-
-  void gotoRegister() {
-    Get.offAndToNamed('/auth/register_account');
   }
 }

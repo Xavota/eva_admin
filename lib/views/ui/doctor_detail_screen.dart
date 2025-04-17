@@ -74,9 +74,15 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen> with UIMixin {
                     MyFlexItem(
                         sizes: 'lg-4',
                         child: Column(
-                          children: [doctorProfile(), MySpacing.height(24), about(), MySpacing.height(24), workExpertise()],
+                          children: [
+                            doctorProfile(),
+                            /*MySpacing.height(24),
+                            about(),
+                            MySpacing.height(24),
+                            workExpertise(),*/
+                          ],
                         )),
-                    MyFlexItem(
+                    /*MyFlexItem(
                         sizes: 'lg-8',
                         child: Column(
                           children: [
@@ -86,7 +92,7 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen> with UIMixin {
                             MySpacing.height(24),
                             experience(),
                           ],
-                        ))
+                        ))*/
                   ],
                 ),
               ),
@@ -103,7 +109,7 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen> with UIMixin {
       borderRadiusAll: 12,
       child: Row(
         children: [
-          MyContainer(
+          /*MyContainer(
             height: 150,
             width: 150,
             paddingAll: 0,
@@ -111,25 +117,30 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen> with UIMixin {
             borderRadiusAll: 12,
             child: Image.asset(Images.avatars[4], fit: BoxFit.cover),
           ),
-          MySpacing.width(20),
+          MySpacing.width(20),*/
           Expanded(
             child: SizedBox(
-              height: 120,
+              //height: 120,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  MyText.bodyMedium("Dr. ${controller.selectedDoctor?.fullName?? "Nobody"}", fontWeight: 600, muted: true, overflow: TextOverflow.ellipsis),
-                  MyText.bodySmall(controller.selectedDoctor?.speciality?? "Does nothing", fontWeight: 600, muted: true, overflow: TextOverflow.ellipsis),
-                  MyText.bodySmall("12 Year Experience", fontWeight: 600, muted: true, overflow: TextOverflow.ellipsis),
-                  Row(
+                  MyText.bodyMedium("Dr. ${controller.selectedDoctor?.fullName?? "Nadie"}", fontSize: 20.0, fontWeight: 800, muted: true, overflow: TextOverflow.ellipsis),
+                  MySpacing.height(15.0),
+                  MyText.bodySmall("Especialidad: ${controller.selectedDoctor?.speciality?? "Ninguna"}", fontWeight: 600, muted: true, overflow: TextOverflow.ellipsis),
+                  MySpacing.height(5.0),
+                  MyText.bodySmall("Cédula profesional: ${controller.selectedDoctor?.professionalNumber?? "00000000"}", fontWeight: 600, muted: true, overflow: TextOverflow.ellipsis),
+                  MySpacing.height(5.0),
+                  MyText.bodySmall("Estatus: ${(controller.selectedDoctor?.status?? false)? "Activo" : "Archivado"}", fontWeight: 600, muted: true, overflow: TextOverflow.ellipsis),
+                  //MyText.bodySmall("12 Year Experience", fontWeight: 600, muted: true, overflow: TextOverflow.ellipsis),
+                  /*Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       MyStarRating(activeColor: contentTheme.warning),
                       MySpacing.width(8),
                       Flexible(child: MyText.bodySmall("3736 Reviews", fontWeight: 600, xMuted: true, overflow: TextOverflow.ellipsis)),
                     ],
-                  ),
+                  ),*/
                 ],
               ),
             ),

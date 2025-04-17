@@ -61,6 +61,88 @@ class MyDoctorUserNumberValidator extends MyFieldValidatorRule<String> {
   }
 }
 
+class MyUserNumberValidator extends MyFieldValidatorRule<String> {
+  @override
+  String? validate(String? value, bool required, Map<String, dynamic> data) {
+    if (!required && value == null) {
+      return null;
+    }
+
+    if (value != null && value.isNotEmpty) {
+      final userNumber = int.tryParse(value);
+      if (userNumber == null || userNumber <= 1000) {
+        return "Debería ser mayor a 1000.";
+      }
+    }
+    return null;
+  }
+}
+
+class MyIntegerValidator extends MyFieldValidatorRule<String> {
+  final int? min, max;
+  final bool minInclusive, maxInclusive;
+  final int? minLength, maxLength, exactLength;
+  MyIntegerValidator({this.min, this.max,
+    this.minInclusive = true, this.maxInclusive = false,
+    this.minLength, this.maxLength, this.exactLength});
+
+  @override
+  String? validate(String? value, bool required, Map<String, dynamic> data) {
+    if (!required && (value?? "").isEmpty) return null;
+
+    final userNumber = int.tryParse(value!);
+    if (userNumber == null) return "Debería ser un número entero válido";
+
+
+    /// Check for length
+    String constructedErrorMsg = "Debería tener ";
+    if (exactLength != null) {
+      constructedErrorMsg += "exactamente $exactLength dígitos";
+    }
+    if (minLength != null && maxLength == null) {
+      constructedErrorMsg += "más de $minLength dígitos";
+    }
+    else if (minLength == null && maxLength != null) {
+      constructedErrorMsg += "menos de $maxLength dígitos";
+    }
+    else if (minLength != null && maxLength != null) {
+      constructedErrorMsg += "entre $minLength y $maxLength dígitos";
+    }
+
+    if (exactLength != null && value.length != exactLength!) {
+      return constructedErrorMsg;
+    }
+    if (minLength != null && value.length < minLength!) {
+      return constructedErrorMsg;
+    }
+    if (maxLength != null && value.length > maxLength!) {
+      return constructedErrorMsg;
+    }
+
+
+    /// Check for range
+    constructedErrorMsg = "Debería ";
+    if (min != null && max == null) {
+      constructedErrorMsg += "ser mayor a ${(minInclusive ? "[" : "(")}$min${(minInclusive ? "]" : ")")}";
+    }
+    else if (min == null && max != null) {
+      constructedErrorMsg += "ser menor a ${(maxInclusive ? "[" : "(")}$max${(maxInclusive ? "]" : ")")}";
+    }
+    else if (min != null && max != null) {
+      constructedErrorMsg += "estar en el rango ${(minInclusive ? "[" : "(")}$min, $max${(maxInclusive ? "]" : ")")}";
+    }
+
+    if (min != null && (minInclusive ? userNumber < min! : userNumber <= min!)) {
+      return constructedErrorMsg;
+    }
+    if (max != null && (maxInclusive ? userNumber > max! : userNumber >= max!)) {
+      return constructedErrorMsg;
+    }
+
+    return null;
+  }
+}
+
 class MyPinValidator extends MyFieldValidatorRule<String> {
   final int length;
 
@@ -68,18 +150,14 @@ class MyPinValidator extends MyFieldValidatorRule<String> {
 
   @override
   String? validate(String? value, bool required, Map<String, dynamic> data) {
-    if (!required) {
-      if (value == null) {
-        return null;
-      }
-    } else if (value != null && value.isNotEmpty) {
-      if (value.length != length) {
-        return "Debe ser exactamente $length dígitos";
-      }
-      final pin = int.tryParse(value);
-      if (pin == null) {
-        return "Debe ser un número entero válido.";
-      }
+    if (!required && (value?? "").isEmpty) return null;
+
+    if (value!.length != length) {
+      return "Debe tener exactamente $length dígitos";
+    }
+    final pin = int.tryParse(value);
+    if (pin == null) {
+      return "Debe ser un número entero válido.";
     }
     return null;
   }

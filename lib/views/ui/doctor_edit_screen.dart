@@ -93,6 +93,7 @@ class _DoctorEditScreenState extends State<DoctorEditScreen> with UIMixin {
                                     commonTextField(
                                       validator: controller.basicValidator.getValidation("userNumber"),
                                       teController: controller.basicValidator.getController("userNumber"),
+                                      readOnly: true,
                                       title: "Número de Usuario",
                                       hintText: "Número de usuario",
                                       prefixIcon: Icon(Icons.numbers_sharp, size: 16),
@@ -242,7 +243,17 @@ class _DoctorEditScreenState extends State<DoctorEditScreen> with UIMixin {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             MyContainer(
-                              onTap: () {},
+                              onTap: () {
+                                controller.onUpdate().then((validationError) {
+                                  if (!context.mounted) return;
+                                  if (validationError != null) {
+                                    simpleSnackBar(context, validationError, contentTheme.danger);// Color(0XFFAA236E));
+                                  }
+                                  else {
+                                    simpleSnackBar(context, "Doctor actualizado con éxito", contentTheme.success);// Color(0xFF35639D));
+                                  }
+                                });
+                              },
                               padding: MySpacing.xy(12, 8),
                               color: contentTheme.primary,
                               borderRadiusAll: 8,
@@ -270,13 +281,14 @@ class _DoctorEditScreenState extends State<DoctorEditScreen> with UIMixin {
     );
   }
 
-  Widget commonTextField({String? title, String? hintText, String? Function(String?)? validator, Widget? prefixIcon, void Function()? onTap, TextEditingController? teController, bool numbered = false, int? length}) {
+  Widget commonTextField({String? title, String? hintText, bool readOnly = false, String? Function(String?)? validator, Widget? prefixIcon, void Function()? onTap, TextEditingController? teController, bool numbered = false, int? length}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         MyText.labelMedium(title ?? "", fontWeight: 600, muted: true),
         MySpacing.height(8),
         TextFormField(
+          readOnly: readOnly,
           validator: validator,
           onTap: onTap ?? () {},
           controller: teController,

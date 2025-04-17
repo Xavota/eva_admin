@@ -1,4 +1,5 @@
 import 'package:blix_essentials/blix_essentials.dart';
+import 'package:medicare/helpers/utils/my_string_utils.dart';
 import 'package:medicare/helpers/widgets/my_form_validator.dart';
 import 'package:medicare/helpers/widgets/my_validators.dart';
 import 'package:medicare/views/my_controller.dart';
@@ -35,13 +36,15 @@ class DoctorAddController extends MyController {
   int? _currentUserId;
   int? get currentUserId {
     if (_currentUserId == null) {
-      calculateUserID().then((_) { Debug.log("Got id", overrideColor: Colors.blue); update(); });
+      calculateUserID();
     }
     return _currentUserId;
   }
 
   @override
   void onInit() {
+    calculateUserID();
+
     /*basicValidator.addField(
       'userNumber', required: true, label: "Número de usuario",
       validators: [MyDoctorUserNumberValidator()],
@@ -55,7 +58,7 @@ class DoctorAddController extends MyController {
 
     basicValidator.addField(
       'pin', required: true, label: "NIP",
-      validators: [MyPinValidator(length: 4)],
+      validators: [MyIntegerValidator(exactLength: 4)],
       controller: TextEditingController(),
     );
 
@@ -122,7 +125,8 @@ class DoctorAddController extends MyController {
 
   Future<int?> calculateUserID() async {
     _currentUserId = await manager.getLastDoctorID();
-    Debug.log("user id = $_currentUserId", overrideColor: Colors.yellowAccent);
+    basicValidator.getController("userNumber")!.text =
+    _currentUserId == null ? "" : MyStringUtils.addZerosAtFront(_currentUserId!, lengthRequired: 4);
     update();
     return _currentUserId;
   }

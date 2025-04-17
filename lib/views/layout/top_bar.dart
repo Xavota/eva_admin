@@ -318,7 +318,8 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
                 Debug.log("top_bar logout", overrideColor: Colors.greenAccent);
                 languageHideFn?.call();
                 /// TODO: Get.offAll(LoginScreen());
-                AuthService.logoutUser();
+                //AuthService.logoutUser();
+                AuthService.logout();
                 Get.offAllNamed('/auth/login');
               },
               borderRadiusAll: AppStyle.buttonRadius.medium,

@@ -270,7 +270,8 @@ class Layout extends StatelessWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               onPressed: () {
                 Debug.log("layout logout", overrideColor: Colors.greenAccent);
-                AuthService.logoutUser();
+                //AuthService.logoutUser();
+                AuthService.logout();
                 Get.offAllNamed('/auth/login');
               },
               borderRadiusAll: AppStyle.buttonRadius.medium,
