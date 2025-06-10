@@ -45,6 +45,6 @@ class HomeController extends MyController {
   }
 
   void goToDetailScreen() {
-    Get.toNamed('/admin/patient/detail');
+    Get.toNamed('/doctor/patient/detail/0');
   }
 }

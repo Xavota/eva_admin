@@ -37,16 +37,16 @@ class DoctorListController extends MyController {
   }
 
   void goEditDoctorScreen(int index) {
-    //Get.toNamed('/admin/doctor/edit/$index');
-    Get.offAllNamed('/admin/doctor/edit/$index');
+    Get.toNamed('/panel/doctor/edit/$index');
+    //Get.offAllNamed('/panel/doctor/edit/$index');
   }
 
   void goDetailDoctorScreen(int index) {
-    Get.toNamed('/admin/doctor/detail/$index');
+    Get.toNamed('/panel/doctor/detail/$index');
   }
 
   void addDoctor() {
-    Get.toNamed('/admin/doctor/add');
+    Get.toNamed('/panel/doctor/add');
   }
 
   Future<bool> changeDoctorStatus(int index, bool newStatus) async {

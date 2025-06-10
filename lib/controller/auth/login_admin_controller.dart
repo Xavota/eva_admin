@@ -5,6 +5,8 @@ import 'package:medicare/helpers/widgets/my_validators.dart';
 import 'package:get/get.dart';
 import 'package:medicare/views/my_controller.dart';
 
+import 'package:blix_essentials/blix_essentials.dart';
+
 class LoginAdminController extends MyController {
   MyFormValidator basicValidator = MyFormValidator();
 
@@ -51,6 +53,7 @@ class LoginAdminController extends MyController {
       }
       else {
         String nextUrl = Uri.parse(ModalRoute.of(Get.context!)?.settings.name ?? "").queryParameters['next'] ?? "/home";
+        Debug.log(nextUrl, overrideColor: Colors.blue);
         Get.toNamed(
           nextUrl,
         );

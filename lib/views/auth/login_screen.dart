@@ -1,5 +1,6 @@
 import 'package:blix_essentials/blix_essentials.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:medicare/controller/auth/login_controller.dart';
 import 'package:medicare/helpers/theme/app_themes.dart';
 import 'package:medicare/helpers/utils/ui_mixins.dart';
@@ -44,36 +45,38 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 children: [
                   MyText.headlineSmall("LogIn", fontWeight: 600),
                   MySpacing.height(20),
-                  MyText.bodySmall("Bienvenido al panel de administración!\nPor favor ingrese sus credenciales.", muted: true),
+                  MyText.bodySmall("Bienvenido a Eva!\nPor favor ingrese sus credenciales.", muted: true),
                   MySpacing.height(20),
-                  MyText.labelMedium("Correo Electrónico", fontWeight: 600, muted: true),
+                  MyText.labelMedium("Número de usuario", fontWeight: 600, muted: true),
                   MySpacing.height(8),
                   TextFormField(
-                    validator: controller.basicValidator.getValidation('email'),
-                    controller: controller.basicValidator.getController('email'),
+                    validator: controller.basicValidator.getValidation('userNumber'),
+                    controller: controller.basicValidator.getController('userNumber'),
                     keyboardType: TextInputType.emailAddress,
                     style: MyTextStyle.bodySmall(),
                     decoration: InputDecoration(
-                      labelText: "Correo electrónico",
+                      labelText: "Número de usuario",
                       labelStyle: MyTextStyle.bodySmall(xMuted: true),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                      prefixIcon: const Icon(LucideIcons.mail, size: 20),
+                      prefixIcon: const Icon(LucideIcons.id_card, size: 20),
                       contentPadding: MySpacing.all(16),
                       isCollapsed: true,
                       floatingLabelBehavior: FloatingLabelBehavior.never,
                     ),
                   ),
                   MySpacing.height(20),
-                  MyText.labelMedium("Contraseña", fontWeight: 600, muted: true),
+                  MyText.labelMedium("NIP", fontWeight: 600, muted: true),
                   MySpacing.height(8),
                   TextFormField(
-                    validator: controller.basicValidator.getValidation('password'),
-                    controller: controller.basicValidator.getController('password'),
-                    keyboardType: TextInputType.visiblePassword,
+                    validator: controller.basicValidator.getValidation('pin'),
+                    controller: controller.basicValidator.getController('pin'),
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))],
+                    maxLength: 4,
                     obscureText: !controller.showPassword,
                     style: MyTextStyle.bodySmall(),
                     decoration: InputDecoration(
-                      labelText: "Contraseña",
+                      labelText: "NIP",
                       labelStyle: MyTextStyle.bodySmall(xMuted: true),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       prefixIcon: const Icon(
@@ -93,7 +96,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     ),
                   ),
                   MySpacing.height(10),
-                  MyText.bodySmall("* Para restablecer tu contraseña, contacta al equipo de desarrollo.", fontWeight: 600, muted: true),
+                  //MyText.bodySmall("* Para restablecer tu contraseña, contacta al equipo de desarrollo.", fontWeight: 600, muted: true),
                   /*Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [

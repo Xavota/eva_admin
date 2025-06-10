@@ -287,7 +287,7 @@ class Layout extends StatelessWidget {
                   ),
                   MySpacing.width(8),
                   MyText.labelMedium(
-                    "Log out",
+                    "Cerrar Sesión",
                     fontWeight: 600,
                     color: contentTheme.danger,
                   )

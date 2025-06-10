@@ -11,6 +11,7 @@ import 'package:medicare/helpers/widgets/my_spacing.dart';
 import 'package:medicare/helpers/widgets/my_text.dart';
 import 'package:medicare/helpers/widgets/my_text_style.dart';
 import 'package:medicare/helpers/widgets/responsive.dart';
+import 'package:medicare/helpers/widgets/my_form.dart';
 import 'package:medicare/views/layout/layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,6 +32,20 @@ class _DoctorAddScreenState extends State<DoctorAddScreen> with UIMixin {
 
   TextEditingController userIdController = TextEditingController();
 
+  bool fistBuild = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (fistBuild) {
+        fistBuild = false;
+        controller.clearForm();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Layout(
@@ -47,14 +62,14 @@ class _DoctorAddScreenState extends State<DoctorAddScreen> with UIMixin {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     MyText.titleMedium(
-                      "Registrar Nuevo Doctor",
+                      "Registrar Nuevo Médico",
                       fontSize: 18,
                       fontWeight: 600,
                     ),
                     MyBreadcrumb(
                       children: [
                         MyBreadcrumbItem(name: 'Admin'),
-                        MyBreadcrumbItem(name: 'Añadir doctor', active: true),
+                        MyBreadcrumbItem(name: 'Añadir Médico', active: true),
                       ],
                     ),
                   ],
@@ -66,12 +81,14 @@ class _DoctorAddScreenState extends State<DoctorAddScreen> with UIMixin {
                 child: MyContainer(
                   paddingAll: 20,
                   borderRadiusAll: 12,
-                  child: Form(
-                    key: controller.basicValidator.formKey,
+                  child: MyForm(
+                    //key: controller.basicValidator.formKey,
+                    addNewFormKey: controller.addNewFormKey,
+                    disposeFormKey: controller.disposeFormKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        MyText.titleMedium("Información básica", fontWeight: 600),
+                        MyText.titleMedium("Información Básica", fontWeight: 600),
                         MySpacing.height(20),
                         MyFlex(
                           contentPadding: false,
@@ -217,12 +234,15 @@ class _DoctorAddScreenState extends State<DoctorAddScreen> with UIMixin {
                             MyContainer(
                               onTap: () {
                                 controller.onRegister().then((validationError) {
-                                  if (!context.mounted) return;
                                   if (validationError != null) {
+                                    if (!context.mounted) return;
                                     simpleSnackBar(context, validationError, contentTheme.danger);// Color(0XFFAA236E));
                                   }
                                   else {
-                                    simpleSnackBar(context, "Doctor registrado con éxito", contentTheme.success);// Color(0xFF35639D));
+                                    controller.calculateUserID();
+                                    controller.manager.getDoctors();
+                                    if (!context.mounted) return;
+                                    simpleSnackBar(context, "Médico registrado con éxito", contentTheme.success);// Color(0xFF35639D));
                                   }
                                 });
                               },
@@ -253,7 +273,7 @@ class _DoctorAddScreenState extends State<DoctorAddScreen> with UIMixin {
     );
   }
 
-  Widget commonTextField({String? title, String? hintText, String? initialString, bool? readOnly, String? Function(String?)? validator, Widget? prefixIcon, void Function()? onTap, TextEditingController? teController, bool numbered = false, int? length}) {
+  Widget commonTextField({String? title, String? hintText, bool? readOnly, String? Function(String?)? validator, Widget? prefixIcon, void Function()? onTap, TextEditingController? teController, bool numbered = false, int? length}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -262,7 +282,6 @@ class _DoctorAddScreenState extends State<DoctorAddScreen> with UIMixin {
         TextFormField(
           validator: validator,
           readOnly: readOnly?? false,
-          initialValue: initialString,
           onTap: onTap ?? () {},
           controller: teController,
           keyboardType: numbered ? TextInputType.phone : null,

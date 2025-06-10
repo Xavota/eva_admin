@@ -1,14 +1,10 @@
-import 'package:blix_essentials/blix_essentials.dart';
 import 'package:medicare/helpers/utils/my_string_utils.dart';
 import 'package:medicare/helpers/widgets/my_form_validator.dart';
 import 'package:medicare/helpers/widgets/my_validators.dart';
 import 'package:medicare/views/my_controller.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import 'package:medicare/db_manager.dart';
-
-import 'package:blix_essentials/blix_essentials.dart';
 
 /*enum Gender {
   male,
@@ -28,18 +24,12 @@ enum Department {
 
 class DoctorAddController extends MyController {
   final manager = DBManager.instance!;
+  List<GlobalKey<FormState>> formKeys = [];
+
   //Gender gender = Gender.male;
   //DateTime? selectedDate;
   MyFormValidator basicValidator = MyFormValidator();
   bool loading = false;
-
-  int? _currentUserId;
-  int? get currentUserId {
-    if (_currentUserId == null) {
-      calculateUserID();
-    }
-    return _currentUserId;
-  }
 
   @override
   void onInit() {
@@ -64,7 +54,7 @@ class DoctorAddController extends MyController {
 
     basicValidator.addField(
       'professionalNumber', required: true, label: "Cédula Profesional",
-      validators: [MyProNumberValidator()],
+      validators: [MyIntegerValidator(exactLength: 8)],
       controller: TextEditingController(),
     );
 
@@ -81,18 +71,30 @@ class DoctorAddController extends MyController {
     super.onInit();
   }
 
-  /*void onChangeGender(Gender? value) {
-    gender = value ?? gender;
+
+  void clearForm() {
+    basicValidator.getController('pin')!.text = "";
+    basicValidator.getController('professionalNumber')!.text = "";
+    basicValidator.getController('fullName')!.text = "";
+    basicValidator.getController('speciality')!.text = "";
+
     update();
   }
 
-  Future<void> pickDate() async {
-    final DateTime? picked = await showDatePicker(context: Get.context!, initialDate: selectedDate ?? DateTime.now(), firstDate: DateTime(2015, 8), lastDate: DateTime(2101));
-    if (picked != null && picked != selectedDate) {
-      selectedDate = picked;
-      update();
+
+  GlobalKey<FormState> addNewFormKey() {
+    formKeys.add(GlobalKey());
+    basicValidator.formKey = formKeys.last;
+    return basicValidator.formKey;
+  }
+
+  void disposeFormKey(GlobalKey<FormState> key) {
+    if (formKeys.contains(key)) {
+      formKeys.remove(key);
     }
-  }*/
+    basicValidator.formKey = formKeys.last;
+  }
+
 
   Future<String?> onRegister() async {
     String? validationError;
@@ -123,11 +125,10 @@ class DoctorAddController extends MyController {
     return validationError;
   }
 
-  Future<int?> calculateUserID() async {
-    _currentUserId = await manager.getLastDoctorID();
-    basicValidator.getController("userNumber")!.text =
-    _currentUserId == null ? "" : MyStringUtils.addZerosAtFront(_currentUserId!, lengthRequired: 4);
+  Future<String?> calculateUserID() async {
+    final lastID = await manager.getLastDoctorID();
+    basicValidator.getController("userNumber")!.text = lastID?? "";
     update();
-    return _currentUserId;
+    return lastID;
   }
 }

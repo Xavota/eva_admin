@@ -12,16 +12,19 @@ class MyFormValidator {
   final Map<String, dynamic> _validators = {};
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, dynamic> _data = {};
+  final Map<String, FocusNode> _focusNodes = {};
 
   void addField<T>(String name,
-      {bool required = false, List<MyFieldValidatorRule<T>> validators = const [], String? label, TextEditingController? controller}) {
+      {bool required = false, List<MyFieldValidatorRule<T>> validators = const [], String? label, TextEditingController? controller, FocusNode? node}) {
     _validators[name] = _createValidation<T>(name, required: required, validators: validators, label: label);
     if (controller != null) _controllers[name] = controller;
+    if (node != null) _focusNodes[name] = node;
   }
 
   MyFieldValidator<T>? getValidation<T>(String name) => _validators[name] != null ? _validators[name] as MyFieldValidator<T> : null;
 
   TextEditingController? getController(String name) => _controllers[name];
+  FocusNode? getFocusNode(String name) => _focusNodes[name];
 
   MyFieldValidator<T> _createValidation<T>(String name, {bool required = false, List<MyFieldValidatorRule<T>> validators = const [], String? label}) {
     return (T? value) {
@@ -66,6 +69,8 @@ class MyFormValidator {
   }
 
   bool validateForm({bool clear = false, bool consumeError = true}) {
+    print("Validating form with key: $formKey");
+
     if (clear) {
       errors.clear();
       remainingError.clear();

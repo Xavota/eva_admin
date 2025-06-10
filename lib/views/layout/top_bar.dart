@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:medicare/db_manager.dart';
 import 'package:medicare/helpers/localizations/language.dart';
 import 'package:medicare/helpers/services/auth_services.dart';
 import 'package:medicare/helpers/theme/app_notifire.dart';
@@ -14,7 +15,6 @@ import 'package:medicare/helpers/widgets/my_container.dart';
 import 'package:medicare/helpers/widgets/my_dashed_divider.dart';
 import 'package:medicare/helpers/widgets/my_spacing.dart';
 import 'package:medicare/helpers/widgets/my_text.dart';
-import 'package:medicare/images.dart';
 import 'package:medicare/widgets/custom_pop_menu.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:provider/provider.dart';
@@ -25,11 +25,47 @@ class TopBar extends StatefulWidget {
   const TopBar({super.key});
 
   @override
-  _TopBarState createState() => _TopBarState();
+  State<TopBar> createState() => _TopBarState();
 }
 
 class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UIMixin {
   Function? languageHideFn;
+
+  String userName = "";
+
+  @override
+  void initState() {
+    super.initState();
+
+
+    if (AuthService.loginType == LoginType.kAdmin) {
+      userName = "Admin";
+    }
+    else if (AuthService.loginType == LoginType.kDoctor) {
+      DBManager.instance!.doctors.then((docs) {
+        if (docs == null) return;
+        setState(() {
+          userName = docs.firstWhere((e) => e.userNumber == AuthService.loggedUserNumber).fullName;
+        });
+      });
+    }
+    else if (AuthService.loginType == LoginType.kSecretary) {
+      DBManager.instance!.getSecretary(userNumber: AuthService.loggedUserNumber).then((secretary) {
+        if (secretary == null) return;
+        setState(() {
+          userName = secretary.fullName;
+        });
+      });
+    }
+    else {
+      DBManager.instance!.getPatients(userNumber: AuthService.loggedUserNumber).then((patient) {
+        if (patient == null || patient.isEmpty) return;
+        setState(() {
+          userName = patient[0].fullName;
+        });
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,19 +78,22 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
       child: Row(
         children: [
           InkWell(
-              splashColor: theme.colorScheme.onSurface,
-              highlightColor: theme.colorScheme.onSurface,
-              onTap: () {
-                ThemeCustomizer.toggleLeftBarCondensed();
-              },
-              child: Icon(
-                LucideIcons.menu,
-                color: topBarTheme.onBackground,
-              )),
+            splashColor: theme.colorScheme.onSurface,
+            highlightColor: theme.colorScheme.onSurface,
+            onTap: () {
+              ThemeCustomizer.toggleLeftBarCondensed();
+            },
+            child: Icon(
+              LucideIcons.menu,
+              color: topBarTheme.onBackground,
+            ),
+          ),
           Expanded(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
+                MyText.labelLarge(userName),
+                MySpacing.width(20),
                 InkWell(
                   onTap: () {
                     ThemeCustomizer.setTheme(ThemeCustomizer.instance.theme == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark);
@@ -66,7 +105,7 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
                   ),
                 ),
                 MySpacing.width(12),
-                CustomPopupMenu(
+                /*CustomPopupMenu(
                   backdrop: true,
                   hideFn: (hide) => languageHideFn = hide,
                   onChange: (_) {},
@@ -104,7 +143,7 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
                   ),
                   menuBuilder: (_) => buildNotifications(),
                 ),
-                MySpacing.width(4),
+                MySpacing.width(4),*/
                 CustomPopupMenu(
                   backdrop: true,
                   onChange: (_) {},
@@ -115,7 +154,7 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        MyContainer.rounded(
+                        /*MyContainer.rounded(
                             paddingAll: 0,
                             child: Image.asset(
                               Images.avatars[0],
@@ -123,8 +162,8 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
                               width: 28,
                               fit: BoxFit.cover,
                             )),
-                        MySpacing.width(8),
-                        MyText.labelLarge("Alison")
+                        MySpacing.width(8),*/
+                        MyText.labelLarge(AuthService.loginType == LoginType.kAdmin ? "Admin" : (AuthService.loginType == LoginType.kDoctor ? "Médico" : (AuthService.loginType == LoginType.kSecretary ? "Secretaria" : "Usuario")))
                       ],
                     ),
                   ),
@@ -335,7 +374,7 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
                   ),
                   MySpacing.width(8),
                   MyText.labelMedium(
-                    "Log out",
+                    "Cerrar Sesión",
                     fontWeight: 600,
                     color: contentTheme.danger,
                   )

@@ -1,6 +1,17 @@
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+
+import 'package:flutter_lucide/flutter_lucide.dart';
+import 'package:get/get.dart';
+
 import 'package:medicare/controller/ui/patient_list_controller.dart';
+
+import 'package:medicare/helpers/theme/app_themes.dart';
 import 'package:medicare/helpers/utils/ui_mixins.dart';
 import 'package:medicare/helpers/utils/utils.dart';
+import 'package:medicare/helpers/utils/my_string_utils.dart';
+
 import 'package:medicare/helpers/widgets/my_breadcrumb.dart';
 import 'package:medicare/helpers/widgets/my_breadcrumb_item.dart';
 import 'package:medicare/helpers/widgets/my_container.dart';
@@ -8,11 +19,13 @@ import 'package:medicare/helpers/widgets/my_list_extension.dart';
 import 'package:medicare/helpers/widgets/my_spacing.dart';
 import 'package:medicare/helpers/widgets/my_text.dart';
 import 'package:medicare/helpers/widgets/responsive.dart';
-import 'package:medicare/images.dart';
+
 import 'package:medicare/views/layout/layout.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_lucide/flutter_lucide.dart';
-import 'package:get/get.dart';
+
+import 'package:medicare/model/patient_list_model.dart';
+
+import 'package:blix_essentials/blix_essentials.dart';
+
 
 class PatientListScreen extends StatefulWidget {
   const PatientListScreen({super.key});
@@ -23,8 +36,18 @@ class PatientListScreen extends StatefulWidget {
 
 class _PatientListScreenState extends State<PatientListScreen> with UIMixin {
   PatientListController controller = Get.put(PatientListController());
+
+  @override
+  void initState() {
+    super.initState();
+    controller.updatePatients();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final tableFlexWidth = (1541 - 888 - (1920 - screenWidth));
+
     return Layout(
       child: GetBuilder(
         init: controller,
@@ -39,14 +62,14 @@ class _PatientListScreenState extends State<PatientListScreen> with UIMixin {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     MyText.titleMedium(
-                      "Patient List",
+                      "Listado de Tratantes",
                       fontSize: 18,
                       fontWeight: 600,
                     ),
                     MyBreadcrumb(
                       children: [
-                        MyBreadcrumbItem(name: 'Admin'),
-                        MyBreadcrumbItem(name: 'Patient List', active: true),
+                        MyBreadcrumbItem(name: 'Médico'),
+                        MyBreadcrumbItem(name: 'Lista Tratantes', active: true),
                       ],
                     ),
                   ],
@@ -65,14 +88,80 @@ class _PatientListScreenState extends State<PatientListScreen> with UIMixin {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          MyText.bodyMedium("Patient List", fontWeight: 600, muted: true),
+                          MyText.bodyMedium("Listado de Tratantes", fontWeight: 600, muted: true),
                           MyContainer(
                             onTap: controller.addPatient,
                             padding: MySpacing.xy(12, 8),
                             borderRadiusAll: 8,
                             color: contentTheme.primary,
-                            child: MyText.labelSmall("Add Patient", fontWeight: 600, color: contentTheme.onPrimary),
+                            child: MyText.labelSmall("Registrar Tratante", fontWeight: 600, color: contentTheme.onPrimary),
                           )
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          InkWell(
+                            onTap: () => controller.setActiveFilter(null),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Radio<bool?>(
+                                  value: null,
+                                  activeColor: theme.colorScheme.primary,
+                                  groupValue: controller.activeFilter,
+                                  onChanged: (value) => controller.setActiveFilter(value),
+                                  visualDensity: getCompactDensity,
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                MySpacing.width(8),
+                                MyText.labelMedium(
+                                  "Todos",
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 10.0,),
+                          InkWell(
+                            onTap: () => controller.setActiveFilter(true),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Radio<bool?>(
+                                  value: true,
+                                  activeColor: theme.colorScheme.primary,
+                                  groupValue: controller.activeFilter,
+                                  onChanged: (value) => controller.setActiveFilter(value),
+                                  visualDensity: getCompactDensity,
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                MySpacing.width(8),
+                                MyText.labelMedium(
+                                  "Activos",
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(width: 10.0,),
+                          InkWell(
+                            onTap: () => controller.setActiveFilter(false),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Radio<bool?>(
+                                  value: false,
+                                  activeColor: theme.colorScheme.primary,
+                                  groupValue: controller.activeFilter,
+                                  onChanged: (value) => controller.setActiveFilter(value),
+                                  visualDensity: getCompactDensity,
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                MySpacing.width(8),
+                                MyText.labelMedium(
+                                  "Archivados",
+                                ),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                       MySpacing.height(20),
@@ -81,7 +170,8 @@ class _PatientListScreenState extends State<PatientListScreen> with UIMixin {
                           scrollDirection: Axis.horizontal,
                           child: DataTable(
                               sortAscending: true,
-                              columnSpacing: 60,
+                              columnSpacing: 30,
+                              horizontalMargin: 15.0,
                               onSelectAll: (_) => {},
                               headingRowColor: WidgetStatePropertyAll(contentTheme.primary.withAlpha(40)),
                               dataRowMaxHeight: 60,
@@ -90,19 +180,22 @@ class _PatientListScreenState extends State<PatientListScreen> with UIMixin {
                               border: TableBorder.all(
                                   borderRadius: BorderRadius.circular(12), style: BorderStyle.solid, width: .4, color: contentTheme.secondary),
                               columns: [
-                                DataColumn(label: MyText.labelMedium('Name', color: contentTheme.primary)),
-                                DataColumn(label: MyText.labelMedium('Sex', color: contentTheme.primary)),
-                                DataColumn(label: MyText.labelMedium('Address', color: contentTheme.primary)),
-                                DataColumn(label: MyText.labelMedium('Mobile Number', color: contentTheme.primary)),
-                                DataColumn(label: MyText.labelMedium('Birth Date', color: contentTheme.primary)),
-                                DataColumn(label: MyText.labelMedium('Age', color: contentTheme.primary)),
-                                DataColumn(label: MyText.labelMedium('Blood Group', color: contentTheme.primary)),
-                                DataColumn(label: MyText.labelMedium('Status', color: contentTheme.primary)),
-                                DataColumn(label: MyText.labelMedium('Action', color: contentTheme.primary)),
+                                DataColumn(label: MyText.labelMedium('Usuario', color: contentTheme.primary)),
+                                DataColumn(label: MyText.labelMedium('Nombre', color: contentTheme.primary)),
+                                DataColumn(label: MyText.labelMedium('Edad', color: contentTheme.primary)),
+                                DataColumn(label: MyText.labelMedium('Sexo', color: contentTheme.primary)),
+                                DataColumn(label: MyText.labelMedium('Peso', color: contentTheme.primary)),
+                                DataColumn(label: MyText.labelMedium('Altura', color: contentTheme.primary)),
+                                DataColumn(label: MyText.labelMedium('Cintura', color: contentTheme.primary)),
+                                DataColumn(label: MyText.labelMedium('Ocupación', color: contentTheme.primary)),
+                                DataColumn(label: MyText.labelMedium('Nacimiento', color: contentTheme.primary)),
+                                DataColumn(label: MyText.labelMedium('Teléfono', color: contentTheme.primary)),
+                                DataColumn(label: MyText.labelMedium('Acciones', color: contentTheme.primary)),
                               ],
                               rows: controller.patients
-                                  .mapIndexed((index, data) => DataRow(cells: [
-                                        DataCell(SizedBox(
+                                  .mapIndexed((index, data) => DataRow(
+                                cells: [
+                                  /*DataCell(SizedBox(
                                           width: 200,
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
@@ -117,33 +210,56 @@ class _PatientListScreenState extends State<PatientListScreen> with UIMixin {
                                               MyText.bodySmall(data.name),
                                             ],
                                           ),
-                                        )),
-                                        DataCell(MyText.bodySmall(data.gender)),
-                                        DataCell(SizedBox(width: 250, child: MyText.bodySmall(data.address))),
-                                        DataCell(SizedBox(width: 100, child: MyText.bodySmall(data.mobileNumber))),
-                                        DataCell(SizedBox(width: 100, child: MyText.bodySmall(Utils.getDateStringFromDateTime(data.birthDate)))),
-                                        DataCell(MyText.bodySmall('${data.age}')),
-                                        DataCell(MyText.bodySmall(data.bloodGroup)),
-                                        DataCell(SizedBox(width: 100, child: MyText.bodySmall(data.status))),
-                                        DataCell(Row(
-                                          children: [
-                                            MyContainer(
-                                              onTap: controller.goDetailScreen,
-                                              paddingAll: 8,
-                                              color: contentTheme.secondary.withAlpha(32),
-                                              child: Icon(LucideIcons.eye, size: 16),
-                                            ),
-                                            MySpacing.width(20),
-                                            MyContainer(
-                                              onTap: controller.goEditScreen,
-                                              paddingAll: 8,
-                                              color: contentTheme.secondary.withAlpha(32),
-                                              child: Icon(LucideIcons.pencil, size: 16),
-                                            ),
-                                          ],
-                                        )),
-                                      ]))
-                                  .toList()),
+                                        )),*/
+                                  DataCell(SizedBox(width: 47, child: MyText.bodySmall(data.userNumber))),
+                                  DataCell(SizedBox(width: math.max(tableFlexWidth * 0.625, 200), child: MyText.bodySmall(data.fullName))),
+                                  DataCell(SizedBox(width: 35, child: MyText.bodySmall(data.age.toString()))),
+                                  DataCell(SizedBox(width: 35, child: MyText.bodySmall(data.sex.name))),
+                                  DataCell(SizedBox(width: 50, child: MyText.bodySmall(data.weight.toString()))),
+                                  DataCell(SizedBox(width: 50, child: MyText.bodySmall(data.height.toString()))),
+                                  DataCell(SizedBox(width: 50, child: MyText.bodySmall(data.waist.toString()))),
+                                  DataCell(SizedBox(width: math.max(tableFlexWidth * 0.375, 120), child: MyText.bodySmall(data.job))),
+                                  DataCell(SizedBox(width: 75, child: MyText.bodySmall(Utils.getDateStringFromDateTime(data.birthDate)))),
+                                  DataCell(SizedBox(width: 80, child: MyText.bodySmall(data.phoneNumber))),
+                                  DataCell(Row(
+                                    children: [
+                                      MyContainer(
+                                        onTap: () => controller.changePatientStatus(index, !data.status).then((response) {
+                                          if (context.mounted) {
+                                            if (response) {
+                                              simpleSnackBar(context, "Tratante ${(data.status ? "" : "des")}archivado con éxito", contentTheme.success);// Color(0XFFAA236E));
+                                            }
+                                            else {
+                                              simpleSnackBar(context, "Hubo un error en el servidor, intenta de nuevo más tarde", contentTheme.danger);// Color(0XFFAA236E));
+                                            }
+                                          }
+                                          if (response) {
+                                            setState(() {});
+                                          }
+                                        }),
+                                        paddingAll: 8,
+                                        color: contentTheme.secondary.withAlpha(32),
+                                        child: Icon(data.status ? LucideIcons.archive : LucideIcons.archive_restore, size: 16),
+                                      ),
+                                      MySpacing.width(20),
+                                      MyContainer(
+                                        onTap: () => controller.goDetailScreen(index),
+                                        paddingAll: 8,
+                                        color: contentTheme.secondary.withAlpha(32),
+                                        child: Icon(LucideIcons.eye, size: 16),
+                                      ),
+                                      MySpacing.width(20),
+                                      MyContainer(
+                                        onTap: () => controller.goEditScreen(index),
+                                        paddingAll: 8,
+                                        color: contentTheme.secondary.withAlpha(32),
+                                        child: Icon(LucideIcons.pencil, size: 16),
+                                      ),
+                                    ],
+                                  ),
+                                  ),
+                                ],
+                              ),).toList()),
                         ),
                     ],
                   ),

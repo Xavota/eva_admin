@@ -220,7 +220,7 @@ class AppStyle {
       containerRadius: AppStyle.containerRadius.medium,
       cardRadius: AppStyle.cardRadius.medium,
       buttonRadius: AppStyle.buttonRadius.medium,
-      defaultBreadCrumbItem: MyBreadcrumbItem(name: 'TrendX', route: '/dashboard'),
+      defaultBreadCrumbItem: MyBreadcrumbItem(name: 'Eva', route: '/dashboard'),
     ));
     bool isMobile = true;
     try {

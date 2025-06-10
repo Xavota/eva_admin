@@ -32,8 +32,8 @@ class _DoctorListScreenState extends State<DoctorListScreen> with UIMixin {
 
   @override
   void initState() {
-    controller = DoctorListController();
     super.initState();
+    controller = DoctorListController();
   }
 
   @override
@@ -54,14 +54,14 @@ class _DoctorListScreenState extends State<DoctorListScreen> with UIMixin {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     MyText.titleMedium(
-                      "Lista de Doctores",
+                      "Listado de Médicos",
                       fontSize: 18,
                       fontWeight: 600,
                     ),
                     MyBreadcrumb(
                       children: [
                         MyBreadcrumbItem(name: 'Admin'),
-                        MyBreadcrumbItem(name: 'Lista Doctores', active: true),
+                        MyBreadcrumbItem(name: 'Lista Médicos', active: true),
                       ],
                     ),
                   ],
@@ -80,13 +80,13 @@ class _DoctorListScreenState extends State<DoctorListScreen> with UIMixin {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          MyText.bodyMedium("Lista de Doctores", fontWeight: 600, muted: true),
+                          MyText.bodyMedium("Listado de Médicos", fontWeight: 600, muted: true),
                           MyContainer(
                             onTap: controller.addDoctor,
                             padding: MySpacing.xy(12, 8),
                             borderRadiusAll: 8,
                             color: contentTheme.primary,
-                            child: MyText.labelSmall("Registrar Doctor",fontWeight: 600,color: contentTheme.onPrimary),
+                            child: MyText.labelSmall("Registrar Médico",fontWeight: 600,color: contentTheme.onPrimary),
                           )
                         ],
                       ),
@@ -224,7 +224,7 @@ class _DoctorListScreenState extends State<DoctorListScreen> with UIMixin {
                                     ],
                                   ),
                                 )),*/
-                                DataCell(SizedBox(width: 50, child: MyText.bodySmall(MyStringUtils.addZerosAtFront(data.userNumber, lengthRequired: 4)))),
+                                DataCell(SizedBox(width: 50, child: MyText.bodySmall(data.userNumber))),
                                 DataCell(SizedBox(width: math.max(1605 - 1017 - (1920 - screenWidth), 200), child: MyText.bodySmall(data.fullName))),
                                 DataCell(SizedBox(width: 120, child: MyText.bodySmall(data.professionalNumber))),
                                 DataCell(SizedBox(width: 150, child: MyText.bodySmall(data.speciality))),

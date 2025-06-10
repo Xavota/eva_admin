@@ -4,12 +4,17 @@ import 'package:medicare/helpers/theme/theme_customizer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorage {
-  static const String _loggedInAdminKey = "admin";
+  /*static const String _loggedInAdminKey = "admin";
   static const String _loggedInAdminTimeKey = "admin_time";
   static const String _loggedInDoctorKey = "doctor";
   static const String _loggedInDoctorTimeKey = "doctor_time";
   static const String _loggedInUserKey = "user";
-  static const String _loggedInUserTimeKey = "user_time";
+  static const String _loggedInUserTimeKey = "user_time";*/
+
+  static const String _loggedInTypeKey = "log_in_type";
+  static const String _loggedInTimeKey = "log_in_time";
+  static const String _loggedInNumberKey = "log_in_number";
+
   static const String _themeCustomizerKey = "theme_customizer";
   static const String _languageKey = "lang_code";
 
@@ -30,7 +35,18 @@ class LocalStorage {
   static Future<void> initData() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
 
-    DateTime? loggedTime = DateTime.tryParse(preferences.getString(_loggedInAdminTimeKey)?? "");
+    DateTime? loggedTime = DateTime.tryParse(preferences.getString(_loggedInTimeKey)?? "");
+    if (loggedTime != null && DateTime.now().difference(loggedTime).inMinutes < 15) {
+      final logInType = preferences.getString(_loggedInTypeKey)?? "";
+      final logInNumber = preferences.getString(_loggedInNumberKey)?? "";
+
+      AuthService.loginType = LoginTypeExtension.tryParse(logInType)?? LoginType.kNone;
+      AuthService.loggedUserNumber = logInNumber;
+      await AuthService.updateLoggedUserData();
+    }
+
+
+    /*loggedTime = DateTime.tryParse(preferences.getString(_loggedInAdminTimeKey)?? "");
     if (loggedTime != null && DateTime.now().difference(loggedTime).inMinutes < 15) {
       //AuthService.isLoggedInAdmin = preferences.getBool(_loggedInAdminKey) ?? false;
       final isLoggedIn = preferences.getBool(_loggedInAdminKey)?? false;
@@ -48,13 +64,26 @@ class LocalStorage {
     if (AuthService.loginType == LoginType.kNone && loggedTime != null && DateTime.now().difference(loggedTime).inMinutes < 15) {
       //AuthService.isLoggedIn = preferences.getBool(_loggedInUserKey) ?? false;
       final isLoggedIn = preferences.getBool(_loggedInUserKey)?? false;
-      AuthService.loginType = isLoggedIn ? LoginType.kUser : AuthService.loginType;
-    }
+      AuthService.loginType = isLoggedIn ? LoginType.kPatient : AuthService.loginType;
+    }*/
 
     ThemeCustomizer.fromJSON(preferences.getString(_themeCustomizerKey));
   }
 
-  static Future<bool> setLoggedInUser(bool loggedIn) async {
+  static Future<bool> setLoggedIn(LoginType type, [String? number]) async {
+    if (type != LoginType.kNone) {
+      if (!await preferences.setString(_loggedInTimeKey, DateTime.now().toString())) {
+        return false;
+      }
+    }
+
+    preferences.setString(_loggedInTypeKey, type.name);
+    preferences.setString(_loggedInNumberKey, number?? "");
+
+    return true;
+  }
+
+  /*static Future<bool> setLoggedInUser(bool loggedIn) async {
     if (loggedIn) {
       if (!await preferences.setString(_loggedInUserTimeKey, DateTime.now().toString())) {
         return false;
@@ -79,7 +108,7 @@ class LocalStorage {
       }
     }
     return preferences.setBool(_loggedInAdminKey, loggedIn);
-  }
+  }*/
 
   static Future<bool> setCustomizer(ThemeCustomizer themeCustomizer) {
     return preferences.setString(_themeCustomizerKey, themeCustomizer.toJSON());
@@ -93,7 +122,16 @@ class LocalStorage {
     return preferences.getString(_languageKey);
   }
 
-  static Future<bool> removeLoggedInUser() async {
+  static Future<bool> removeLoggedIn() async {
+    bool r = true;
+    r = await preferences.remove(_loggedInTypeKey) ? r : false;
+    r = await preferences.remove(_loggedInTimeKey) ? r : false;
+    r = await preferences.remove(_loggedInNumberKey) ? r : false;
+
+    return r;
+  }
+
+  /*static Future<bool> removeLoggedInUser() async {
     return preferences.remove(_loggedInUserKey);
   }
 
@@ -103,5 +141,5 @@ class LocalStorage {
 
   static Future<bool> removeLoggedInAdmin() async {
     return preferences.remove(_loggedInAdminKey);
-  }
+  }*/
 }

@@ -1,19 +1,33 @@
+import 'package:flutter/material.dart';
+
+import 'package:get/get.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+
+import 'package:medicare/images.dart';
+import 'package:medicare/app_constant.dart';
+
 import 'package:medicare/controller/ui/patient_detail_controller.dart';
+
 import 'package:medicare/helpers/utils/ui_mixins.dart';
 import 'package:medicare/helpers/utils/utils.dart';
+
 import 'package:medicare/helpers/widgets/my_breadcrumb.dart';
 import 'package:medicare/helpers/widgets/my_breadcrumb_item.dart';
 import 'package:medicare/helpers/widgets/my_container.dart';
-import 'package:medicare/helpers/widgets/my_flex.dart';
-import 'package:medicare/helpers/widgets/my_flex_item.dart';
+//import 'package:medicare/helpers/widgets/my_flex.dart';
+//import 'package:medicare/helpers/widgets/my_flex_item.dart';
 import 'package:medicare/helpers/widgets/my_spacing.dart';
 import 'package:medicare/helpers/widgets/my_text.dart';
 import 'package:medicare/helpers/widgets/responsive.dart';
-import 'package:medicare/images.dart';
+import 'package:medicare/helpers/widgets/my_file_selector.dart';
+
 import 'package:medicare/views/layout/layout.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+
+import 'package:medicare/model/patient_list_model.dart';
+
+import 'package:medicare/db_manager.dart';
+import 'package:blix_essentials/blix_essentials.dart';
+
 
 class PatientDetailScreen extends StatefulWidget {
   const PatientDetailScreen({super.key});
@@ -24,6 +38,19 @@ class PatientDetailScreen extends StatefulWidget {
 
 class _PatientDetailScreenState extends State<PatientDetailScreen> with UIMixin {
   PatientDetailController controller = Get.put(PatientDetailController());
+
+
+  @override
+  void initState() {
+    super.initState();
+
+    final String param = Get.parameters['index']!;
+    final int index = int.parse(param);
+    controller.updatePatientInfo(index).then((_) {
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Layout(
@@ -40,14 +67,14 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> with UIMixin 
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     MyText.titleMedium(
-                      "Patient Detail",
+                      "Detalles del Tratante",
                       fontSize: 18,
                       fontWeight: 600,
                     ),
                     MyBreadcrumb(
                       children: [
-                        MyBreadcrumbItem(name: 'Admin'),
-                        MyBreadcrumbItem(name: 'Patient Detail', active: true),
+                        MyBreadcrumbItem(name: 'Médico'),
+                        MyBreadcrumbItem(name: 'Detalles Tratante', active: true),
                       ],
                     ),
                   ],
@@ -55,6 +82,15 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> with UIMixin 
               ),
               MySpacing.height(flexSpacing),
               Padding(
+                padding: MySpacing.x(flexSpacing / 2),
+                child: patientDetail(),
+              ),
+              MySpacing.height(10),
+              Padding(
+                padding: MySpacing.x(flexSpacing / 2),
+                child: pdfViewer(),
+              ),
+              /*Padding(
                 padding: MySpacing.x(flexSpacing / 2),
                 child: MyFlex(
                   children: [
@@ -68,7 +104,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> with UIMixin 
                     MyFlexItem(sizes: 'lg-6 md-6', child: report()),
                   ],
                 ),
-              ),
+              ),*/
             ],
           );
         },
@@ -80,7 +116,7 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> with UIMixin 
     Widget details(String title, String detail) {
       return Row(
         children: [
-          Expanded(child: MyText.bodySmall(title, fontWeight: 600, maxLines: 1, overflow: TextOverflow.ellipsis)),
+          SizedBox(width: 200.0, child: MyText.bodySmall(title, fontWeight: 600, maxLines: 1, overflow: TextOverflow.ellipsis)),
           Flexible(child: MyText.bodySmall(detail, muted: true, maxLines: 1, overflow: TextOverflow.ellipsis)),
         ],
       );
@@ -93,9 +129,23 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> with UIMixin 
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              MyText.bodyMedium("Details", fontWeight: 600),
+              MyText.bodyMedium("Detalles", fontWeight: 600, muted: true),
+              MyContainer(
+                onTap: controller.goEditScreen,
+                padding: MySpacing.xy(12, 8),
+                borderRadiusAll: 8,
+                color: contentTheme.primary,
+                child: MyText.labelSmall("Editar Tratante", fontWeight: 600, color: contentTheme.onPrimary),
+              )
+            ],
+          ),
+          /*Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              MyText.bodyMedium("Detalles", fontWeight: 600),
               PopupMenuButton(
                 itemBuilder: (context) {
                   return [
@@ -110,9 +160,9 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> with UIMixin 
                 child: Icon(LucideIcons.ellipsis_vertical, size: 16),
               )
             ],
-          ),
+          ),*/
           MySpacing.height(20),
-          Center(
+          /*Center(
             child: MyContainer(
               paddingAll: 0,
               height: 200,
@@ -122,18 +172,156 @@ class _PatientDetailScreenState extends State<PatientDetailScreen> with UIMixin 
               child: Image.asset(Images.avatars[2], fit: BoxFit.cover),
             ),
           ),
+          MySpacing.height(20),*/
+          details("Nombre", controller.selectedPatient?.fullName?? "Nadie"),
           MySpacing.height(20),
-          details("Name", "William Wilson"),
+          details("Edad", "${controller.selectedPatient?.age.toString()?? "0"} años"),
           MySpacing.height(20),
-          details("Date of birth", "12-7-1993"),
+          details("Sexo", controller.selectedPatient?.sex.name?? "N/A"),
           MySpacing.height(20),
-          details("Gender", "Male"),
+          details("Peso", "${controller.selectedPatient?.weight.toString()?? "0.0"} Kg"),
           MySpacing.height(20),
-          details("Address", "6518 Schumm Landing Suite 350"),
+          details("Altura", "${controller.selectedPatient?.height.toString()} m"),
           MySpacing.height(20),
-          details("Phone", "+1234567890"),
+          details("Cintura", "${controller.selectedPatient?.waist.toString()} cm"),
           MySpacing.height(20),
-          details("Email", "william@example.com"),
+          details("Ocupación", controller.selectedPatient?.job?? "Ninguna"),
+          MySpacing.height(20),
+          details("Fecha de Nacimiento", dateFormatter.format(controller.selectedPatient?.birthDate?? DateTime.now())),
+          MySpacing.height(20),
+          details("Número de Teléfono", controller.selectedPatient?.phoneNumber?? "0000000000"),
+          MySpacing.height(20),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(width: 200, child: MyText.bodySmall("Motivos de Consulta", fontWeight: 600, maxLines: 1, overflow: TextOverflow.ellipsis)),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: controller.selectedPatient?.consultationReasons.map<Widget>(
+                          (e) => MyText.bodySmall(
+                            e.name, muted: true, maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          )
+                  ).toList()?? [],
+                ),
+              ),
+            ],
+          ),
+          MySpacing.height(40),
+          details("Suscripción", switch (controller.subscriptionStatus) {
+            SubscriptionStatus.kNotActive => "No Activa",
+            SubscriptionStatus.kActive => "Activa",
+            SubscriptionStatus.kPending => "Pendiente",
+            null => "-"
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget pdfViewer() {
+    final pdfName = controller.selectedPatient?.pdfName?? "";
+    final pdfURL = BlixDBManager.getUrl("uploads/pdf/$pdfName");
+    Debug.log("pdfURL: $pdfURL");
+    return MyContainer(
+      paddingAll: 24,
+      borderRadiusAll: 12,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          MyText.bodyMedium("PDF", fontWeight: 600),
+          MySpacing.height(20),
+          MyText.bodyMedium(pdfName.isEmpty ? "No hay expediente cargado" : "Expediente cargado", fontWeight: 600),
+          if (pdfName.isNotEmpty)
+            MySpacing.height(10),
+          if (pdfName.isNotEmpty)
+            Wrap(
+              spacing: 10.0,
+              runSpacing: 10.0,
+              children: [
+                //if (pdfName.isNotEmpty/* && controller.pdfBytes != null*/)
+                MyContainer(
+                  onTap: () {
+                    controller.showPDFPreview(context);
+                  },
+                  padding: MySpacing.xy(12, 8),
+                  color: contentTheme.primary,
+                  borderRadiusAll: 8,
+                  child: MyText.labelMedium("Ver expediente", color: contentTheme.onPrimary, fontWeight: 600),
+                ),
+                //if (pdfName.isNotEmpty)
+                MyContainer(
+                  onTap: () {
+                    controller.deletePDFFile().then((error) {
+                      if (!mounted) return;
+
+                      if (error == null) {
+                        simpleSnackBar(context, "El archivo se eliminó correctamente", contentTheme.success);
+                      }
+                      else if (error == "no user") {
+                        simpleSnackBar(context, "No hay un usuario seleccionado", contentTheme.danger);
+                      }
+                      else if (error == "no such file") {
+                        simpleSnackBar(context, "El archivo no existe", contentTheme.danger);
+                      }
+                    });
+                  },
+                  padding: MySpacing.xy(12, 8),
+                  color: contentTheme.danger,
+                  borderRadiusAll: 8,
+                  child: MyText.labelMedium("Eliminar expediente", color: contentTheme.onPrimary, fontWeight: 600),
+                ),
+              ],
+            ),
+          MySpacing.height(20),
+          FileUploadWidget(
+            hintText: "Arrastra aquí el archivo o",
+            uploadButtonText: "busca en tus archivos",
+            onFileSelected: controller.loadPDFFile,
+            onError: (error) {
+              if (error == "type") {
+                simpleSnackBar(context, "El archivo no es un PDF", contentTheme.danger);
+              }
+              else if (error == "size") {
+                simpleSnackBar(context, "El archivo pesa más de 10MB", contentTheme.danger);
+              }
+            },
+          ),
+          MySpacing.height(10),
+          MyContainer(
+            onTap: () {
+              controller.uploadPDFFile().then((error) {
+                if (!mounted) return;
+
+                if (error == null) {
+                  simpleSnackBar(context, "El archivo se subió correctamente", contentTheme.success);
+                }
+                else if (error == "missing info") {
+                  simpleSnackBar(context, "No hay un archivo seleccionado", contentTheme.danger);
+                }
+                else if (error == "type") {
+                  simpleSnackBar(context, "El archivo no es un PDF", contentTheme.danger);
+                }
+                else if (error == "size") {
+                  simpleSnackBar(context, "El archivo pesa más de 10MB", contentTheme.danger);
+                }
+                else if (error == "file error") {
+                  simpleSnackBar(context, "Hubo un error con el archivo o con el servidor", contentTheme.danger);
+                }
+                else if (error == "failed") {
+                  simpleSnackBar(context, "Hubo un fallo subiendo el archivo al servidor", contentTheme.danger);
+                }
+                else if (error == "no user") {
+                  simpleSnackBar(context, "No hay un usuario seleccionado", contentTheme.danger);
+                }
+              });
+            },
+            padding: MySpacing.xy(12, 8),
+            color: contentTheme.primary,
+            borderRadiusAll: 8,
+            child: MyText.labelMedium("Subir", color: contentTheme.onPrimary, fontWeight: 600),
+          ),
         ],
       ),
     );

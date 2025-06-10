@@ -53,14 +53,14 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen> with UIMixin {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     MyText.titleMedium(
-                      "Doctor Detail",
+                      "Detalles del Médico",
                       fontSize: 18,
                       fontWeight: 600,
                     ),
                     MyBreadcrumb(
                       children: [
                         MyBreadcrumbItem(name: 'Admin'),
-                        MyBreadcrumbItem(name: 'Doctor Detail', active: true),
+                        MyBreadcrumbItem(name: 'Detalles Médico', active: true),
                       ],
                     ),
                   ],
@@ -125,6 +125,21 @@ class _DoctorDetailScreenState extends State<DoctorDetailScreen> with UIMixin {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      MyText.bodyMedium("Detalles", fontWeight: 600, muted: true),
+                      MyContainer(
+                        onTap: controller.goEditScreen,
+                        padding: MySpacing.xy(12, 8),
+                        borderRadiusAll: 8,
+                        color: contentTheme.primary,
+                        child: MyText.labelSmall("Editar Médico", fontWeight: 600, color: contentTheme.onPrimary),
+                      ),
+                    ],
+                  ),
+                  MySpacing.height(20),
                   MyText.bodyMedium("Dr. ${controller.selectedDoctor?.fullName?? "Nadie"}", fontSize: 20.0, fontWeight: 800, muted: true, overflow: TextOverflow.ellipsis),
                   MySpacing.height(15.0),
                   MyText.bodySmall("Especialidad: ${controller.selectedDoctor?.speciality?? "Ninguna"}", fontWeight: 600, muted: true, overflow: TextOverflow.ellipsis),

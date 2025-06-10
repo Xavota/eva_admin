@@ -44,39 +44,6 @@ class MyLengthValidator implements MyFieldValidatorRule<String> {
   }
 }
 
-class MyDoctorUserNumberValidator extends MyFieldValidatorRule<String> {
-  @override
-  String? validate(String? value, bool required, Map<String, dynamic> data) {
-    if (!required && value == null) {
-      return null;
-    }
-
-    if (value != null && value.isNotEmpty) {
-      final userNumber = int.tryParse(value);
-      if (userNumber == null || userNumber <= 0 || userNumber > 1000) {
-        return "Debería ser entre 1 y 1000 para doctores.";
-      }
-    }
-    return null;
-  }
-}
-
-class MyUserNumberValidator extends MyFieldValidatorRule<String> {
-  @override
-  String? validate(String? value, bool required, Map<String, dynamic> data) {
-    if (!required && value == null) {
-      return null;
-    }
-
-    if (value != null && value.isNotEmpty) {
-      final userNumber = int.tryParse(value);
-      if (userNumber == null || userNumber <= 1000) {
-        return "Debería ser mayor a 1000.";
-      }
-    }
-    return null;
-  }
-}
 
 class MyIntegerValidator extends MyFieldValidatorRule<String> {
   final int? min, max;
@@ -143,38 +110,99 @@ class MyIntegerValidator extends MyFieldValidatorRule<String> {
   }
 }
 
-class MyPinValidator extends MyFieldValidatorRule<String> {
-  final int length;
-
-  MyPinValidator({this.length = 4});
+class MyFloatingPointValidator extends MyFieldValidatorRule<String> {
+  final double? min, max;
+  final bool minInclusive, maxInclusive;
+  final int? minLengthBeforePoint, maxLengthBeforePoint, exactLengthBeforePoint;
+  final int? minLengthAfterPoint, maxLengthAfterPoint, exactLengthAfterPoint;
+  MyFloatingPointValidator({this.min, this.max,
+    this.minInclusive = true, this.maxInclusive = false,
+    this.minLengthBeforePoint, this.maxLengthBeforePoint, this.exactLengthBeforePoint,
+    this.minLengthAfterPoint, this.maxLengthAfterPoint, this.exactLengthAfterPoint});
 
   @override
   String? validate(String? value, bool required, Map<String, dynamic> data) {
     if (!required && (value?? "").isEmpty) return null;
 
-    if (value!.length != length) {
-      return "Debe tener exactamente $length dígitos";
-    }
-    final pin = int.tryParse(value);
-    if (pin == null) {
-      return "Debe ser un número entero válido.";
-    }
-    return null;
-  }
-}
+    final userNumber = double.tryParse(value!);
+    if (userNumber == null) return "Debería ser un número flotante válido";
 
-class MyProNumberValidator extends MyFieldValidatorRule<String> {
-  @override
-  String? validate(String? value, bool required, Map<String, dynamic> data) {
-    if (!required) {
-      if (value == null) {
-        return null;
-      }
-    } else if (value != null && value.isNotEmpty) {
-      if (value.length != 8) {
-        return "Cédula profesional inválida";
-      }
+    final divided = value.split('.');
+    final beforePoint = divided[0];
+    final afterPoint = divided.length > 1 ? divided[1] : "";
+
+
+    /// Check for length before point
+    String constructedErrorMsg = "Debería tener ";
+    if (exactLengthBeforePoint != null) {
+      constructedErrorMsg += "exactamente $exactLengthBeforePoint dígitos antes del punto decimal";
     }
+    if (minLengthBeforePoint != null && maxLengthBeforePoint == null) {
+      constructedErrorMsg += "más de $minLengthBeforePoint dígitos antes del punto decimal";
+    }
+    else if (minLengthBeforePoint == null && maxLengthBeforePoint != null) {
+      constructedErrorMsg += "menos de $maxLengthBeforePoint dígitos antes del punto decimal";
+    }
+    else if (minLengthBeforePoint != null && maxLengthBeforePoint != null) {
+      constructedErrorMsg += "entre $minLengthBeforePoint y $maxLengthBeforePoint dígitos antes del punto decimal";
+    }
+
+    if (exactLengthBeforePoint != null && beforePoint.length != exactLengthBeforePoint!) {
+      return constructedErrorMsg;
+    }
+    if (minLengthBeforePoint != null && beforePoint.length < minLengthBeforePoint!) {
+      return constructedErrorMsg;
+    }
+    if (maxLengthBeforePoint != null && beforePoint.length > maxLengthBeforePoint!) {
+      return constructedErrorMsg;
+    }
+
+
+    /// Check for length after point
+    constructedErrorMsg = "Debería tener ";
+    if (exactLengthAfterPoint != null) {
+      constructedErrorMsg += "exactamente $exactLengthAfterPoint dígitos después del punto decimal";
+    }
+    if (minLengthAfterPoint != null && maxLengthAfterPoint == null) {
+      constructedErrorMsg += "más de $minLengthAfterPoint dígitos después del punto decimal";
+    }
+    else if (minLengthAfterPoint == null && maxLengthAfterPoint != null) {
+      constructedErrorMsg += "menos de $maxLengthAfterPoint dígitos después del punto decimal";
+    }
+    else if (minLengthAfterPoint != null && maxLengthAfterPoint != null) {
+      constructedErrorMsg += "entre $minLengthAfterPoint y $maxLengthAfterPoint dígitos después del punto decimal";
+    }
+
+    if (exactLengthAfterPoint != null && afterPoint.length != exactLengthAfterPoint!) {
+      return constructedErrorMsg;
+    }
+    if (minLengthAfterPoint != null && afterPoint.length < minLengthAfterPoint!) {
+      return constructedErrorMsg;
+    }
+    if (maxLengthAfterPoint != null && afterPoint.length > maxLengthAfterPoint!) {
+      return constructedErrorMsg;
+    }
+
+
+    /// Check for range
+    constructedErrorMsg = "Debería ";
+    if (min != null && max == null) {
+      constructedErrorMsg += "ser mayor a ${(minInclusive ? "[" : "(")}$min${(minInclusive ? "]" : ")")}";
+    }
+    else if (min == null && max != null) {
+      constructedErrorMsg += "ser menor a ${(maxInclusive ? "[" : "(")}$max${(maxInclusive ? "]" : ")")}";
+    }
+    else if (min != null && max != null) {
+      constructedErrorMsg += "estar en el rango ${(minInclusive ? "[" : "(")}$min, $max${(maxInclusive ? "]" : ")")}";
+    }
+
+    if (min != null && (minInclusive ? userNumber < min! : userNumber <= min!)) {
+      return constructedErrorMsg;
+    }
+    if (max != null && (maxInclusive ? userNumber > max! : userNumber >= max!)) {
+      return constructedErrorMsg;
+    }
+
     return null;
   }
 }

@@ -15,9 +15,9 @@ class LoginController extends MyController {
 
   @override
   void onInit() {
-    basicValidator.addField('userNumber', required: true, label: "Número de usuario", validators: [MyIntegerValidator()], controller: TextEditingController());
+    basicValidator.addField('userNumber', required: true, label: "Número de usuario", controller: TextEditingController());
 
-    basicValidator.addField('password', required: true, label: "Contraseña", validators: [MyLengthValidator(min: 8, max: 20)], controller: TextEditingController());
+    basicValidator.addField('pin', required: true, label: "NIP", validators: [MyIntegerValidator(exactLength: 4)], controller: TextEditingController());
     super.onInit();
   }
 
@@ -50,7 +50,10 @@ class LoginController extends MyController {
         }
       }
       else {
-        String nextUrl = Uri.parse(ModalRoute.of(Get.context!)?.settings.name ?? "").queryParameters['next'] ?? "/home";
+        String nextUrl = Uri.parse(ModalRoute.of(Get.context!)?.settings.name ?? "").queryParameters['next'] ??
+            (AuthService.loginType == LoginType.kDoctor ? "/doctor/patient/list" :
+            (AuthService.loginType == LoginType.kSecretary ? "/secretary/patient/list" :
+            (AuthService.loginType == LoginType.kPatient ? "/dates/list" : "")));
         Get.toNamed(
           nextUrl,
         );

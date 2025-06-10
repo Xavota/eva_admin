@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
-import 'package:google_fonts/google_fonts.dart';
+//import 'package:google_fonts/google_fonts.dart';
 import 'package:medicare/helpers/services/url_service.dart';
 import 'package:medicare/helpers/theme/theme_customizer.dart';
 import 'package:medicare/helpers/utils/my_shadow.dart';
 import 'package:medicare/helpers/utils/ui_mixins.dart';
+import 'package:medicare/helpers/services/auth_services.dart';
 import 'package:medicare/helpers/widgets/my_card.dart';
 import 'package:medicare/helpers/widgets/my_container.dart';
 import 'package:medicare/helpers/widgets/my_router.dart';
@@ -57,233 +58,299 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
   @override
   Widget build(BuildContext context) {
     isCondensed = widget.isCondensed;
-    return MyCard(
-      paddingAll: 0,
-      borderRadiusAll: 12,
-      shadow: MyShadow(position: MyShadowPosition.centerRight, elevation: 1),
-      child: AnimatedContainer(
-        width: isCondensed ? 70 : 270,
-        curve: Curves.easeInOut,
-        decoration: BoxDecoration(color: leftBarTheme.background, borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(milliseconds: 200),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: MySpacing.all(12),
-              child: InkWell(
-                onTap: () => Get.toNamed('/home'),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    if (widget.isCondensed) Image.asset(Images.logoSmall, height: 44, fit: BoxFit.cover),
-                    if (!widget.isCondensed)
-                      Flexible(
-                        fit: FlexFit.loose,
-                        child: Image.asset(Images.logoMedium, height: 110, fit: BoxFit.cover),
-                        /*MyText.displayMedium(
-                          "Medicars",
-                          style: GoogleFonts.raleway(fontSize: 24, fontWeight: FontWeight.w800, color: contentTheme.primary, letterSpacing: .5),
-                          maxLines: 1,
-                        ),*/
-                      )
-                  ],
+    return ExcludeFocusTraversal(
+      child: MyCard(
+        paddingAll: 0,
+        borderRadiusAll: 12,
+        shadow: MyShadow(position: MyShadowPosition.centerRight, elevation: 1),
+        child: AnimatedContainer(
+          width: isCondensed ? 70 : 270,
+          curve: Curves.easeInOut,
+          decoration: BoxDecoration(color: leftBarTheme.background, borderRadius: BorderRadius.circular(12)),
+          duration: const Duration(milliseconds: 200),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: MySpacing.all(12),
+                child: InkWell(
+                  //onTap: () => Get.toNamed('/home'),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (widget.isCondensed) Image.asset(Images.logoSmall, height: 44, fit: BoxFit.cover),
+                      if (!widget.isCondensed)
+                        Flexible(
+                          fit: FlexFit.loose,
+                          child: Image.asset(Images.logoMedium, height: 110, fit: BoxFit.cover),
+                          /*MyText.displayMedium(
+                            "Medicars",
+                            style: GoogleFonts.raleway(fontSize: 24, fontWeight: FontWeight.w800, color: contentTheme.primary, letterSpacing: .5),
+                            maxLines: 1,
+                          ),*/
+                        )
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-                child: ScrollConfiguration(
-              behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    MySpacing.height(12),
-                    LabelWidget(isCondensed: isCondensed, label: "Client App"),
-                    NavigationItem(iconData: LucideIcons.house, title: "Home", isCondensed: isCondensed, route: '/home'),
-                    MenuWidget(
-                      iconData: LucideIcons.notepad_text,
-                      isCondensed: isCondensed,
-                      title: "Appointment",
-                      children: [
-                        MenuItem(title: "Book", isCondensed: isCondensed, route: '/appointment_book'),
-                        MenuItem(title: "Edit", isCondensed: isCondensed, route: '/appointment_edit'),
-                      ],
-                    ),
-                    MenuWidget(
-                      iconData: LucideIcons.tablets,
-                      isCondensed: isCondensed,
-                      title: "Pharmacy",
-                      children: [
-                        MenuItem(title: "List", isCondensed: isCondensed, route: '/pharmacy_list'),
-                        MenuItem(title: "Detail", isCondensed: isCondensed, route: '/detail'),
-                        MenuItem(title: "Cart", isCondensed: isCondensed, route: '/cart'),
-                        MenuItem(title: "Checkout", isCondensed: isCondensed, route: '/pharmacy_checkout'),
-                      ],
-                    ),
-                    NavigationItem(iconData: LucideIcons.messages_square, title: "Chat", isCondensed: isCondensed, route: '/chat'),
-                    MySpacing.height(16),
-                    LabelWidget(isCondensed: isCondensed, label: "Admin Panel"),
-                    NavigationItem(iconData: LucideIcons.layout_dashboard, title: "Dashboard", isCondensed: isCondensed, route: '/dashboard'),
-                    MenuWidget(
-                      iconData: LucideIcons.user_plus,
-                      isCondensed: isCondensed,
-                      title: "Patients",
-                      children: [
-                        MenuItem(title: "List", isCondensed: isCondensed, route: '/admin/patient/list', iconData: LucideIcons.scroll_text),
-                        MenuItem(title: "Detail", isCondensed: isCondensed, route: '/admin/patient/detail', iconData: LucideIcons.list_ordered),
-                        MenuItem(title: "Add", isCondensed: isCondensed, route: '/admin/patient/add', iconData: LucideIcons.list_ordered),
-                        MenuItem(title: "Edit", isCondensed: isCondensed, route: '/admin/patient/edit', iconData: LucideIcons.list_ordered),
-                      ],
-                    ),
-                    MenuWidget(
-                      iconData: LucideIcons.briefcase_medical,
-                      isCondensed: isCondensed,
-                      title: "Doctor",
-                      children: [
-                        MenuItem(title: "Listado", isCondensed: isCondensed, route: '/admin/doctor/list'),
-                        //MenuItem(title: "Detail", isCondensed: isCondensed, route: '/admin/doctor/detail'),
-                        MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/admin/doctor/add'),
-                        //MenuItem(title: "Edit", isCondensed: isCondensed, route: '/admin/doctor/edit'),
-                      ],
-                    ),
-                    MenuWidget(
-                      iconData: LucideIcons.notepad_text,
-                      isCondensed: isCondensed,
-                      title: "Appointment",
-                      children: [
-                        MenuItem(title: "List", isCondensed: isCondensed, route: '/admin/appointment_list'),
-                        MenuItem(title: "Schedule", isCondensed: isCondensed, route: '/admin/appointment_scheduling'),
-                        MenuItem(title: "Book", isCondensed: isCondensed, route: '/admin/appointment_book'),
-                        MenuItem(title: "Edit", isCondensed: isCondensed, route: '/admin/appointment_edit'),
-                      ],
-                    ),
-                    NavigationItem(iconData: LucideIcons.wallet, title: "Wallet", isCondensed: isCondensed, route: '/admin/wallet'),
-                    NavigationItem(iconData: LucideIcons.settings, title: "Setting", isCondensed: isCondensed, route: '/admin/setting'),
-                    labelWidget("UI"),
-                    MenuWidget(
-                      iconData: LucideIcons.key_round,
-                      isCondensed: isCondensed,
-                      title: "Auth",
-                      children: [
-                        MenuItem(title: 'Login', route: '/auth/login', isCondensed: widget.isCondensed),
-                        MenuItem(title: 'Register Password', route: '/auth/register_account', isCondensed: widget.isCondensed),
-                        MenuItem(title: 'Forgot Password', route: '/auth/forgot_password', isCondensed: widget.isCondensed),
-                        MenuItem(title: 'Reset Password', route: '/auth/reset_password', isCondensed: widget.isCondensed),
-                      ],
-                    ),
-                    MenuWidget(
-                      iconData: LucideIcons.component,
-                      isCondensed: isCondensed,
-                      title: "Widgets",
-                      children: [
-                        MenuItem(title: "Buttons", route: '/widget/buttons', isCondensed: widget.isCondensed),
-                        MenuItem(title: "Toast", route: '/widget/toast', isCondensed: widget.isCondensed),
-                        MenuItem(title: "Modal", route: '/widget/modal', isCondensed: widget.isCondensed),
-                        MenuItem(title: "Tabs", route: '/widget/tabs', isCondensed: widget.isCondensed),
-                        MenuItem(title: "Cards", route: '/widget/cards', isCondensed: widget.isCondensed),
-                        MenuItem(title: "Loaders", route: '/widget/loader', isCondensed: widget.isCondensed),
-                        MenuItem(title: "Dialog", route: '/widget/dialog', isCondensed: widget.isCondensed),
-                        MenuItem(title: "Carousels", route: '/widget/carousel', isCondensed: widget.isCondensed),
-                        MenuItem(title: "Drag & Drop", route: '/widget/drag_n_drop', isCondensed: widget.isCondensed),
-                        MenuItem(title: "Notifications", route: '/widget/notification', isCondensed: widget.isCondensed),
-                      ],
-                    ),
-                    MenuWidget(
-                      iconData: LucideIcons.book_open_check,
-                      title: "Form",
-                      isCondensed: isCondensed,
-                      children: [
-                        MenuItem(title: "Basic Input", route: '/form/basic_input', isCondensed: widget.isCondensed),
-                        MenuItem(title: "Custom Option", route: '/form/custom_option', isCondensed: widget.isCondensed),
-                        //MenuItem(title: "Editor", route: '/form/editor', isCondensed: widget.isCondensed),
-                        MenuItem(title: "File Upload", route: '/form/file_upload', isCondensed: widget.isCondensed),
-                        MenuItem(title: "Slider", route: '/form/slider', isCondensed: widget.isCondensed),
-                        MenuItem(title: "Validation", route: '/form/validation', isCondensed: widget.isCondensed),
-                        MenuItem(title: "Mask", route: '/form/mask', isCondensed: widget.isCondensed),
-                      ],
-                    ),
-                    MenuWidget(
-                      iconData: LucideIcons.shield_alert,
-                      isCondensed: isCondensed,
-                      title: "Error",
-                      children: [
-                        MenuItem(title: 'Error 404', route: '/error/404', isCondensed: widget.isCondensed),
-                        MenuItem(title: 'Error 500', route: '/error/500', isCondensed: widget.isCondensed),
-                        MenuItem(title: 'Coming Soon', route: '/error/coming_soon', isCondensed: widget.isCondensed),
-                      ],
-                    ),
-                    MenuWidget(
-                      iconData: LucideIcons.book_open,
-                      isCondensed: isCondensed,
-                      title: "Extra Pages",
-                      children: [
-                        MenuItem(title: 'FAQs', route: '/extra/faqs', isCondensed: widget.isCondensed),
-                        MenuItem(title: 'Pricing', route: '/extra/pricing', isCondensed: widget.isCondensed),
-                        MenuItem(title: 'Time Line', route: '/extra/time_line', isCondensed: widget.isCondensed),
-                      ],
-                    ),
-                    NavigationItem(
-                      iconData: LucideIcons.table,
-                      title: "Basic Table",
-                      isCondensed: isCondensed,
-                      route: '/other/basic_table',
-                    ),
-                    MySpacing.height(20),
-                    if (!isCondensed)
-                      InkWell(
-                        onTap: () => UrlService.goToPagger(),
-                        child: Padding(
-                            padding: MySpacing.x(16),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 16),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8), // color: contentTheme.primary.withAlpha(40),
-                                  gradient: LinearGradient(
-                                      colors: const [Colors.deepPurple, Colors.lightBlue], begin: Alignment.topLeft, end: Alignment.bottomRight)),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      color: Colors.white.withAlpha(32),
+              Expanded(
+                  child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      MySpacing.height(12),
+                      if (AuthService.loginType == LoginType.kNone)
+                        LabelWidget(isCondensed: isCondensed, label: "Client App"),
+                      if (AuthService.loginType == LoginType.kNone)
+                        NavigationItem(iconData: LucideIcons.house, title: "Home", isCondensed: isCondensed, route: '/home'),
+                      if (AuthService.loginType == LoginType.kNone)
+                        MenuWidget(
+                          iconData: LucideIcons.notepad_text,
+                          isCondensed: isCondensed,
+                          title: "Appointment",
+                          children: [
+                            MenuItem(title: "Book", isCondensed: isCondensed, route: '/appointment_book'),
+                            MenuItem(title: "Edit", isCondensed: isCondensed, route: '/appointment_edit'),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kNone)
+                        MenuWidget(
+                          iconData: LucideIcons.tablets,
+                          isCondensed: isCondensed,
+                          title: "Pharmacy",
+                          children: [
+                            MenuItem(title: "List", isCondensed: isCondensed, route: '/pharmacy_list'),
+                            MenuItem(title: "Detail", isCondensed: isCondensed, route: '/detail'),
+                            MenuItem(title: "Cart", isCondensed: isCondensed, route: '/cart'),
+                            MenuItem(title: "Checkout", isCondensed: isCondensed, route: '/pharmacy_checkout'),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kNone)
+                        NavigationItem(iconData: LucideIcons.messages_square, title: "Chat", isCondensed: isCondensed, route: '/chat'),
+                      if (AuthService.loginType == LoginType.kNone)
+                        MySpacing.height(16),
+                      if (AuthService.loginType == LoginType.kAdmin || AuthService.loginType == LoginType.kDoctor)
+                        LabelWidget(isCondensed: isCondensed, label: "Admin Panel"),
+                      if (AuthService.loginType == LoginType.kNone)
+                        NavigationItem(iconData: LucideIcons.layout_dashboard, title: "Dashboard", isCondensed: isCondensed, route: '/dashboard'),
+                      if (AuthService.loginType == LoginType.kDoctor)
+                        MenuWidget(
+                          iconData: LucideIcons.user_plus,
+                          isCondensed: isCondensed,
+                          title: "Tratantes",
+                          children: [
+                            MenuItem(title: "Listado", isCondensed: isCondensed, route: '/doctor/patient/list', iconData: LucideIcons.scroll_text),
+                            MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/doctor/patient/add', iconData: LucideIcons.list_ordered),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kDoctor)
+                        MenuWidget(
+                          iconData: LucideIcons.user_plus,
+                          isCondensed: isCondensed,
+                          title: "Secretari@",
+                          children: [
+                            MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/doctor/secretary/add', iconData: LucideIcons.list_ordered),
+                            MenuItem(title: "Editar", isCondensed: isCondensed, route: '/doctor/secretary/edit', iconData: LucideIcons.list_ordered),
+                            MenuItem(title: "Detalles", isCondensed: isCondensed, route: '/doctor/secretary/detail', iconData: LucideIcons.list_ordered),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kDoctor)
+                        MenuWidget(
+                          iconData: LucideIcons.calendar,
+                          isCondensed: isCondensed,
+                          title: "Citas",
+                          children: [
+                            MenuItem(title: "Listado", isCondensed: isCondensed, route: '/doctor/dates/list', iconData: LucideIcons.scroll_text),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kSecretary)
+                        MenuWidget(
+                          iconData: LucideIcons.user_plus,
+                          isCondensed: isCondensed,
+                          title: "Tratantes",
+                          children: [
+                            MenuItem(title: "Listado", isCondensed: isCondensed, route: '/secretary/patient/list', iconData: LucideIcons.scroll_text),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kSecretary)
+                        MenuWidget(
+                          iconData: LucideIcons.calendar,
+                          isCondensed: isCondensed,
+                          title: "Citas",
+                          children: [
+                            MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/secretary/dates/add', iconData: LucideIcons.scroll_text),
+                            MenuItem(title: "Listado", isCondensed: isCondensed, route: '/secretary/dates/list', iconData: LucideIcons.scroll_text),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kAdmin)
+                        MenuWidget(
+                          iconData: LucideIcons.briefcase_medical,
+                          isCondensed: isCondensed,
+                          title: "Médicos",
+                          children: [
+                            MenuItem(title: "Listado", isCondensed: isCondensed, route: '/panel/doctor/list'),
+                            MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/panel/doctor/add'),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kPatient)
+                        MenuWidget(
+                          iconData: LucideIcons.calendar,
+                          isCondensed: isCondensed,
+                          title: "Citas",
+                          children: [
+                            MenuItem(title: "Próximas citas", isCondensed: isCondensed, route: '/dates/list', iconData: LucideIcons.scroll_text),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kNone)
+                        MenuWidget(
+                          iconData: LucideIcons.notepad_text,
+                          isCondensed: isCondensed,
+                          title: "Appointment",
+                          children: [
+                            MenuItem(title: "List", isCondensed: isCondensed, route: '/admin/appointment_list'),
+                            MenuItem(title: "Schedule", isCondensed: isCondensed, route: '/admin/appointment_scheduling'),
+                            MenuItem(title: "Book", isCondensed: isCondensed, route: '/admin/appointment_book'),
+                            MenuItem(title: "Edit", isCondensed: isCondensed, route: '/admin/appointment_edit'),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kNone)
+                        NavigationItem(iconData: LucideIcons.wallet, title: "Wallet", isCondensed: isCondensed, route: '/admin/wallet'),
+                      if (AuthService.loginType == LoginType.kNone)
+                        NavigationItem(iconData: LucideIcons.settings, title: "Setting", isCondensed: isCondensed, route: '/admin/setting'),
+                      if (AuthService.loginType == LoginType.kNone)
+                        labelWidget("UI"),
+                      if (AuthService.loginType == LoginType.kNone)
+                        MenuWidget(
+                          iconData: LucideIcons.key_round,
+                          isCondensed: isCondensed,
+                          title: "Auth",
+                          children: [
+                            MenuItem(title: 'Login', route: '/auth/login', isCondensed: widget.isCondensed),
+                            MenuItem(title: 'Register Password', route: '/auth/register_account', isCondensed: widget.isCondensed),
+                            MenuItem(title: 'Forgot Password', route: '/auth/forgot_password', isCondensed: widget.isCondensed),
+                            MenuItem(title: 'Reset Password', route: '/auth/reset_password', isCondensed: widget.isCondensed),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kNone)
+                        MenuWidget(
+                          iconData: LucideIcons.component,
+                          isCondensed: isCondensed,
+                          title: "Widgets",
+                          children: [
+                            MenuItem(title: "Buttons", route: '/widget/buttons', isCondensed: widget.isCondensed),
+                            MenuItem(title: "Toast", route: '/widget/toast', isCondensed: widget.isCondensed),
+                            MenuItem(title: "Modal", route: '/widget/modal', isCondensed: widget.isCondensed),
+                            MenuItem(title: "Tabs", route: '/widget/tabs', isCondensed: widget.isCondensed),
+                            MenuItem(title: "Cards", route: '/widget/cards', isCondensed: widget.isCondensed),
+                            MenuItem(title: "Loaders", route: '/widget/loader', isCondensed: widget.isCondensed),
+                            MenuItem(title: "Dialog", route: '/widget/dialog', isCondensed: widget.isCondensed),
+                            MenuItem(title: "Carousels", route: '/widget/carousel', isCondensed: widget.isCondensed),
+                            MenuItem(title: "Drag & Drop", route: '/widget/drag_n_drop', isCondensed: widget.isCondensed),
+                            MenuItem(title: "Notifications", route: '/widget/notification', isCondensed: widget.isCondensed),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kNone)
+                        MenuWidget(
+                          iconData: LucideIcons.book_open_check,
+                          title: "Form",
+                          isCondensed: isCondensed,
+                          children: [
+                            MenuItem(title: "Basic Input", route: '/form/basic_input', isCondensed: widget.isCondensed),
+                            MenuItem(title: "Custom Option", route: '/form/custom_option', isCondensed: widget.isCondensed),
+                            //MenuItem(title: "Editor", route: '/form/editor', isCondensed: widget.isCondensed),
+                            MenuItem(title: "File Upload", route: '/form/file_upload', isCondensed: widget.isCondensed),
+                            MenuItem(title: "Slider", route: '/form/slider', isCondensed: widget.isCondensed),
+                            MenuItem(title: "Validation", route: '/form/validation', isCondensed: widget.isCondensed),
+                            MenuItem(title: "Mask", route: '/form/mask', isCondensed: widget.isCondensed),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kNone)
+                        MenuWidget(
+                          iconData: LucideIcons.shield_alert,
+                          isCondensed: isCondensed,
+                          title: "Error",
+                          children: [
+                            MenuItem(title: 'Error 404', route: '/error/404', isCondensed: widget.isCondensed),
+                            MenuItem(title: 'Error 500', route: '/error/500', isCondensed: widget.isCondensed),
+                            MenuItem(title: 'Coming Soon', route: '/error/coming_soon', isCondensed: widget.isCondensed),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kNone)
+                        MenuWidget(
+                          iconData: LucideIcons.book_open,
+                          isCondensed: isCondensed,
+                          title: "Extra Pages",
+                          children: [
+                            MenuItem(title: 'FAQs', route: '/extra/faqs', isCondensed: widget.isCondensed),
+                            MenuItem(title: 'Pricing', route: '/extra/pricing', isCondensed: widget.isCondensed),
+                            MenuItem(title: 'Time Line', route: '/extra/time_line', isCondensed: widget.isCondensed),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kNone)
+                        NavigationItem(
+                          iconData: LucideIcons.table,
+                          title: "Basic Table",
+                          isCondensed: isCondensed,
+                          route: '/other/basic_table',
+                        ),
+                      MySpacing.height(20),
+                      /*if (!isCondensed)
+                        InkWell(
+                          onTap: () => UrlService.goToPagger(),
+                          child: Padding(
+                              padding: MySpacing.x(16),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(vertical: 16),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(8), // color: contentTheme.primary.withAlpha(40),
+                                    gradient: LinearGradient(
+                                        colors: const [Colors.deepPurple, Colors.lightBlue], begin: Alignment.topLeft, end: Alignment.bottomRight)),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        color: Colors.white.withAlpha(32),
+                                      ),
+                                      child: Icon(LucideIcons.layout_dashboard, color: Colors.white),
                                     ),
-                                    child: Icon(LucideIcons.layout_dashboard, color: Colors.white),
-                                  ),
-                                  SizedBox(height: 16),
-                                  MyText.bodyLarge("Ready to use page for any Flutter Project", color: Colors.white, textAlign: TextAlign.center),
-                                  SizedBox(height: 16),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: Colors.white),
-                                    child: MyText.bodyMedium("Free Download", color: Colors.black, fontWeight: 600),
-                                  )
-                                ],
-                              ),
-                            )),
-                      ),
-                    if (isCondensed)
-                      InkWell(
-                        onTap: () => UrlService.goToPagger(),
-                        child: Padding(
-                            padding: MySpacing.x(16),
-                            child: Container(
-                              padding: EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(4), // color: contentTheme.primary.withAlpha(40),
-                                  gradient: LinearGradient(
-                                      colors: const [Colors.deepPurple, Colors.lightBlue], begin: Alignment.topLeft, end: Alignment.bottomRight)),
-                              child: Icon(LucideIcons.download, color: Colors.white, size: 20),
-                            )),
-                      ),
-                    MySpacing.height(20),
-                  ],
+                                    SizedBox(height: 16),
+                                    MyText.bodyLarge("Ready to use page for any Flutter Project", color: Colors.white, textAlign: TextAlign.center),
+                                    SizedBox(height: 16),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(4), color: Colors.white),
+                                      child: MyText.bodyMedium("Free Download", color: Colors.black, fontWeight: 600),
+                                    )
+                                  ],
+                                ),
+                              )),
+                        ),*/
+                      if (isCondensed)
+                        InkWell(
+                          onTap: () => UrlService.goToPagger(),
+                          child: Padding(
+                              padding: MySpacing.x(16),
+                              child: Container(
+                                padding: EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(4), // color: contentTheme.primary.withAlpha(40),
+                                    gradient: LinearGradient(
+                                        colors: const [Colors.deepPurple, Colors.lightBlue], begin: Alignment.topLeft, end: Alignment.bottomRight)),
+                                child: Icon(LucideIcons.download, color: Colors.white, size: 20),
+                              )),
+                        ),
+                      MySpacing.height(20),
+                    ],
+                  ),
                 ),
-              ),
-            ))
-          ],
+              ))
+            ],
+          ),
         ),
       ),
     );
@@ -425,6 +492,7 @@ class _MenuWidgetState extends State<MenuWidget> with UIMixin, SingleTickerProvi
           margin: MySpacing.fromLTRB(24, 0, 16, 0),
           paddingAll: 0,
           child: ListTileTheme(
+            enableFeedback: false,
             contentPadding: const EdgeInsets.all(0),
             dense: true,
             horizontalTitleGap: 0.0,
