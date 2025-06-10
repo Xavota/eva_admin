@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:get/get.dart';
 
 import 'package:medicare/controller/ui/patient_dates_list_controller.dart';
@@ -21,8 +20,6 @@ import 'package:medicare/helpers/widgets/my_text_style.dart';
 import 'package:medicare/helpers/widgets/responsive.dart';
 
 import 'package:medicare/views/layout/layout.dart';
-
-import 'package:medicare/app_constant.dart';
 
 
 class PatientDatesListScreen extends StatefulWidget {

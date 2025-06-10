@@ -22,8 +22,6 @@ import 'package:medicare/helpers/widgets/responsive.dart';
 
 import 'package:medicare/views/layout/layout.dart';
 
-import 'package:medicare/app_constant.dart';
-
 
 class SecretaryDatesListScreen extends StatefulWidget {
   const SecretaryDatesListScreen({super.key});
