@@ -21,6 +21,8 @@ import 'package:medicare/helpers/widgets/responsive.dart';
 
 import 'package:medicare/views/layout/layout.dart';
 
+import 'package:blix_essentials/blix_essentials.dart';
+
 
 class PatientDatesListScreen extends StatefulWidget {
   const PatientDatesListScreen({super.key});
@@ -40,17 +42,43 @@ class _PatientDatesListScreenState extends State<PatientDatesListScreen> with UI
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final tableFlexWidth = (1541 - 180 - (1920 - screenWidth));
-
     return Layout(
       child: GetBuilder(
         init: controller,
-        tag: 'admin_patient_list_controller',
+        tag: 'patient_dates_list_controller',
         builder: (controller) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            controller.calculateContentWidth(flexSpacing + 20);
+          });
+
+          Debug.log("GetBuilder.builder()", overrideColor: Colors.purple);
+          Debug.log("contentWidth: ${controller.contentWidth}", overrideColor: Colors.purpleAccent);
+          //final screenWidth = MediaQuery.of(context).size.width;
+          //final availableSpace = (1541 - (1920 - screenWidth));
+
+          final cardsSpacing = 5.0;
+          final cardsMinWidth = 225.0;
+          int? cardsMaxCount = controller.contentWidth == null ? null : controller.contentWidth! ~/ (cardsMinWidth + cardsSpacing);
+          if (cardsMaxCount != null && ((cardsMaxCount + 1) * cardsMinWidth + cardsMaxCount * cardsSpacing) < controller.contentWidth!) {
+            cardsMaxCount += 1;
+          }
+          cardsMaxCount = cardsMaxCount == null ? null : math.min(cardsMaxCount, controller.dates.length);
+          Debug.log("cardsMaxCount: $cardsMaxCount", overrideColor: Colors.purpleAccent);
+          final totalSpacing = cardsMaxCount == null ? null : (cardsMaxCount - 1) * cardsSpacing;
+          Debug.log("totalSpacing: $totalSpacing", overrideColor: Colors.purpleAccent);
+          final availableCardSpace = totalSpacing == null ? null : controller.contentWidth! - totalSpacing;
+          Debug.log("availableCardSpace: $availableCardSpace", overrideColor: Colors.purpleAccent);
+          final cardsWidth = availableCardSpace == null ? null : availableCardSpace / cardsMaxCount!;
+          Debug.log("cardsWidth: $cardsWidth", overrideColor: Colors.purpleAccent);
+
           return Column(
+            key: controller.contentKey,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              /*Padding(
+                padding: const EdgeInsets.only(left: 40.0),
+                child: Container(color: Colors.red, width: controller.contentWidth, height: 10.0,),
+              ),*/
               Padding(
                 padding: MySpacing.x(flexSpacing),
                 child: Row(
@@ -116,68 +144,15 @@ class _PatientDatesListScreenState extends State<PatientDatesListScreen> with UI
                       ),*/
                       MySpacing.height(20),
                       if (controller.dates.isNotEmpty)
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: DataTable(
-                              sortAscending: true,
-                              columnSpacing: 30,
-                              horizontalMargin: 15.0,
-                              onSelectAll: (_) => {},
-                              headingRowColor: WidgetStatePropertyAll(contentTheme.primary.withAlpha(40)),
-                              dataRowMaxHeight: 80,
-                              showBottomBorder: true,
-                              clipBehavior: Clip.antiAliasWithSaveLayer,
-                              border: TableBorder.all(
-                                  borderRadius: BorderRadius.circular(12), style: BorderStyle.solid, width: .4, color: contentTheme.secondary),
-                              columns: [
-                                DataColumn(label: MyText.labelMedium('Médico', color: contentTheme.primary)),
-                                DataColumn(label: MyText.labelMedium('Fecha', color: contentTheme.primary)),
-                                //DataColumn(label: MyText.labelMedium('Acciones', color: contentTheme.primary)),
-                              ],
-                              rows: controller.dates
-                                  .mapIndexed((index, data) => DataRow(
-                                cells: [
-                                  DataCell(SizedBox(width: math.min(math.max(tableFlexWidth * 1, 360), 700), child: MyText.bodySmall(controller.getDoctorName(data)))),
-                                  DataCell(SizedBox(width: 120, child: MyText.bodySmall(controller.getDateFormatted(data.date)))),
-                                  /*DataCell(Row(
-                                    children: [
-                                      /*MyContainer(
-                                        onTap: () => controller.changePatientStatus(index, !data.status).then((response) {
-                                          if (context.mounted) {
-                                            if (response) {
-                                              simpleSnackBar(context, "Tratante ${(data.status ? "" : "des")}archivado con éxito", contentTheme.success);// Color(0XFFAA236E));
-                                            }
-                                            else {
-                                              simpleSnackBar(context, "Hubo un error en el servidor, intenta de nuevo más tarde", contentTheme.danger);// Color(0XFFAA236E));
-                                            }
-                                          }
-                                          if (response) {
-                                            setState(() {});
-                                          }
-                                        }),
-                                        paddingAll: 8,
-                                        color: contentTheme.secondary.withAlpha(32),
-                                        child: Icon(data.status ? LucideIcons.archive : LucideIcons.archive_restore, size: 16),
-                                      ),
-                                      MySpacing.width(20),*/
-                                      MyContainer(
-                                        onTap: () => controller.goDetailScreen(index),
-                                        paddingAll: 8,
-                                        color: contentTheme.secondary.withAlpha(32),
-                                        child: Icon(LucideIcons.eye, size: 16),
-                                      ),
-                                      /*MySpacing.width(20),
-                                      MyContainer(
-                                        onTap: () => controller.goEditScreen(index),
-                                        paddingAll: 8,
-                                        color: contentTheme.secondary.withAlpha(32),
-                                        child: Icon(LucideIcons.pencil, size: 16),
-                                      ),*/
-                                    ],
-                                  ),
-                                  ),*/
-                                ],
-                              ),).toList()),
+                        Wrap(
+                          spacing: cardsSpacing * 0.99,
+                          runSpacing: cardsSpacing,
+                          children: controller.dates
+                              .mapIndexed((index, data) => dateCard(
+                            controller.getDoctorName(data),
+                            controller.getDateFormatted(data.date),
+                            cardsWidth,
+                          )).toList(),
                         ),
                       if (controller.dates.isEmpty)
                         Center(
@@ -232,6 +207,60 @@ class _PatientDatesListScreenState extends State<PatientDatesListScreen> with UI
           onChanged: onChange,
         ),
       ],
+    );
+  }
+
+  Widget dateCard(String doctorName, String date, [double? width]) {
+    return MyContainer(
+      width: width,
+      bordered: true,
+      border: Border.all(
+        color: Colors.black54,
+        width: 1.0,
+      ),
+      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+      paddingAll: 12.0,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 60.0,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: MyText.titleSmall("Médico: ", fontWeight: 800,),
+                ),
+              ),
+              MySpacing.width(5.0),
+              SizedBox(
+                width: width == null ? null : width - 91.0, // 60 tile + 5 spacing + 24 padding + 2 border
+                child: MyText.bodySmall(doctorName, fontWeight: 600),
+              ),
+            ],
+          ),
+          MySpacing.height(10.0),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 60.0,
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: MyText.titleSmall("Fecha: ", fontWeight: 800,),
+                ),
+              ),
+              MySpacing.width(5.0),
+              SizedBox(
+                width: width == null ? null : width - 91.0, // 60 tile + 5 spacing + 24 padding + 2 border
+                child: MyText.bodySmall(date, fontWeight: 600),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

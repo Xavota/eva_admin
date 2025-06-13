@@ -54,7 +54,7 @@ class _SecretaryPatientListScreenState extends State<SecretaryPatientListScreen>
     return Layout(
       child: GetBuilder(
         init: controller,
-        tag: 'admin_patient_list_controller',
+        tag: 'secretary_patient_list_controller',
         builder: (controller) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,7 +71,7 @@ class _SecretaryPatientListScreenState extends State<SecretaryPatientListScreen>
                     ),
                     MyBreadcrumb(
                       children: [
-                        MyBreadcrumbItem(name: 'Médico'),
+                        MyBreadcrumbItem(name: 'Secretaria'),
                         MyBreadcrumbItem(name: 'Lista Tratantes', active: true),
                       ],
                     ),

@@ -5,12 +5,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a363054-7293-47b7-ba2c-9c84fe57d6db" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/date_add_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/date_add_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/patient_dates_list_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/patient_dates_list_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/db_manager.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/db_manager.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/dates_add_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/dates_add_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/views/ui/dates_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/dates_list_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/views/ui/patient_dates_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/patient_dates_list_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/patient_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/patient_list_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/views/ui/secretary_dates_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/secretary_dates_list_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/secretary_patient_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/secretary_patient_detail_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/secretary_patient_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/secretary_patient_list_screen.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

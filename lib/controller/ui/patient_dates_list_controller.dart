@@ -14,6 +14,8 @@ import 'package:medicare/model/patient_list_model.dart';
 import 'package:medicare/app_constant.dart';
 import 'package:medicare/db_manager.dart';
 
+import 'package:blix_essentials/blix_essentials.dart';
+
 /*class _DateFilters {
   _DateFilters();
 
@@ -39,6 +41,10 @@ class PatientDatesListController extends MyController {
 
   PatientListModel? _loggedInPatient;
 
+  GlobalKey contentKey = GlobalKey();
+  double? contentWidth;
+  bool calculateWidth = true;
+
   //final _DateFilters _filter = _DateFilters();
 
   List<DateModel> _dates = [];
@@ -58,6 +64,25 @@ class PatientDatesListController extends MyController {
 
   String getDateFormatted(DateTime date) {
     return "Día: ${dateFormatter.format(date)}\nHora: ${timeFormatter.format(date)}";
+  }
+
+
+  void calculateContentWidth(double flexSpacing) {
+    if (!calculateWidth) {
+      calculateWidth = true;
+      return;
+    }
+
+    contentWidth = null;
+
+    final RenderBox? box = contentKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null) return;
+
+    contentWidth = box.size.width - flexSpacing * 2.0;
+
+    calculateWidth = false;
+
+    update();
   }
 
 

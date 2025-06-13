@@ -53,12 +53,6 @@ class DateAddController extends MyController {
       controller: TextEditingController(),
     );
 
-    basicValidator.addField(
-      'tempPhoneNumber', label: "Número de teléfono",
-      controller: TextEditingController(),
-      validators: [MyIntegerValidator(exactLength: 10)],
-    );
-
     super.onInit();
   }
 
@@ -73,7 +67,6 @@ class DateAddController extends MyController {
     selectedPatient = null;
     basicValidator.getController('phoneNumber')!.text = "";
     basicValidator.getController('tempFullName')!.text = "";
-    basicValidator.getController('tempPhoneNumber')!.text = "";
     tempPatient = false;
     selectedDate = null;
     consultationReasons = [];
@@ -167,11 +160,6 @@ class DateAddController extends MyController {
       validationError = addExtraDataError(
         'tempFullName',
         dataIsEmpty('tempFullName', data),
-        "Este campo es obligatorio",
-      )?? validationError;
-      validationError = addExtraDataError(
-        'tempPhoneNumber',
-        dataIsEmpty('tempPhoneNumber', data),
         "Este campo es obligatorio",
       )?? validationError;
       validationError = addExtraDataError(

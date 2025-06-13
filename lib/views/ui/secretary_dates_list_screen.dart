@@ -47,7 +47,7 @@ class _SecretaryDatesListScreenState extends State<SecretaryDatesListScreen> wit
     return Layout(
       child: GetBuilder(
         init: controller,
-        tag: 'admin_patient_list_controller',
+        tag: 'secretary_dates_list_controller',
         builder: (controller) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,7 +64,7 @@ class _SecretaryDatesListScreenState extends State<SecretaryDatesListScreen> wit
                     ),
                     MyBreadcrumb(
                       children: [
-                        MyBreadcrumbItem(name: 'Médico'),
+                        MyBreadcrumbItem(name: 'Secretaria'),
                         MyBreadcrumbItem(name: 'Lista Citas', active: true),
                       ],
                     ),
@@ -103,16 +103,18 @@ class _SecretaryDatesListScreenState extends State<SecretaryDatesListScreen> wit
                               readOnly: true,
                             ),
                           ),
-                          MySpacing.width(10),
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 5.0),
-                            child: MyContainer(
-                              onTap: controller.removeDayFilter,
-                              paddingAll: 8,
-                              color: contentTheme.secondary.withAlpha(32),
-                              child: Icon(Icons.close, size: 16),
+                          if (controller.getDayFilter() != null)
+                            MySpacing.width(10),
+                          if (controller.getDayFilter() != null)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 5.0),
+                              child: MyContainer(
+                                onTap: controller.removeDayFilter,
+                                paddingAll: 8,
+                                color: contentTheme.secondary.withAlpha(32),
+                                child: Icon(Icons.close, size: 16),
+                              ),
                             ),
-                          ),
                         ],
                       ),
                       MySpacing.height(20),

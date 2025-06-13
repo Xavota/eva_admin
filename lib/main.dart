@@ -49,6 +49,7 @@ Future<void> main() async {
 
   BlixDBManager.setBaseUrl("https://blixdev.com/eva/");
   BlixDBManager.setPhpLocalUrl("phps/");
+  BlixDBManager.setDefaultDebugLogs(false);
 
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();

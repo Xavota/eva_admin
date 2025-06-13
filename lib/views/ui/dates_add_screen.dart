@@ -82,7 +82,7 @@ class _DatesAddScreenState extends State<DatesAddScreen> with UIMixin {
                     ),
                     MyBreadcrumb(
                       children: [
-                        MyBreadcrumbItem(name: 'Médico'),
+                        MyBreadcrumbItem(name: 'Secretaria'),
                         MyBreadcrumbItem(name: 'Agendar Cita', active: true),
                       ],
                     ),
@@ -203,20 +203,11 @@ class _DatesAddScreenState extends State<DatesAddScreen> with UIMixin {
                                 children: [
                                   if (controller.tempPatient)
                                     commonTextField(
-                                      title: "Número de Teléfono", hintText: "Número de teléfono",
-                                      validator: controller.basicValidator.getValidation("tempPhoneNumber"),
-                                      teController: controller.basicValidator.getController("tempPhoneNumber"),
-                                      prefixIcon: Icon(LucideIcons.phone, size: 16),
-                                      integer: true, length: 10,
+                                      title: "Nombre Completo", hintText: "Nombre completo",
+                                      validator: controller.basicValidator.getValidation("tempFullName"),
+                                      teController: controller.basicValidator.getController("tempFullName"),
+                                      prefixIcon: Icon(LucideIcons.user_round, size: 16),
                                     ),
-                                  if (controller.tempPatient)
-                                    MySpacing.height(20),
-                                  if (controller.tempPatient)
-                                    MyText.labelMedium("Motivo de Consulta", fontWeight: 600, muted: true),
-                                  if (controller.tempPatient)
-                                    MySpacing.height(8),
-                                  if (controller.tempPatient)
-                                    consultationReasons(),
                                   if (!controller.tempPatient)
                                     selectPatientDropdown(),
                                 ],
@@ -228,12 +219,11 @@ class _DatesAddScreenState extends State<DatesAddScreen> with UIMixin {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   if (controller.tempPatient)
-                                    commonTextField(
-                                      title: "Nombre Completo", hintText: "Nombre completo",
-                                      validator: controller.basicValidator.getValidation("tempFullName"),
-                                      teController: controller.basicValidator.getController("tempFullName"),
-                                      prefixIcon: Icon(LucideIcons.user_round, size: 16),
-                                    ),
+                                    MyText.labelMedium("Motivo de Consulta", fontWeight: 600, muted: true),
+                                  if (controller.tempPatient)
+                                    MySpacing.height(8),
+                                  if (controller.tempPatient)
+                                    consultationReasons(),
                                 ],
                               ),
                             ),

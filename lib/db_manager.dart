@@ -289,7 +289,7 @@ class DBManager {
         "pin": data["pin"],
         "fullName": data["fullName"],
       },
-      debug: true,
+      //debug: true,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -320,7 +320,7 @@ class DBManager {
         "pin": data["pin"],
         "fullName": data["fullName"],
       },
-      debug: true,
+      //debug: true,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -418,7 +418,7 @@ class DBManager {
       params: {
         "number": userNumber,
       },
-      debug: true,
+      //debug: true,
     );
     if (response.errors.isNotEmpty) {
       for (final e in response.errors) {
@@ -474,7 +474,7 @@ class DBManager {
         "phoneNumber": data["phoneNumber"],
         "consultReasons": (data["consultation"] as List<ConsultationReason>).map<int>((e) => e.dbid).toList().join(","),
       },
-      debug: true,
+      //debug: true,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -514,7 +514,7 @@ class DBManager {
         "phoneNumber": data["phoneNumber"],
         "consultReasons": (data["consultation"] as List<ConsultationReason>).map<int>((e) => e.dbid).toList().join(","),
       },
-      debug: true,
+      //debug: true,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -597,10 +597,10 @@ class DBManager {
 
         "userNumber": data["userNumber"]?? "",
         "tempFullName": data["tempFullName"]?? "",
-        "tempPhoneNumber": data["tempPhoneNumber"]?? "",
+        "tempPhoneNumber": data["phoneNumber"]?? "",
         "tempConsultReasons": consultReasons?.map<int>((e) => e.dbid).toList().join(",")?? "",
       },
-      debug: true,
+      //debug: true,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -668,7 +668,7 @@ class DBManager {
         "dir": pathToUpload,
         "type": "${type.type}/${type.subtype}",
       },
-      debug: true,
+      //debug: true,
     );
 
     if (response.errors.isNotEmpty) {

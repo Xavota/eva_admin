@@ -51,7 +51,7 @@ class _PatientListScreenState extends State<PatientListScreen> with UIMixin {
     return Layout(
       child: GetBuilder(
         init: controller,
-        tag: 'admin_patient_list_controller',
+        tag: 'doctor_patient_list_controller',
         builder: (controller) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

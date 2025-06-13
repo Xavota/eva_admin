@@ -75,7 +75,7 @@ class _SecretaryPatientDetailScreenState extends State<SecretaryPatientDetailScr
                     ),
                     MyBreadcrumb(
                       children: [
-                        MyBreadcrumbItem(name: 'Médico'),
+                        MyBreadcrumbItem(name: 'Secretaria'),
                         MyBreadcrumbItem(name: 'Detalles Tratante', active: true),
                       ],
                     ),
