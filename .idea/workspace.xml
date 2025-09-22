@@ -5,18 +5,103 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6a363054-7293-47b7-ba2c-9c84fe57d6db" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/admin_doctor_subs_list_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/admin_premium_books_add_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/admin_premium_books_edit_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/admin_premium_books_list_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/admin_premium_posts_add_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/admin_premium_posts_edit_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/admin_premium_posts_list_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/admin_premium_videos_list_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/doctor_patient_prescription_add_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/doctor_patient_prescription_detail_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/doctor_patient_prescription_edit_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/doctor_patient_prescription_list_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/patient_daily_record_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/patient_premium_content_list_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/patient_prescription_detail_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/patient_prescription_list_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/controller/ui/patient_record_history_controller.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/helpers/utils/context_instance.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/helpers/widgets/my_key_widget.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/model/daily_record_model.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/model/premium_book_model.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/model/premium_parent_model.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/model/premium_post_model.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/model/premium_video_model.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/model/prescription_model.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/admin_doctor_subs_list_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/admin_premium_books_add_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/admin_premium_books_edit_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/admin_premium_books_list_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/admin_premium_posts_add_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/admin_premium_posts_edit_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/admin_premium_posts_list_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/admin_premium_videos_list_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/doctor_patient_prescription_add_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/doctor_patient_prescription_detail_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/doctor_patient_prescription_edit_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/doctor_patient_prescription_list_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/patient_daily_record_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/patient_premium_content_list_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/patient_prescription_detail_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/patient_prescription_list_screen.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/lib/views/ui/patient_record_history_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/eva_admin.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/eva_admin.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/controller/ui/date_add_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/date_add_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.metadata" beforeDir="false" afterPath="$PROJECT_DIR$/.metadata" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/app_constant.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/app_constant.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/auth/login_admin_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/auth/login_admin_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/auth/login_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/auth/login_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/layout/layout_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/layout/layout_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/date_add_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/secretary-date_add_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/dates_list_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/doctor_dates_list_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/doctor_add_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/admin_doctor_add_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/doctor_detail_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/admin_doctor_detail_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/doctor_edit_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/admin_doctor_edit_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/doctor_list_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/admin_doctor_list_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/patient_add_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/doctor_patient_add_controller.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/controller/ui/patient_dates_list_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/patient_dates_list_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/patient_detail_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/doctor_patient_detail_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/patient_edit_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/doctor_patient_edit_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/patient_list_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/doctor_patient_list_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/secretary_add_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/doctor_secretary_add_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/secretary_detail_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/doctor_secretary_detail_controller.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/controller/ui/secretary_edit_controller.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/controller/ui/doctor_secretary_edit_controller.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/db_manager.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/db_manager.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/helpers/services/auth_services.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/helpers/services/auth_services.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/helpers/theme/app_style.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/helpers/theme/app_style.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/helpers/utils/my_string_utils.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/helpers/utils/my_string_utils.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/helpers/utils/utils.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/helpers/utils/utils.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/helpers/widgets/my_container.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/helpers/widgets/my_container.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/helpers/widgets/my_file_selector.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/helpers/widgets/my_file_selector.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/helpers/widgets/my_flex_item.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/helpers/widgets/my_flex_item.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/views/ui/dates_add_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/dates_add_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/views/ui/dates_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/dates_list_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/model/doctor_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/model/doctor_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/model/patient_list_model.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/model/patient_list_model.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/routes.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/routes.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/auth/login_admin_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/auth/login_admin_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/auth/login_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/auth/login_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/layout/layout.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/layout/layout.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/layout/left_bar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/layout/left_bar.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/layout/top_bar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/layout/top_bar.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/dates_add_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/secretary_dates_add_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/dates_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/doctor_dates_list_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/doctor_add_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/admin_doctor_add_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/doctor_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/admin_doctor_detail_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/doctor_edit_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/admin_doctor_edit_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/doctor_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/admin_doctor_list_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/patient_add_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/doctor_patient_add_screen.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/views/ui/patient_dates_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/patient_dates_list_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/views/ui/patient_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/patient_list_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/views/ui/secretary_dates_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/secretary_dates_list_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/views/ui/secretary_patient_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/secretary_patient_detail_screen.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/views/ui/secretary_patient_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/secretary_patient_list_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/patient_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/doctor_patient_detail_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/patient_edit_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/doctor_patient_edit_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/patient_list_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/doctor_patient_list_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/secretary_add_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/doctor_secretary_add_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/secretary_detail_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/doctor_secretary_detail_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/views/ui/secretary_edit_screen.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/views/ui/doctor_secretary_edit_screen.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,7 +139,8 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
-    &quot;Flutter.main.dart.executor&quot;: &quot;Run&quot;,
+    &quot;Flutter.NWS_WASM.executor&quot;: &quot;Run&quot;,
+    &quot;Flutter.main.dart.executor&quot;: &quot;Debug&quot;,
     &quot;Flutter.noWebSecurity.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
@@ -75,11 +161,16 @@
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Develop\Github\eva_admin\lib\controller\ui" />
       <recent name="C:\Develop\Github\eva_admin\lib\views\ui" />
-      <recent name="C:\Develop\Github\eva_admin\assets\data" />
       <recent name="C:\Develop\Github\eva_admin\lib\model" />
+      <recent name="C:\Develop\Github\eva_admin\assets\data" />
     </key>
   </component>
-  <component name="RunManager" selected="Flutter.main.dart">
+  <component name="RunManager" selected="Flutter.noWebSecurity">
+    <configuration name="NWS_WASM" type="FlutterRunConfigurationType" factoryName="Flutter">
+      <option name="additionalArgs" value="--web-browser-flag &quot;--disable-web-security&quot; --wasm" />
+      <option name="filePath" value="$PROJECT_DIR$/lib/main.dart" />
+      <method v="2" />
+    </configuration>
     <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter">
       <option name="filePath" value="$PROJECT_DIR$/lib/main.dart" />
       <method v="2" />
@@ -92,6 +183,7 @@
     <list>
       <item itemvalue="Flutter.main.dart" />
       <item itemvalue="Flutter.noWebSecurity" />
+      <item itemvalue="Flutter.NWS_WASM" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -112,14 +204,19 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="Dart">
-          <url>file://$PROJECT_DIR$/lib/controller/ui/secretary_edit_controller.dart</url>
+          <url>file://$PROJECT_DIR$/lib/controller/ui/doctor_secretary_edit_controller.dart</url>
           <line>56</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="Dart">
-          <url>file://$PROJECT_DIR$/lib/helpers/services/auth_services.dart</url>
-          <line>113</line>
-          <option name="timeStamp" value="8" />
+          <url>file://$PROJECT_DIR$/lib/controller/ui/doctor_patient_edit_controller.dart</url>
+          <line>98</line>
+          <option name="timeStamp" value="12" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="Dart">
+          <url>file://$PROJECT_DIR$/lib/views/ui/patient_record_history_screen.dart</url>
+          <line>156</line>
+          <option name="timeStamp" value="21" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

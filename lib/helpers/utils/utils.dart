@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:medicare/helpers/extention/date_time_extention.dart';
 
 class Utils {
@@ -64,5 +66,29 @@ class Utils {
     } else {
       return "${b.toStringAsFixed(2)} Bytes";
     }
+  }
+
+
+  static double getColumnsWidth(double contentWidth, {
+    double minWidth = 300.0, double spacing = 1.0,
+    int? hardLimitMin, int? hardLimitMax
+  }) {
+    int columnsCount = contentWidth ~/ (minWidth + spacing);
+    if (((columnsCount + 1) * minWidth + columnsCount * spacing) < contentWidth) {
+      columnsCount += 1;
+    }
+
+    if (hardLimitMax != null) {
+      columnsCount = math.min(columnsCount, hardLimitMax);
+    }
+    if (hardLimitMin != null) {
+      columnsCount = math.max(columnsCount, hardLimitMin);
+    }
+    columnsCount = math.max(columnsCount, 1); // Min 1
+    //Debug.log("columnsCount after min/max: $columnsCount\n", overrideColor: Colors.green);
+
+    final totalSpacing = (columnsCount - 1) * spacing;
+    final availableColumnsSpace = contentWidth - totalSpacing;
+    return availableColumnsSpace / columnsCount;
   }
 }

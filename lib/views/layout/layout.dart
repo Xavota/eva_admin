@@ -1,4 +1,7 @@
 import 'package:get/get.dart';
+import 'package:medicare/app_constant.dart';
+import 'package:medicare/db_manager.dart';
+import 'package:medicare/model/patient_list_model.dart';
 import 'package:medicare/views/layout/left_bar.dart';
 import 'package:medicare/views/layout/right_bar.dart';
 import 'package:medicare/views/layout/top_bar.dart';
@@ -22,14 +25,31 @@ import 'package:flutter_lucide/flutter_lucide.dart';
 
 import 'package:blix_essentials/blix_essentials.dart';
 
-class Layout extends StatelessWidget {
+class Layout extends StatefulWidget {
   final Widget? child;
+  final Widget? externalChild;
 
+  Layout({super.key, this.child, this.externalChild});
+
+  @override
+  State<Layout> createState() => _LayoutState();
+}
+
+class _LayoutState extends State<Layout> {
   final LayoutController controller = LayoutController();
+
+  final DBManager manager = DBManager.instance!;
+
   final topBarTheme = AdminTheme.theme.topBarTheme;
+
   final contentTheme = AdminTheme.theme.contentTheme;
 
-  Layout({super.key, this.child});
+  @override
+  void initState() {
+    super.initState();
+    controller.getPremiumStatus();
+    Debug.log("Premium Status: ${controller.premium}", overrideColor: Colors.amber);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +70,7 @@ class Layout extends StatelessWidget {
         centerTitle: true,
         title: Row(
           children: [
-            Row(
+            /*Row(
               children: [
                 buildTopBar(LucideIcons.map_pin, contentTheme.success),
                 MySpacing.width(12),
@@ -58,16 +78,26 @@ class Layout extends StatelessWidget {
                 MySpacing.width(12),
                 buildTopBar(LucideIcons.badge_percent, contentTheme.danger),
               ],
-            ),
+            ),*/
+            /*if (controller.premium != null)
+              Icon(
+                LucideIcons.crown, color: controller.premium! ? Colors.amber : Colors.black54,
+              ),
+            if (controller.premium != null)
+              MySpacing.width(10.0),
+            if (controller.premium != null && controller.premium!)
+              MyText.labelMedium("Activo hasta ${dateFormatter.format(controller.premiumEnd!)}", fontWeight: 700,),
+            if (controller.premium != null && !controller.premium!)
+              MyText.labelMedium("Premium Inactivo", fontWeight: 700,),*/
           ],
         ),
         actions: [
           Row(
             children: [
-              MyContainer.roundBordered(
+              /*MyContainer.roundBordered(
                 paddingAll: 8,
                 child: Icon(LucideIcons.shopping_cart, size: 20),
-              ),
+              ),*/
               CustomPopupMenu(
                 backdrop: true,
                 onChange: (_) {},
@@ -88,11 +118,16 @@ class Layout extends StatelessWidget {
           ),
         ],
       ),
-      drawer: LeftBar(),
-      body: SingleChildScrollView(
-        padding: MySpacing.bottom(flexSpacing),
-        key: controller.scrollKey,
-        child: child,
+      drawer: LeftBar(premium: controller.premium, premiumEnd: controller.premiumEnd,),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            padding: MySpacing.bottom(flexSpacing),
+            key: controller.scrollKey,
+            child: widget.child,
+          ),
+          if (widget.externalChild != null) widget.externalChild!,
+        ],
       ),
     );
   }
@@ -116,7 +151,7 @@ class Layout extends StatelessWidget {
         children: [
           Padding(
             padding: MySpacing.all(20),
-            child: LeftBar(isCondensed: ThemeCustomizer.instance.leftBarCondensed),
+            child: LeftBar(isCondensed: ThemeCustomizer.instance.leftBarCondensed, premium: controller.premium, premiumEnd: controller.premiumEnd,),
           ),
           Expanded(
               child: Stack(
@@ -126,13 +161,18 @@ class Layout extends StatelessWidget {
                 right: 0,
                 left: -20,
                 bottom: 0,
-                child: SingleChildScrollView(
-                  padding: MySpacing.fromLTRB(0, 78 + flexSpacing, 0, flexSpacing),
-                  key: controller.scrollKey,
-                  child: child,
+                child: Stack(
+                  children: [
+                    SingleChildScrollView(
+                      padding: MySpacing.fromLTRB(0, 78 + flexSpacing, 0, flexSpacing),
+                      key: controller.scrollKey,
+                      child: widget.child,
+                    ),
+                    if (widget.externalChild != null) widget.externalChild!,
+                  ],
                 ),
               ),
-              Positioned(top: 20, left: 0, right: 20, child: TopBar()),
+              Positioned(top: 20, left: 0, right: 20, child: TopBar(/*premium: controller.premium, premiumEnd: controller.premiumEnd,*/)),
             ],
           )),
         ],
@@ -207,7 +247,7 @@ class Layout extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
+          /*Padding(
             padding: MySpacing.xy(8, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,7 +303,7 @@ class Layout extends StatelessWidget {
           Divider(
             height: 1,
             thickness: 1,
-          ),
+          ),*/
           Padding(
             padding: MySpacing.xy(8, 8),
             child: MyButton(

@@ -17,6 +17,7 @@ import 'package:medicare/helpers/widgets/my_list_extension.dart';
 import 'package:medicare/helpers/widgets/my_spacing.dart';
 import 'package:medicare/helpers/widgets/my_text.dart';
 import 'package:medicare/helpers/widgets/my_text_style.dart';
+//import 'package:medicare/helpers/widgets/my_key_widget.dart';
 import 'package:medicare/helpers/widgets/responsive.dart';
 
 import 'package:medicare/views/layout/layout.dart';
@@ -34,10 +35,21 @@ class PatientDatesListScreen extends StatefulWidget {
 class _PatientDatesListScreenState extends State<PatientDatesListScreen> with UIMixin {
   PatientDatesListController controller = Get.put(PatientDatesListController());
 
+  int instanceIndex = -1;
+  bool firstFrame = true;
+
   @override
   void initState() {
     super.initState();
-    controller.updateDates();
+    instanceIndex = controller.addInstance();
+    controller.updateDates(instanceIndex);
+  }
+
+  @override
+  void dispose() {
+    controller.disposeInstance(instanceIndex);
+
+    super.dispose();
   }
 
   @override
@@ -48,31 +60,35 @@ class _PatientDatesListScreenState extends State<PatientDatesListScreen> with UI
         tag: 'patient_dates_list_controller',
         builder: (controller) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            controller.calculateContentWidth(flexSpacing + 20);
+            if (!firstFrame && controller.updateInstanceIndex != instanceIndex) return;
+            firstFrame = false;
+            controller.calculateContentWidth(instanceIndex, flexSpacing + 20);
           });
 
-          Debug.log("GetBuilder.builder()", overrideColor: Colors.purple);
-          Debug.log("contentWidth: ${controller.contentWidth}", overrideColor: Colors.purpleAccent);
+          final contentWidth = controller.getContentWidth(instanceIndex);
+
+          //Debug.log("GetBuilder.builder()", overrideColor: Colors.purple);
+          //Debug.log("contentWidth: $contentWidth", overrideColor: Colors.purpleAccent);
           //final screenWidth = MediaQuery.of(context).size.width;
           //final availableSpace = (1541 - (1920 - screenWidth));
 
           final cardsSpacing = 5.0;
           final cardsMinWidth = 225.0;
-          int? cardsMaxCount = controller.contentWidth == null ? null : controller.contentWidth! ~/ (cardsMinWidth + cardsSpacing);
-          if (cardsMaxCount != null && ((cardsMaxCount + 1) * cardsMinWidth + cardsMaxCount * cardsSpacing) < controller.contentWidth!) {
+          int? cardsMaxCount = contentWidth == null ? null : contentWidth ~/ (cardsMinWidth + cardsSpacing);
+          if (cardsMaxCount != null && ((cardsMaxCount + 1) * cardsMinWidth + cardsMaxCount * cardsSpacing) < contentWidth!) {
             cardsMaxCount += 1;
           }
           cardsMaxCount = cardsMaxCount == null ? null : math.min(cardsMaxCount, controller.dates.length);
-          Debug.log("cardsMaxCount: $cardsMaxCount", overrideColor: Colors.purpleAccent);
+          //Debug.log("cardsMaxCount: $cardsMaxCount", overrideColor: Colors.purpleAccent);
           final totalSpacing = cardsMaxCount == null ? null : (cardsMaxCount - 1) * cardsSpacing;
-          Debug.log("totalSpacing: $totalSpacing", overrideColor: Colors.purpleAccent);
-          final availableCardSpace = totalSpacing == null ? null : controller.contentWidth! - totalSpacing;
-          Debug.log("availableCardSpace: $availableCardSpace", overrideColor: Colors.purpleAccent);
+          //Debug.log("totalSpacing: $totalSpacing", overrideColor: Colors.purpleAccent);
+          final availableCardSpace = totalSpacing == null ? null : contentWidth! - totalSpacing;
+          //Debug.log("availableCardSpace: $availableCardSpace", overrideColor: Colors.purpleAccent);
           final cardsWidth = availableCardSpace == null ? null : availableCardSpace / cardsMaxCount!;
-          Debug.log("cardsWidth: $cardsWidth", overrideColor: Colors.purpleAccent);
+          //Debug.log("cardsWidth: $cardsWidth", overrideColor: Colors.purpleAccent);
 
           return Column(
-            key: controller.contentKey,
+            key: controller.getContentKey(instanceIndex),
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               /*Padding(
@@ -91,7 +107,7 @@ class _PatientDatesListScreenState extends State<PatientDatesListScreen> with UI
                     ),
                     MyBreadcrumb(
                       children: [
-                        MyBreadcrumbItem(name: 'Médico'),
+                        MyBreadcrumbItem(name: 'Tratante'),
                         MyBreadcrumbItem(name: 'Lista Citas', active: true),
                       ],
                     ),

@@ -34,27 +34,50 @@ import 'package:medicare/views/ui/loaders_screen.dart';
 import 'package:medicare/views/ui/modal_screen.dart';
 import 'package:medicare/views/ui/notification_screen.dart';
 
-import 'package:medicare/views/ui/doctor_add_screen.dart';
-import 'package:medicare/views/ui/doctor_detail_screen.dart';
-import 'package:medicare/views/ui/doctor_edit_screen.dart';
-import 'package:medicare/views/ui/doctor_list_screen.dart';
+import 'package:medicare/views/ui/admin_doctor_add_screen.dart';
+import 'package:medicare/views/ui/admin_doctor_detail_screen.dart';
+import 'package:medicare/views/ui/admin_doctor_edit_screen.dart';
+import 'package:medicare/views/ui/admin_doctor_list_screen.dart';
+import 'package:medicare/views/ui/admin_doctor_subs_list_screen.dart';
 
-import 'package:medicare/views/ui/secretary_add_screen.dart';
-import 'package:medicare/views/ui/secretary_detail_screen.dart';
-import 'package:medicare/views/ui/secretary_edit_screen.dart';
+import 'package:medicare/views/ui/admin_premium_posts_add_screen.dart';
+import 'package:medicare/views/ui/admin_premium_posts_list_screen.dart';
+import 'package:medicare/views/ui/admin_premium_posts_edit_screen.dart';
+
+import 'package:medicare/views/ui/admin_premium_videos_list_screen.dart';
+
+import 'package:medicare/views/ui/admin_premium_books_list_screen.dart';
+import 'package:medicare/views/ui/admin_premium_books_add_screen.dart';
+import 'package:medicare/views/ui/admin_premium_books_edit_screen.dart';
+
+import 'package:medicare/views/ui/doctor_secretary_add_screen.dart';
+import 'package:medicare/views/ui/doctor_secretary_detail_screen.dart';
+import 'package:medicare/views/ui/doctor_secretary_edit_screen.dart';
 
 import 'package:medicare/views/ui/secretary_patient_list_screen.dart';
 import 'package:medicare/views/ui/secretary_patient_detail_screen.dart';
 
-import 'package:medicare/views/ui/dates_add_screen.dart';
-import 'package:medicare/views/ui/dates_list_screen.dart';
+import 'package:medicare/views/ui/secretary_dates_add_screen.dart';
+import 'package:medicare/views/ui/doctor_dates_list_screen.dart';
 import 'package:medicare/views/ui/secretary_dates_list_screen.dart';
-import 'package:medicare/views/ui/patient_dates_list_screen.dart';
 
-import 'package:medicare/views/ui/patient_add_screen.dart';
-import 'package:medicare/views/ui/patient_detail_screen.dart';
-import 'package:medicare/views/ui/patient_edit_screen.dart';
-import 'package:medicare/views/ui/patient_list_screen.dart';
+import 'package:medicare/views/ui/doctor_patient_add_screen.dart';
+import 'package:medicare/views/ui/doctor_patient_detail_screen.dart';
+import 'package:medicare/views/ui/doctor_patient_edit_screen.dart';
+import 'package:medicare/views/ui/doctor_patient_list_screen.dart';
+
+import 'package:medicare/views/ui/doctor_patient_prescription_list_screen.dart';
+import 'package:medicare/views/ui/doctor_patient_prescription_add_screen.dart';
+import 'package:medicare/views/ui/doctor_patient_prescription_edit_screen.dart';
+import 'package:medicare/views/ui/doctor_patient_prescription_detail_screen.dart';
+
+import 'package:medicare/views/ui/patient_dates_list_screen.dart';
+import 'package:medicare/views/ui/patient_prescription_list_screen.dart';
+import 'package:medicare/views/ui/patient_prescription_detail_screen.dart';
+import 'package:medicare/views/ui/patient_daily_record_screen.dart';
+import 'package:medicare/views/ui/patient_record_history_screen.dart';
+
+import 'package:medicare/views/ui/patient_premium_content_list_screen.dart';
 
 import 'package:medicare/views/ui/pharmacy_cart_screen.dart';
 import 'package:medicare/views/ui/pharmacy_checkout_screen.dart';
@@ -79,7 +102,7 @@ class AuthMiddleware extends GetMiddleware {
 
   @override
   RouteSettings? redirect(String? route) {
-    Debug.log("AuthMiddleware.redirect: AuthService.loginType = ${AuthService.loginType.name}", overrideColor: Colors.green);
+    //Debug.log("AuthMiddleware.redirect: AuthService.loginType = ${AuthService.loginType.name}", overrideColor: Colors.green);
     //return AuthService.isLoggedIn || AuthService.isLoggedInAdmin ? null : const RouteSettings(name: '/auth/login');
     if (specificLogin != null) {
       return AuthService.loginType == specificLogin ? null : RouteSettings(name: reRouteUrl?? '/auth/login');
@@ -108,14 +131,14 @@ class AuthMiddleware extends GetMiddleware {
   }*/
 }
 
-class DoctorAuthMiddleware extends GetMiddleware {
+/*class DoctorAuthMiddleware extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
-    Debug.log("AuthMiddleware.redirect: AuthService.loginType = ${AuthService.loginType.name}", overrideColor: Colors.green);
+    //Debug.log("AuthMiddleware.redirect: AuthService.loginType = ${AuthService.loginType.name}", overrideColor: Colors.green);
     //return AuthService.isLoggedIn || AuthService.isLoggedInAdmin ? null : const RouteSettings(name: '/auth/login');
     return AuthService.loginType == LoginType.kDoctor ? null : const RouteSettings(name: '/auth/login');
   }
-}
+}*/
 
 class AdminAuthMiddleware extends GetMiddleware {
   @override
@@ -146,43 +169,73 @@ class AdminAuthMiddleware extends GetMiddleware {
   }*/
 }
 
-getPageRoute() {
+List<GetPage<dynamic>> getPageRoute() {
   var routes = [
     GetPage(name: '/', page: () => const DashboardScreen(), middlewares: [AuthMiddleware()]),
-    GetPage(name: '/panel', page: () => const DashboardScreen(), middlewares: [AdminAuthMiddleware()]),
+
     GetPage(name: '/auth/login', page: () => const LoginScreen()),
     GetPage(name: '/panel/auth/login', page: () => const LoginAdminScreen()),
     GetPage(name: '/auth/register_account', page: () => const RegisterAccountScreen()),
     GetPage(name: '/auth/forgot_password', page: () => const ForgotPasswordScreen()),
     GetPage(name: '/auth/reset_password', page: () => const ResetPasswordScreen()),
+
     GetPage(name: '/home', page: () => const HomeScreen(), middlewares: [AuthMiddleware()]),
     //GetPage(name: '/home', page: () => const RemotePdfPreview(pdfUrl: "https://blixdev.com/eva/uploads/pdf/upload_68239934e6dc66.22740508_MARA_CASTELLANOS.pdf"), middlewares: [AuthMiddleware()]),
     GetPage(name: '/dashboard', page: () => const DashboardScreen(), middlewares: [AuthMiddleware()]),
+    GetPage(name: '/panel', page: () => const DashboardScreen(), middlewares: [AdminAuthMiddleware()]),
 
-    GetPage(name: '/panel/doctor/list', page: () => const DoctorListScreen(), middlewares: [AdminAuthMiddleware()]),
-    GetPage(name: '/panel/doctor/add', page: () => const DoctorAddScreen(), middlewares: [AdminAuthMiddleware()]),
-    GetPage(name: '/panel/doctor/edit/:index', page: () => const DoctorEditScreen(), middlewares: [AdminAuthMiddleware()]),
-    GetPage(name: '/panel/doctor/detail/:index', page: () => const DoctorDetailScreen(), middlewares: [AdminAuthMiddleware()]),
+    // Admin
+    GetPage(name: '/panel/doctor/list', page: () => const AdminDoctorListScreen(), middlewares: [AdminAuthMiddleware()]),
+    GetPage(name: '/panel/doctor_subs/list', page: () => const AdminDoctorSubsListScreen(), middlewares: [AdminAuthMiddleware()]),
+    GetPage(name: '/panel/doctor/add', page: () => const AdminDoctorAddScreen(), middlewares: [AdminAuthMiddleware()]),
+    GetPage(name: '/panel/doctor/edit/:index', page: () => const AdminDoctorEditScreen(), middlewares: [AdminAuthMiddleware()]),
+    GetPage(name: '/panel/doctor/detail/:index', page: () => const AdminDoctorDetailScreen(), middlewares: [AdminAuthMiddleware()]),
 
-    GetPage(name: '/doctor/patient/list', page: () => const PatientListScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
-    GetPage(name: '/doctor/patient/add', page: () => const PatientAddScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
-    GetPage(name: '/doctor/patient/edit/:index', page: () => const PatientEditScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
-    GetPage(name: '/doctor/patient/detail/:index', page: () => const PatientDetailScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+    GetPage(name: '/panel/premium/posts/:header/:subHeader/list', page: () => const AdminPremiumPostsListScreen(), middlewares: [AdminAuthMiddleware()]),
+    GetPage(name: '/panel/premium/posts/:header/:subHeader/add', page: () => const AdminPremiumPostsAddScreen(), middlewares: [AdminAuthMiddleware()]),
+    GetPage(name: '/panel/premium/posts/:header/:subHeader/:postIndex/edit', page: () => const AdminPremiumPostsEditScreen(), middlewares: [AdminAuthMiddleware()]),
 
-    GetPage(name: '/doctor/secretary/add', page: () => const SecretaryAddScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
-    GetPage(name: '/doctor/secretary/edit', page: () => const SecretaryEditScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
-    GetPage(name: '/doctor/secretary/detail', page: () => const SecretaryDetailScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+    GetPage(name: '/panel/premium/videos/:header/:subHeader/list', page: () => const AdminPremiumVideosListScreen(), middlewares: [AdminAuthMiddleware()]),
 
-    GetPage(name: '/doctor/dates/list', page: () => const DatesListScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+    GetPage(name: '/panel/premium/books/:header/:subHeader/list', page: () => const AdminPremiumBooksListScreen(), middlewares: [AdminAuthMiddleware()]),
+    GetPage(name: '/panel/premium/books/:header/:subHeader/add', page: () => const AdminPremiumBooksAddScreen(), middlewares: [AdminAuthMiddleware()]),
+    GetPage(name: '/panel/premium/books/:header/:subHeader/:bookIndex/edit', page: () => const AdminPremiumBooksEditScreen(), middlewares: [AdminAuthMiddleware()]),
 
+    // Doctor
+    GetPage(name: '/doctor/patient/list', page: () => const DoctorPatientListScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+    //GetPage(name: '/doctor/patient_prescription_profile/list', page: () => const PatientPrescriptionProfileListScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+    GetPage(name: '/doctor/patient/add', page: () => const DoctorPatientAddScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+    GetPage(name: '/doctor/patient/edit/:index', page: () => const DoctorPatientEditScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+    GetPage(name: '/doctor/patient/detail/:index', page: () => const DoctorPatientDetailScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+
+    GetPage(name: '/doctor/patient/:patientIndex/prescription/list', page: () => const DoctorPatientPrescriptionListScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+    GetPage(name: '/doctor/patient/:patientIndex/prescription/add', page: () => const DoctorPatientPrescriptionAddScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+    GetPage(name: '/doctor/patient/:patientIndex/prescription/:index/edit', page: () => const DoctorPatientPrescriptionEditScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+    GetPage(name: '/doctor/patient/:patientIndex/prescription/:index/detail', page: () => const DoctorPatientPrescriptionDetailScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+
+    GetPage(name: '/doctor/secretary/add', page: () => const DoctorSecretaryAddScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+    GetPage(name: '/doctor/secretary/edit', page: () => const DoctorSecretaryEditScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+    GetPage(name: '/doctor/secretary/detail', page: () => const DoctorSecretaryDetailScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+
+    GetPage(name: '/doctor/dates/list', page: () => const DoctorDatesListScreen(), middlewares: [AuthMiddleware(LoginType.kDoctor)]),
+
+    // Secretary
     GetPage(name: '/secretary/patient/list', page: () => const SecretaryPatientListScreen(), middlewares: [AuthMiddleware(LoginType.kSecretary)]),
     GetPage(name: '/secretary/patient/detail/:index', page: () => const SecretaryPatientDetailScreen(), middlewares: [AuthMiddleware(LoginType.kSecretary)]),
 
-    GetPage(name: '/secretary/dates/add', page: () => const DatesAddScreen(), middlewares: [AuthMiddleware(LoginType.kSecretary)]),
+    GetPage(name: '/secretary/dates/add', page: () => const SecretaryDatesAddScreen(), middlewares: [AuthMiddleware(LoginType.kSecretary)]),
     GetPage(name: '/secretary/dates/list', page: () => const SecretaryDatesListScreen(), middlewares: [AuthMiddleware(LoginType.kSecretary)]),
 
-    GetPage(name: '/dates/list', page: () => const PatientDatesListScreen(), middlewares: [AuthMiddleware(LoginType.kPatient)]),
+    // Patient
+    GetPage(name: '/patient/dates/list', page: () => const PatientDatesListScreen(), middlewares: [AuthMiddleware(LoginType.kPatient)]),
+    GetPage(name: '/patient/prescription/list', page: () => const PatientPrescriptionListScreen(), middlewares: [AuthMiddleware(LoginType.kPatient)]),
+    GetPage(name: '/patient/prescription/:index/detail', page: () => const PatientPrescriptionDetailScreen(), middlewares: [AuthMiddleware(LoginType.kPatient)]),
+    GetPage(name: '/patient/record/daily', page: () => const PatientDalyRecordScreen(), middlewares: [AuthMiddleware(LoginType.kPatient)]),
+    GetPage(name: '/patient/record/history', page: () => const PatientRecordHistoryScreen(), middlewares: [AuthMiddleware(LoginType.kPatient)]),
 
+    GetPage(name: '/patient/premium/content/:header/:subHeader/list', page: () => const PatientPremiumPostsListScreen(), middlewares: [AuthMiddleware(LoginType.kPatient)]),
+
+    // Other
     GetPage(name: '/pharmacy_list', page: () => const PharmacyListScreen(), middlewares: [AuthMiddleware()]),
     GetPage(name: '/detail', page: () => const PharmacyDetailScreen(), middlewares: [AuthMiddleware()]),
     GetPage(name: '/cart', page: () => const PharmacyCartScreen(), middlewares: [AuthMiddleware()]),

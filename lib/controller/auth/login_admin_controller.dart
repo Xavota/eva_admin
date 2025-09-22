@@ -52,7 +52,7 @@ class LoginAdminController extends MyController {
         }
       }
       else {
-        String nextUrl = Uri.parse(ModalRoute.of(Get.context!)?.settings.name ?? "").queryParameters['next'] ?? "/home";
+        String nextUrl = Uri.parse(ModalRoute.of(Get.context!)?.settings.name ?? "").queryParameters['next'] ?? "/panel/doctor_subs/list";
         Debug.log(nextUrl, overrideColor: Colors.blue);
         Get.toNamed(
           nextUrl,

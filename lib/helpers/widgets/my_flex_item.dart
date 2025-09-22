@@ -12,7 +12,7 @@ class MyFlexItem extends StatelessWidget {
 
   Map<MyScreenMediaType, MyDisplayType> get display => MyScreenMedia.getDisplayDataFromString(displays);
 
-  MyFlexItem({
+   const MyFlexItem({
     super.key,
     required this.child,
     this.sizes,

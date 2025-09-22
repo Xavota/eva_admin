@@ -1,34 +1,45 @@
+import 'package:blix_essentials/blix_essentials.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/route_manager.dart';
+import 'package:medicare/app_constant.dart';
+import 'package:medicare/db_manager.dart';
 //import 'package:google_fonts/google_fonts.dart';
 import 'package:medicare/helpers/services/url_service.dart';
+import 'package:medicare/helpers/theme/admin_theme.dart';
 import 'package:medicare/helpers/theme/theme_customizer.dart';
 import 'package:medicare/helpers/utils/my_shadow.dart';
 import 'package:medicare/helpers/utils/ui_mixins.dart';
+import 'package:medicare/helpers/utils/my_input_formaters.dart';
 import 'package:medicare/helpers/services/auth_services.dart';
 import 'package:medicare/helpers/widgets/my_card.dart';
 import 'package:medicare/helpers/widgets/my_container.dart';
 import 'package:medicare/helpers/widgets/my_router.dart';
 import 'package:medicare/helpers/widgets/my_spacing.dart';
 import 'package:medicare/helpers/widgets/my_text.dart';
+import 'package:medicare/helpers/widgets/my_text_style.dart';
+import 'package:medicare/helpers/widgets/my_button.dart';
 import 'package:medicare/images.dart';
+import 'package:medicare/model/patient_list_model.dart';
 import 'package:medicare/widgets/custom_pop_menu.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
+
+import 'package:medicare/db_manager.dart';
 
 typedef LeftbarMenuFunction = void Function(String key);
 
 class LeftbarObserver {
   static Map<String, LeftbarMenuFunction> observers = {};
 
-  static attachListener(String key, LeftbarMenuFunction fn) {
+  static void attachListener(String key, LeftbarMenuFunction fn) {
     observers[key] = fn;
   }
 
-  static detachListener(String key) {
+  static void detachListener(String key) {
     observers.remove(key);
   }
 
-  static notifyAll(String key) {
+  static void notifyAll(String key) {
     for (var fn in observers.values) {
       fn(key);
     }
@@ -37,27 +48,66 @@ class LeftbarObserver {
 
 class LeftBar extends StatefulWidget {
   final bool isCondensed;
+  
+  final bool? premium;
+  final DateTime? premiumEnd;
 
-  const LeftBar({super.key, this.isCondensed = false});
+  const LeftBar({super.key, this.isCondensed = false, this.premium, this.premiumEnd});
 
   @override
-  _LeftBarState createState() => _LeftBarState();
+  State<LeftBar> createState() => _LeftBarState();
 }
 
 class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, UIMixin {
   final ThemeCustomizer customizer = ThemeCustomizer.instance;
 
+  final manager = DBManager.instance!;
+
   bool isCondensed = false;
   String path = UrlService.getCurrentUrl();
+
+  Map<PremiumContentTypes, Map<String, List<String>>> contentHeaders = {};
+  late AnimationController animationController = AnimationController(vsync: this, duration: Duration(seconds: 20));
+  TextEditingController headerTxCtrl = TextEditingController();
+  TextEditingController subHeaderTxCtrl = TextEditingController();
+
+
+  void getContentHeaders() {
+    if (!mounted || !context.mounted) return;
+    //Debug.log("getContentHeaders");
+
+    manager.getPremiumContent().then((content) {
+      if (content == null) return;
+
+      contentHeaders.clear();
+      for (final t in content.entries) {
+        contentHeaders[t.key] = {};
+        for (final h in t.value.entries) {
+          contentHeaders[t.key]![h.key] = [];
+          for (final sh in h.value.keys) {
+            contentHeaders[t.key]![h.key]!.add(sh);
+          }
+        }
+      }
+
+      if (mounted) setState(() {});
+    });
+  }
+
 
   @override
   void initState() {
     super.initState();
+    //Debug.log("InitState leftBar", overrideColor: Colors.greenAccent);
+    getContentHeaders();
   }
 
   @override
   Widget build(BuildContext context) {
     isCondensed = widget.isCondensed;
+    
+    final showPremiumContent = contentHeaders.isNotEmpty && (AuthService.loginType == LoginType.kAdmin || AuthService.loginType == LoginType.kPatient);
+    
     return ExcludeFocusTraversal(
       child: MyCard(
         paddingAll: 0,
@@ -141,8 +191,8 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                           isCondensed: isCondensed,
                           title: "Tratantes",
                           children: [
-                            MenuItem(title: "Listado", isCondensed: isCondensed, route: '/doctor/patient/list', iconData: LucideIcons.scroll_text),
-                            MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/doctor/patient/add', iconData: LucideIcons.list_ordered),
+                            MenuItem(title: "Listado", isCondensed: isCondensed, route: '/doctor/patient/list'),
+                            MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/doctor/patient/add'),
                           ],
                         ),
                       if (AuthService.loginType == LoginType.kDoctor)
@@ -151,9 +201,9 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                           isCondensed: isCondensed,
                           title: "Secretari@",
                           children: [
-                            MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/doctor/secretary/add', iconData: LucideIcons.list_ordered),
-                            MenuItem(title: "Editar", isCondensed: isCondensed, route: '/doctor/secretary/edit', iconData: LucideIcons.list_ordered),
-                            MenuItem(title: "Detalles", isCondensed: isCondensed, route: '/doctor/secretary/detail', iconData: LucideIcons.list_ordered),
+                            MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/doctor/secretary/add'),
+                            MenuItem(title: "Editar", isCondensed: isCondensed, route: '/doctor/secretary/edit'),
+                            MenuItem(title: "Detalles", isCondensed: isCondensed, route: '/doctor/secretary/detail'),
                           ],
                         ),
                       if (AuthService.loginType == LoginType.kDoctor)
@@ -162,7 +212,7 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                           isCondensed: isCondensed,
                           title: "Citas",
                           children: [
-                            MenuItem(title: "Listado", isCondensed: isCondensed, route: '/doctor/dates/list', iconData: LucideIcons.scroll_text),
+                            MenuItem(title: "Listado", isCondensed: isCondensed, route: '/doctor/dates/list'),
                           ],
                         ),
                       if (AuthService.loginType == LoginType.kSecretary)
@@ -171,7 +221,7 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                           isCondensed: isCondensed,
                           title: "Tratantes",
                           children: [
-                            MenuItem(title: "Listado", isCondensed: isCondensed, route: '/secretary/patient/list', iconData: LucideIcons.scroll_text),
+                            MenuItem(title: "Listado", isCondensed: isCondensed, route: '/secretary/patient/list'),
                           ],
                         ),
                       if (AuthService.loginType == LoginType.kSecretary)
@@ -180,8 +230,8 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                           isCondensed: isCondensed,
                           title: "Citas",
                           children: [
-                            MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/secretary/dates/add', iconData: LucideIcons.scroll_text),
-                            MenuItem(title: "Listado", isCondensed: isCondensed, route: '/secretary/dates/list', iconData: LucideIcons.scroll_text),
+                            MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/secretary/dates/add'),
+                            MenuItem(title: "Listado", isCondensed: isCondensed, route: '/secretary/dates/list'),
                           ],
                         ),
                       if (AuthService.loginType == LoginType.kAdmin)
@@ -191,6 +241,7 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                           title: "Médicos",
                           children: [
                             MenuItem(title: "Listado", isCondensed: isCondensed, route: '/panel/doctor/list'),
+                            MenuItem(title: "Suscripciones", isCondensed: isCondensed, route: '/panel/doctor_subs/list'),
                             MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/panel/doctor/add'),
                           ],
                         ),
@@ -200,9 +251,401 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                           isCondensed: isCondensed,
                           title: "Citas",
                           children: [
-                            MenuItem(title: "Próximas citas", isCondensed: isCondensed, route: '/dates/list', iconData: LucideIcons.scroll_text),
+                            MenuItem(title: "Próximas citas", isCondensed: isCondensed, route: '/patient/dates/list'),
                           ],
                         ),
+                      if (AuthService.loginType == LoginType.kPatient)
+                        MenuWidget(
+                          iconData: LucideIcons.pill_bottle,
+                          isCondensed: isCondensed,
+                          title: "Mis Recetas",
+                          children: [
+                            MenuItem(title: "Médico ${(AuthService.loggedUserData as PatientListModel).owner.fullName}", isCondensed: isCondensed, route: '/patient/prescription/list'),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kPatient)
+                        MenuWidget(
+                          iconData: LucideIcons.heart_pulse,
+                          isCondensed: isCondensed,
+                          title: "Salud",
+                          children: [
+                            MenuItem(title: "Registro Diario", isCondensed: isCondensed, route: '/patient/record/daily'),
+                            MenuItem(title: "Mis Mediciones", isCondensed: isCondensed, route: '/patient/record/history'),
+                          ],
+                        ),
+
+                      if (showPremiumContent && !isCondensed)
+                        Padding(
+                          padding: MySpacing.fromLTRB(20, 20, 20, 0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Container(height: 1.5, color: Colors.orange,),
+                                    MySpacing.height(3.0),
+                                    Container(height: 1.5, color: Colors.orange,),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: MySpacing.horizontal(10),
+                                child: MyText.titleSmall("Contenido Premium", textAlign: TextAlign.center, fontWeight: 800, color: Colors.orange,),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Container(height: 1.5, color: Colors.orange,),
+                                    MySpacing.height(3.0),
+                                    Container(height: 1.5, color: Colors.orange,),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (showPremiumContent && isCondensed)
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(5.0, 20.0, 5.0, 0.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Container(height: 1.0, color: Colors.black,),
+                                    MySpacing.height(3.0),
+                                    Container(height: 1.0, color: Colors.black,),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: MySpacing.horizontal(5),
+                                child: Icon(LucideIcons.crown, color: (widget.premium?? false) ? Colors.amber : Colors.black45,),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Container(height: 1.0, color: Colors.black,),
+                                    MySpacing.height(3.0),
+                                    Container(height: 1.0, color: Colors.black,),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (showPremiumContent && !isCondensed && widget.premium != null)
+                        Padding(
+                          padding: MySpacing.fromLTRB(20, 10, 20, 0),
+                          child: Center(
+                            child: MyText.bodyMedium(
+                              widget.premium! ?
+                              "Premium Activo  ${dateFormatter.format(widget.premiumEnd!)}" :
+                              "Premium Inactivo", textAlign: TextAlign.center,
+                              fontWeight: 700,
+                              color: widget.premium! ?
+                              Colors.deepOrangeAccent : Colors.black45,
+                            ),
+                          ),
+                        ),
+                      if (showPremiumContent && !isCondensed)
+                        Padding(
+                          padding: MySpacing.fromLTRB(20, 10, 20, 0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: List.generate(
+                                    8, (i) =>
+                                      MyContainer(
+                                        width: 3.0, height: 3.0,
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: MySpacing.horizontal(15),
+                                child: MyText.titleSmall("Posts", textAlign: TextAlign.center, fontWeight: 700,),
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: List.generate(
+                                    8, (i) =>
+                                      MyContainer(
+                                        width: 3.0, height: 3.0,
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (showPremiumContent && isCondensed)
+                        Padding(
+                          padding: MySpacing.fromLTRB(6, 10, 6, 0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: List.generate(
+                                    2, (i) =>
+                                      MyContainer(
+                                        width: 3.0, height: 3.0,
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: MySpacing.horizontal(6),
+                                child: Icon(LucideIcons.images),
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: List.generate(
+                                    2, (i) =>
+                                      MyContainer(
+                                        width: 3.0, height: 3.0,
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (showPremiumContent)
+                        for (final header in (contentHeaders[PremiumContentTypes.kPosts]?.entries?? <MapEntry<String, List<String>>>[]))
+                          MenuWidget(
+                            iconData: LucideIcons.crown,
+                            isCondensed: isCondensed,
+                            title: header.key,
+                            endingButtons: [
+                              if (AuthService.loginType == LoginType.kAdmin)
+                                MenuButton(title: "Añadir", isCondensed: isCondensed, iconData: LucideIcons.badge_plus, onTap: () {
+                                  _showAddContentSubHeaderDialog(PremiumContentTypes.kPosts, header.key);
+                                },),
+                            ],
+                            children: [
+                              for (final subHeader in header.value)
+                                MenuItem(
+                                  title: subHeader, isCondensed: isCondensed,
+                                  route: '/${AuthService.loginType == LoginType.kAdmin ? "panel" : "patient"}'
+                                      '/premium/posts/'
+                                      '${Uri.encodeComponent(header.key)}/'
+                                      '${Uri.encodeComponent(subHeader)}/list',
+                                ),
+                            ],
+                          ),
+                      if (showPremiumContent && !isCondensed)
+                        Padding(
+                          padding: MySpacing.fromLTRB(20, 20, 20, 0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: List.generate(
+                                    8, (i) =>
+                                      MyContainer(
+                                        width: 3.0, height: 3.0,
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: MySpacing.horizontal(15),
+                                child: MyText.titleSmall("Videos", textAlign: TextAlign.center, fontWeight: 700,),
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: List.generate(
+                                    8, (i) =>
+                                      MyContainer(
+                                        width: 3.0, height: 3.0,
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (showPremiumContent && isCondensed)
+                        Padding(
+                          padding: MySpacing.fromLTRB(6, 10, 6, 0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: List.generate(
+                                    2, (i) =>
+                                      MyContainer(
+                                        width: 3.0, height: 3.0,
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: MySpacing.horizontal(6),
+                                child: Icon(LucideIcons.video),
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: List.generate(
+                                    2, (i) =>
+                                      MyContainer(
+                                        width: 3.0, height: 3.0,
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (showPremiumContent)
+                        for (final header in (contentHeaders[PremiumContentTypes.kVideos]?.entries?? <MapEntry<String, List<String>>>[]))
+                          MenuWidget(
+                            iconData: LucideIcons.crown,
+                            isCondensed: isCondensed,
+                            title: header.key,
+                            endingButtons: [
+                              if (AuthService.loginType == LoginType.kAdmin)
+                                MenuButton(title: "Añadir", isCondensed: isCondensed, iconData: LucideIcons.badge_plus, onTap: () {
+                                  _showAddContentSubHeaderDialog(PremiumContentTypes.kVideos, header.key);
+                                },),
+                            ],
+                            children: [
+                              for (final subHeader in header.value)
+                                MenuItem(
+                                  title: subHeader, isCondensed: isCondensed,
+                                  route: '/${AuthService.loginType == LoginType.kAdmin ? "panel" : "patient"}'
+                                      '/premium/videos/'
+                                      '${Uri.encodeComponent(header.key)}/'
+                                      '${Uri.encodeComponent(subHeader)}/list',
+                                ),
+                            ],
+                          ),
+                      if (showPremiumContent && !isCondensed)
+                        Padding(
+                          padding: MySpacing.fromLTRB(20, 20, 20, 0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: List.generate(
+                                    8, (i) =>
+                                      MyContainer(
+                                        width: 3.0, height: 3.0,
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: MySpacing.horizontal(15),
+                                child: MyText.titleSmall("Libros", textAlign: TextAlign.center, fontWeight: 700,),
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: List.generate(
+                                    8, (i) =>
+                                      MyContainer(
+                                        width: 3.0, height: 3.0,
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (showPremiumContent && isCondensed)
+                        Padding(
+                          padding: MySpacing.fromLTRB(6, 10, 6, 0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: List.generate(
+                                    2, (i) =>
+                                      MyContainer(
+                                        width: 3.0, height: 3.0,
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: MySpacing.horizontal(6),
+                                child: Icon(LucideIcons.book),
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: List.generate(
+                                    2, (i) =>
+                                      MyContainer(
+                                        width: 3.0, height: 3.0,
+                                        shape: BoxShape.circle,
+                                        color: Colors.black,
+                                      ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      if (showPremiumContent)
+                        for (final header in (contentHeaders[PremiumContentTypes.kBooks]?.entries?? <MapEntry<String, List<String>>>[]))
+                          MenuWidget(
+                            iconData: LucideIcons.crown,
+                            isCondensed: isCondensed,
+                            title: header.key,
+                            endingButtons: [
+                              if (AuthService.loginType == LoginType.kAdmin)
+                                MenuButton(title: "Añadir", isCondensed: isCondensed, iconData: LucideIcons.badge_plus, onTap: () {
+                                  _showAddContentSubHeaderDialog(PremiumContentTypes.kBooks, header.key);
+                                },),
+                            ],
+                            children: [
+                              for (final subHeader in header.value)
+                                MenuItem(
+                                  title: subHeader, isCondensed: isCondensed,
+                                  route: '/${AuthService.loginType == LoginType.kAdmin ? "panel" : "patient"}'
+                                      '/premium/books/'
+                                      '${Uri.encodeComponent(header.key)}/'
+                                      '${Uri.encodeComponent(subHeader)}/list',
+                                ),
+                            ],
+                          ),
+
                       if (AuthService.loginType == LoginType.kNone)
                         MenuWidget(
                           iconData: LucideIcons.notepad_text,
@@ -330,7 +773,7 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                                 ),
                               )),
                         ),*/
-                      if (isCondensed)
+                      /*if (isCondensed)
                         InkWell(
                           onTap: () => UrlService.goToPagger(),
                           child: Padding(
@@ -343,7 +786,7 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                                         colors: const [Colors.deepPurple, Colors.lightBlue], begin: Alignment.topLeft, end: Alignment.bottomRight)),
                                 child: Icon(LucideIcons.download, color: Colors.white, size: 20),
                               )),
-                        ),
+                        ),*/
                       MySpacing.height(20),
                     ],
                   ),
@@ -364,6 +807,174 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
             child: MyText.labelSmall(label.toUpperCase(),
                 color: leftBarTheme.labelColor, muted: true, maxLines: 1, overflow: TextOverflow.clip, fontWeight: 700),
           );
+  }
+
+
+  void _showAddContentSubHeaderDialog(PremiumContentTypes type, String header) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) {
+        return Dialog(
+          clipBehavior: Clip.antiAliasWithSaveLayer,
+          shape: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
+          ),
+          child: SizedBox(
+            width: 400,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: MySpacing.all(16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: MyText.labelLarge(
+                          'Añadir categoría a $header',
+                          fontWeight: 600,
+                        ),
+                      ),
+                      InkWell(
+                        onTap: () => Navigator.pop(context),
+                        child: Icon(
+                          LucideIcons.x,
+                          size: 20,
+                          color: colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Divider(height: 0, thickness: 1),
+
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: commonTextField(
+                    title: "Nombre", hintText: "Nombre de la Categoría",
+                    teController: subHeaderTxCtrl, length: 64
+                  ),
+                ),
+
+                Divider(height: 0, thickness: 1),
+                Padding(
+                  padding: MySpacing.only(right: 20, bottom: 12, top: 14),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      MyButton(
+                        onPressed: () => Get.back(),
+                        elevation: 0,
+                        borderRadiusAll: 8,
+                        padding: MySpacing.xy(20, 16),
+                        backgroundColor: colorScheme.secondaryContainer,
+                        child: MyText.labelMedium(
+                          "Cancelar",
+                          fontWeight: 600,
+                          color: colorScheme.onSecondaryContainer,
+                        ),
+                      ),
+                      MySpacing.width(16),
+                      MyButton(
+                        onPressed: () async {
+                          if (subHeaderTxCtrl.text.isNotEmpty) {
+                            final errors = await manager.registerPremiumContentHeader(type, subHeaderTxCtrl.text, header);
+                            if (errors != null) {
+                              for (final e in errors.entries) {
+                                if (e.key == "server") {
+                                  showSnackBar(e.value, ContentThemeColor.danger.color, ContentThemeColor.danger.onColor);
+                                }
+                              }
+                            }
+                            else {
+                              showSnackBar("Categoría añadida con éxito", ContentThemeColor.success.color, ContentThemeColor.success.onColor);
+                            }
+                            Debug.log("AddHeader leftBar", overrideColor: Colors.greenAccent);
+                            getContentHeaders();
+                            Get.back();
+                          }
+                          else {
+                            showSnackBar("Falta nombre de categoría", ContentThemeColor.danger.color, ContentThemeColor.danger.onColor);
+                          }
+                        },
+                        elevation: 0,
+                        borderRadiusAll: 8,
+                        padding: MySpacing.xy(20, 16),
+                        backgroundColor: colorScheme.primary,
+                        child: MyText.labelMedium(
+                          "Guardar",
+                          fontWeight: 600,
+                          color: colorScheme.onPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void showSnackBar(String text, Color backgroundColor, Color color) {
+    Duration duration = Duration(seconds: 3);
+
+    SnackBar snackBar = SnackBar(
+      width: null,
+      behavior: SnackBarBehavior.fixed,
+      duration: duration,
+      showCloseIcon: true,
+      closeIconColor: color,
+      animation: Tween<double>(begin: 0, end: 300).animate(animationController),
+      content: MyText.labelLarge(
+        text,
+        color: color,
+      ),
+      backgroundColor: backgroundColor,
+    );
+    ScaffoldMessenger.of(Get.context!).hideCurrentSnackBar();
+    ScaffoldMessenger.of(Get.context!).showSnackBar(snackBar);
+  }
+
+
+
+  Widget commonTextField({
+    String? title, String? hintText, bool readOnly = false,
+    String? Function(String?)? validator, Widget? prefixIcon,
+    void Function()? onTap, TextEditingController? teController,
+    bool integer = false, bool floatingPoint = false, int? length}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        MyText.labelMedium(title ?? "", fontWeight: 600, muted: true),
+        MySpacing.height(8),
+        TextFormField(
+          validator: validator,
+          readOnly: readOnly,
+          onTap: onTap ?? () {},
+          controller: teController,
+          keyboardType: integer ? TextInputType.phone : null,
+          maxLength: length != null ? (length + (!integer && floatingPoint ? 3 : 0)) : null,
+          inputFormatters: integer ? <TextInputFormatter>[FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))]
+              : (floatingPoint ? <TextInputFormatter>[FloatingPointTextInputFormatter(maxDigitsBeforeDecimal: length, maxDigitsAfterDecimal: 2)] : null),
+          style: MyTextStyle.bodySmall(),
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            hintText: hintText,
+            counterText: "",
+            hintStyle: MyTextStyle.bodySmall(fontWeight: 600, muted: true),
+            isCollapsed: true,
+            isDense: true,
+            prefixIcon: prefixIcon,
+            contentPadding: MySpacing.all(16),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -393,11 +1004,12 @@ class MenuWidget extends StatefulWidget {
   final bool isCondensed;
   final bool active;
   final List<MenuItem> children;
+  final List<MenuButton> endingButtons;
 
-  const MenuWidget({super.key, required this.iconData, required this.title, this.isCondensed = false, this.active = false, this.children = const []});
+  const MenuWidget({super.key, required this.iconData, required this.title, this.isCondensed = false, this.active = false, this.children = const [], this.endingButtons = const []});
 
   @override
-  _MenuWidgetState createState() => _MenuWidgetState();
+  State<MenuWidget> createState() => _MenuWidgetState();
 }
 
 class _MenuWidgetState extends State<MenuWidget> with UIMixin, SingleTickerProviderStateMixin {
@@ -422,7 +1034,7 @@ class _MenuWidgetState extends State<MenuWidget> with UIMixin, SingleTickerProvi
     }
   }
 
-  void onChangeExpansion(value) {
+  void onChangeExpansion(bool value) {
     isActive = value;
     if (isActive) {
       _controller.forward();
@@ -475,8 +1087,8 @@ class _MenuWidgetState extends State<MenuWidget> with UIMixin, SingleTickerProvi
         menuBuilder: (_) => MyContainer(
           paddingAll: 8,
           borderRadiusAll: 12,
-          width: 200,
-          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: widget.children),
+          width: 250,
+          child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: widget.children.map<Widget>((e) => e).toList()..addAll(widget.endingButtons)),
         ),
       );
     } else {
@@ -528,7 +1140,7 @@ class _MenuWidgetState extends State<MenuWidget> with UIMixin, SingleTickerProvi
                 collapsedBackgroundColor: Colors.transparent,
                 shape: const RoundedRectangleBorder(side: BorderSide(color: Colors.transparent)),
                 backgroundColor: Colors.transparent,
-                children: widget.children),
+                children: widget.children.map<Widget>((e) => e).toList()..addAll(widget.endingButtons)),
           ),
         ),
       );
@@ -558,7 +1170,7 @@ class MenuItem extends StatefulWidget {
   });
 
   @override
-  _MenuItemState createState() => _MenuItemState();
+  State<MenuItem> createState() => _MenuItemState();
 }
 
 class _MenuItemState extends State<MenuItem> with UIMixin {
@@ -570,6 +1182,7 @@ class _MenuItemState extends State<MenuItem> with UIMixin {
     return GestureDetector(
       onTap: () {
         if (widget.route != null) {
+          print(widget.route!);
           Get.toNamed(widget.route!);
         }
       },
@@ -587,13 +1200,112 @@ class _MenuItemState extends State<MenuItem> with UIMixin {
           width: MediaQuery.of(context).size.width,
           padding: MySpacing.xy(18, 7),
           borderRadiusAll: 12,
-          child: MyText.bodySmall("${widget.isCondensed ? "-" : "- "}  ${widget.title}",
-              overflow: TextOverflow.clip,
-              maxLines: 1,
-              textAlign: TextAlign.left,
-              fontSize: 12.5,
-              color: isActive || isHover ? leftBarTheme.activeItemColor : leftBarTheme.onBackground,
-              fontWeight: isActive || isHover ? 600 : 500),
+          child: Row(
+            children: [
+              if (widget.iconData != null)
+                Icon(widget.iconData, size: 15.0)
+              else
+                MyText.bodySmall(
+                  widget.isCondensed ? " -" : " - ",
+                  overflow: TextOverflow.clip,
+                  maxLines: 2,
+                  textAlign: TextAlign.left,
+                  fontSize: 12.5,
+                  color: isActive || isHover ? leftBarTheme.activeItemColor : leftBarTheme.onBackground,
+                  fontWeight: isActive || isHover ? 600 : 500,
+                ),
+              MySpacing.width(4.0),
+              SizedBox(
+                width: 135.0,
+                child: MyText.bodySmall(
+                  widget.title,
+                  overflow: TextOverflow.clip,
+                  maxLines: 2,
+                  textAlign: TextAlign.left,
+                  fontSize: 12.5,
+                  color: isActive || isHover ? leftBarTheme.activeItemColor : leftBarTheme.onBackground,
+                  fontWeight: isActive || isHover ? 600 : 500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class MenuButton extends StatefulWidget {
+  final IconData? iconData;
+  final String title;
+  final bool isCondensed;
+  final void Function()? onTap;
+
+  const MenuButton({
+    super.key,
+    this.iconData,
+    required this.title,
+    this.isCondensed = false,
+    this.onTap,
+  });
+
+  @override
+  State<MenuButton> createState() => _MenuButtonState();
+}
+
+class _MenuButtonState extends State<MenuButton> with UIMixin {
+  bool isHover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (widget.onTap != null) {
+          widget.onTap!();
+        }
+      },
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onHover: (event) => setState(() {
+          isHover = true;
+        }),
+        onExit: (event) => setState(() {
+          isHover = false;
+        }),
+        child: MyContainer.transparent(
+          margin: MySpacing.fromLTRB(4, 0, 8, 4),
+          color: isHover ? leftBarTheme.activeItemBackground : Colors.transparent,
+          width: MediaQuery.of(context).size.width,
+          padding: MySpacing.xy(18, 7),
+          borderRadiusAll: 12,
+          child: Row(
+            children: [
+              if (widget.iconData != null)
+                Icon(widget.iconData, size: 15.0)
+              else
+                MyText.bodySmall(
+                  widget.isCondensed ? " -" : " - ",
+                  overflow: TextOverflow.clip,
+                  maxLines: 2,
+                  textAlign: TextAlign.left,
+                  fontSize: 12.5,
+                  color: isHover ? leftBarTheme.activeItemColor : leftBarTheme.onBackground,
+                  fontWeight: isHover ? 600 : 500,
+                  muted: true,
+                ),
+              MySpacing.width(4.0),
+              MyText.bodySmall(
+                widget.title,
+                overflow: TextOverflow.clip,
+                maxLines: 2,
+                textAlign: TextAlign.left,
+                fontSize: 12.5,
+                color: isHover ? leftBarTheme.activeItemColor : leftBarTheme.onBackground,
+                fontWeight: isHover ? 600 : 500,
+                muted: true,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -609,7 +1321,7 @@ class NavigationItem extends StatefulWidget {
   const NavigationItem({super.key, this.iconData, required this.title, this.isCondensed = false, this.route});
 
   @override
-  _NavigationItemState createState() => _NavigationItemState();
+  State<NavigationItem> createState() => _NavigationItemState();
 }
 
 class _NavigationItemState extends State<NavigationItem> with UIMixin {

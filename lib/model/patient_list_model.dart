@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:medicare/db_manager.dart';
 import 'package:medicare/helpers/services/json_decoder.dart';
+import 'package:medicare/model/doctor_model.dart';
 import 'package:medicare/model/identifier_model.dart';
 import 'package:flutter/services.dart';
 
@@ -109,10 +111,12 @@ extension ConsultationReasonExtension on ConsultationReason {
 
 
 class PatientListModel extends IdentifierModel {
-  PatientListModel(super.id, this.userNumber, this.fullName, this.age,
+  PatientListModel(super.id, this.owner, this.userNumber, this.fullName, this.age,
       this.sex, this.weight, this.height, this.waist, this.job, this.birthDate,
-      this.phoneNumber, this.status, this.consultationReasons, this.pdfName);
+      this.phoneNumber, this.status, this.consultationReasons, this.pdfName,
+      this.weightGoal, this.waistGoal);
 
+  final DoctorModel owner;
   final String userNumber;
   final String fullName;
   final int age;
@@ -129,9 +133,15 @@ class PatientListModel extends IdentifierModel {
   final String pdfName;
 
 
-  static PatientListModel fromJSON(Map<String, dynamic> json) {
+  final double? weightGoal;
+  final double? waistGoal;
+
+
+  static Future<PatientListModel> fromJSON(Map<String, dynamic> json) async {
     JSONDecoder jsonDecoder = JSONDecoder(json);
 
+    String ownerUserNumber = jsonDecoder.getString('owner');
+    final owner = (await DBManager.instance!.doctors)!.firstWhere((e) => e.userNumber == ownerUserNumber);
     String userNumber = jsonDecoder.getString('number');
     String fullName = jsonDecoder.getString('fullName');
     int age = jsonDecoder.getInt('age');
@@ -152,12 +162,18 @@ class PatientListModel extends IdentifierModel {
 
     String pdfName = jsonDecoder.getString('pdfName');
 
-    return PatientListModel(jsonDecoder.getId, userNumber, fullName, age, sex,
-      weight, height, waist, job, birthDate, phoneNumber, status, consultationReasons, pdfName);
+    double? weightGoal = jsonDecoder.getDoubleOrNull('weightGoal');
+    weightGoal = weightGoal == 0.0 ? null : weightGoal;
+    double? waistGoal = jsonDecoder.getDoubleOrNull('waistGoal');
+    waistGoal = waistGoal == 0.0 ? null : waistGoal;
+
+    return PatientListModel(jsonDecoder.getId, owner, userNumber, fullName, age,
+      sex, weight, height, waist, job, birthDate, phoneNumber, status,
+      consultationReasons, pdfName, weightGoal, waistGoal,);
   }
 
-  static List<PatientListModel> listFromJSON(List<dynamic> list) {
-    return list.map((e) => PatientListModel.fromJSON(e)).toList();
+  static Future<List<PatientListModel>> listFromJSON(List<dynamic> list) async {
+    return await Future.wait(list.map((e) => PatientListModel.fromJSON(e)));
   }
 
   static List<PatientListModel>? _dummyList;
@@ -165,7 +181,7 @@ class PatientListModel extends IdentifierModel {
   static Future<List<PatientListModel>> get dummyList async {
     if (_dummyList == null) {
       dynamic data = json.decode(await getData());
-      _dummyList = listFromJSON(data);
+      _dummyList = await listFromJSON(data);
     }
     return _dummyList!;
   }

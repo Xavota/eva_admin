@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:medicare/db_manager.dart';
+import 'package:medicare/app_constant.dart';
 import 'package:medicare/helpers/localizations/language.dart';
 import 'package:medicare/helpers/services/auth_services.dart';
 import 'package:medicare/helpers/theme/app_notifire.dart';
@@ -13,6 +14,7 @@ import 'package:medicare/helpers/widgets/my_button.dart';
 import 'package:medicare/helpers/widgets/my_card.dart';
 import 'package:medicare/helpers/widgets/my_container.dart';
 import 'package:medicare/helpers/widgets/my_dashed_divider.dart';
+import 'package:medicare/helpers/widgets/my_screen_media.dart';
 import 'package:medicare/helpers/widgets/my_spacing.dart';
 import 'package:medicare/helpers/widgets/my_text.dart';
 import 'package:medicare/widgets/custom_pop_menu.dart';
@@ -22,7 +24,10 @@ import 'package:provider/provider.dart';
 import 'package:blix_essentials/blix_essentials.dart';
 
 class TopBar extends StatefulWidget {
-  const TopBar({super.key});
+  const TopBar({super.key, this.premium, this.premiumEnd});
+
+  final bool? premium;
+  final DateTime? premiumEnd;
 
   @override
   State<TopBar> createState() => _TopBarState();
@@ -37,43 +42,56 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
   void initState() {
     super.initState();
 
-
     if (AuthService.loginType == LoginType.kAdmin) {
       userName = "Admin";
     }
     else if (AuthService.loginType == LoginType.kDoctor) {
       DBManager.instance!.doctors.then((docs) {
         if (docs == null) return;
-        setState(() {
-          userName = docs.firstWhere((e) => e.userNumber == AuthService.loggedUserNumber).fullName;
-        });
+        if (mounted) {
+          setState(() {
+            userName = docs.firstWhere((e) => e.userNumber == AuthService.loggedUserNumber).fullName;
+          });
+        }
       });
     }
     else if (AuthService.loginType == LoginType.kSecretary) {
       DBManager.instance!.getSecretary(userNumber: AuthService.loggedUserNumber).then((secretary) {
         if (secretary == null) return;
-        setState(() {
-          userName = secretary.fullName;
-        });
+        if (mounted) {
+          setState(() {
+            userName = secretary.fullName;
+          });
+        }
       });
     }
     else {
       DBManager.instance!.getPatients(userNumber: AuthService.loggedUserNumber).then((patient) {
         if (patient == null || patient.isEmpty) return;
-        setState(() {
-          userName = patient[0].fullName;
-        });
+        if (mounted) {
+          setState(() {
+            userName = patient[0].fullName;
+          });
+        }
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    //final screenType = MyScreenMedia.getTypeFromWidth(screenSize.width);
+
+    //Debug.log("screenWidth: ${screenSize.width}");
+
+    final bool bigScreen = screenSize.width > 900;
+    final bool smallScreen = screenSize.width < 800;
+
     return MyCard(
       shadow: MyShadow(position: MyShadowPosition.bottomRight, elevation: 1),
       height: 60,
       borderRadiusAll: 12,
-      padding: MySpacing.x(24),
+      padding: MySpacing.only(left: 24, right: 10),
       color: topBarTheme.background.withAlpha(246),
       child: Row(
         children: [
@@ -88,24 +106,48 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
               color: topBarTheme.onBackground,
             ),
           ),
+          MySpacing.width(15.0),
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                MyText.labelLarge(userName),
-                MySpacing.width(20),
-                InkWell(
-                  onTap: () {
-                    ThemeCustomizer.setTheme(ThemeCustomizer.instance.theme == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark);
-                  },
-                  child: Icon(
-                    ThemeCustomizer.instance.theme == ThemeMode.dark ? LucideIcons.sun : LucideIcons.moon,
-                    size: 18,
-                    color: topBarTheme.onBackground,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.premium != null)
+                      Icon(
+                        LucideIcons.crown, color: widget.premium! ? Colors.amber : Colors.black54,
+                      ),
+                    if (widget.premium != null)
+                      MySpacing.width(10.0),
+                    if (widget.premium != null && widget.premium! && bigScreen)
+                      MyText.labelMedium("Activo hasta ", fontWeight: 700,),
+                    if (widget.premium != null && widget.premium! && !smallScreen)
+                      MyText.labelMedium(dateFormatter.format(widget.premiumEnd!), fontWeight: 700,),
+                    if (widget.premium != null && !widget.premium! && bigScreen)
+                      MyText.labelMedium("Premium ", fontWeight: 700,),
+                    if (widget.premium != null && !widget.premium! && !smallScreen)
+                      MyText.labelMedium("Inactivo", fontWeight: 700,),
+                  ],
                 ),
-                MySpacing.width(12),
-                /*CustomPopupMenu(
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    MyText.labelLarge(userName),
+                    MySpacing.width(20),
+                    InkWell(
+                      onTap: () {
+                        ThemeCustomizer.setTheme(ThemeCustomizer.instance.theme == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark);
+                      },
+                      child: Icon(
+                        ThemeCustomizer.instance.theme == ThemeMode.dark ? LucideIcons.sun : LucideIcons.moon,
+                        size: 18,
+                        color: topBarTheme.onBackground,
+                      ),
+                    ),
+                    MySpacing.width(12),
+                    /*CustomPopupMenu(
                   backdrop: true,
                   hideFn: (hide) => languageHideFn = hide,
                   onChange: (_) {},
@@ -144,31 +186,47 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
                   menuBuilder: (_) => buildNotifications(),
                 ),
                 MySpacing.width(4),*/
-                CustomPopupMenu(
-                  backdrop: true,
-                  onChange: (_) {},
-                  offsetX: -60,
-                  offsetY: 8,
-                  menu: Padding(
-                    padding: MySpacing.xy(8, 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        /*MyContainer.rounded(
-                            paddingAll: 0,
-                            child: Image.asset(
-                              Images.avatars[0],
-                              height: 28,
-                              width: 28,
-                              fit: BoxFit.cover,
-                            )),
-                        MySpacing.width(8),*/
-                        MyText.labelLarge(AuthService.loginType == LoginType.kAdmin ? "Admin" : (AuthService.loginType == LoginType.kDoctor ? "Médico" : (AuthService.loginType == LoginType.kSecretary ? "Secretaria" : "Usuario")))
-                      ],
+                    SizedBox(
+                      width: 100.0,
+                      height: 50.0,
+                      child: CustomPopupMenu(
+                        backdrop: true,
+                        onChange: (_) {},
+                        offsetX: -60,
+                        offsetY: 8,
+                        menu: Padding(
+                          padding: MySpacing.xy(8, 8),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              /*MyContainer.rounded(
+                              paddingAll: 0,
+                              child: Image.asset(
+                                Images.avatars[0],
+                                height: 28,
+                                width: 28,
+                                fit: BoxFit.cover,
+                              )),
+                          MySpacing.width(8),*/
+                              MyContainer.shadow(
+                                borderRadiusAll: 10.0,
+                                paddingAll: 7.0,
+                                shadowColor: Colors.black26,
+                                child: MyText.labelLarge(
+                                  AuthService.loginType == LoginType.kAdmin ?
+                                  "Admin" : (AuthService.loginType == LoginType.kDoctor ?
+                                  "Médico" : (AuthService.loginType == LoginType.kSecretary ?
+                                  "Secretaria" : "Tratante")),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        menuBuilder: (_) => buildAccountMenu(),
+                        hideFn: (hide) => languageHideFn = hide,
+                      ),
                     ),
-                  ),
-                  menuBuilder: (_) => buildAccountMenu(),
-                  hideFn: (hide) => languageHideFn = hide,
+                  ],
                 ),
               ],
             ),
@@ -285,7 +343,7 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
+          /*Padding(
             padding: MySpacing.xy(8, 8),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,7 +406,7 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
           const Divider(
             height: 1,
             thickness: 1,
-          ),
+          ),*/
           Padding(
             padding: MySpacing.xy(8, 8),
             child: MyButton(

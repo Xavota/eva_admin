@@ -11,7 +11,11 @@ class DoctorModel extends IdentifierModel{
   final String speciality;
   final bool status;
 
-  DoctorModel(super.id,this.userNumber, this.fullName, this.professionalNumber, this.speciality, this.status);
+  final int activePatients;
+  final int activePatientsWithSub;
+
+  DoctorModel(super.id,this.userNumber, this.fullName, this.professionalNumber,
+      this.speciality, this.status, this.activePatients, this.activePatientsWithSub);
 
   static DoctorModel fromJSON(Map<String,dynamic> json){
     JSONDecoder jsonDecoder = JSONDecoder(json);
@@ -22,7 +26,11 @@ class DoctorModel extends IdentifierModel{
     String speciality = jsonDecoder.getString('speciality');
     bool status = jsonDecoder.getInt('status') == 1;
 
-    return DoctorModel(jsonDecoder.getId, userNumber, fullName, professionalNumber, speciality, status);
+    int activePatients = jsonDecoder.getInt('activePatients');
+    int activePatientsWithSub = jsonDecoder.getInt('activePatientsWithSub');
+
+    return DoctorModel(jsonDecoder.getId, userNumber, fullName, professionalNumber,
+        speciality, status, activePatients, activePatientsWithSub);
   }
 
   static List<DoctorModel> listFromJSON(List<dynamic> list) {

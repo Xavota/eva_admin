@@ -53,7 +53,7 @@ class LoginController extends MyController {
         String nextUrl = Uri.parse(ModalRoute.of(Get.context!)?.settings.name ?? "").queryParameters['next'] ??
             (AuthService.loginType == LoginType.kDoctor ? "/doctor/patient/list" :
             (AuthService.loginType == LoginType.kSecretary ? "/secretary/patient/list" :
-            (AuthService.loginType == LoginType.kPatient ? "/dates/list" : "")));
+            (AuthService.loginType == LoginType.kPatient ? "/patient/dates/list" : "")));
         Get.toNamed(
           nextUrl,
         );

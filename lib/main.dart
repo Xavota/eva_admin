@@ -1,4 +1,3 @@
-import 'package:medicare/helpers/services/auth_services.dart';
 import 'package:medicare/helpers/localizations/app_localization_delegate.dart';
 import 'package:medicare/helpers/localizations/language.dart';
 import 'package:medicare/helpers/services/navigation_service.dart';
@@ -10,9 +9,9 @@ import 'package:medicare/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
-import 'package:medicare/views/ui/dashboard_screen.dart';
+//import 'package:medicare/views/ui/dashboard_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:url_strategy/url_strategy.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'package:blix_essentials/blix_essentials.dart';
 
@@ -52,7 +51,7 @@ Future<void> main() async {
   BlixDBManager.setDefaultDebugLogs(false);
 
   WidgetsFlutterBinding.ensureInitialized();
-  setPathUrlStrategy();
+  usePathUrlStrategy();
 
   await LocalStorage.init();
   AppStyle.init();

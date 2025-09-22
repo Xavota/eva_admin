@@ -1,6 +1,7 @@
 import 'package:intl/intl.dart' show DateFormat;
 
 final DateFormat dateFormatter = DateFormat('dd/MM/yyyy');
+final DateFormat shortDateFormatter = DateFormat('dd/MM');
 final DateFormat timeFormatter = DateFormat('jms');
 final DateFormat dateTimeFormatter = DateFormat("yyyy/MM/dd HH:mm");
 

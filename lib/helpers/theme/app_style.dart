@@ -50,7 +50,7 @@ class AppTheme {
     appBarTheme: AppBarTheme(backgroundColor: Color(0xffF5F5F5), iconTheme: IconThemeData(color: Color(0xff495057)), actionsIconTheme: IconThemeData(color: Color(0xff495057))),
 
     /// Card Theme
-    cardTheme: CardTheme(color: Color(0xffffffff)),
+    cardTheme: CardThemeData(color: Color(0xffffffff)),
     cardColor: Color(0xffffffff),
 
     /// Colorscheme
@@ -76,16 +76,17 @@ class AppTheme {
     dividerColor: Color(0xffdddddd),
 
     /// Bottom AppBar Theme
-    bottomAppBarTheme: BottomAppBarTheme(color: Color(0xffeeeeee), elevation: 2),
+    bottomAppBarTheme: BottomAppBarThemeData(color: Color(0xffeeeeee), elevation: 2),
 
     /// Tab bar Theme
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       unselectedLabelColor: Color(0xff495057),
       labelColor: AppTheme.primaryColor,
       indicatorSize: TabBarIndicatorSize.label,
       indicator: UnderlineTabIndicator(
         borderSide: BorderSide(color: AppTheme.primaryColor, width: 2.0),
       ),
+      indicatorColor: Color(0xffeeeeee),
     ),
 
     inputDecorationTheme: InputDecorationTheme(),
@@ -117,7 +118,6 @@ class AppTheme {
 
     /// Other Colors
     splashColor: Colors.white.withAlpha(100),
-    indicatorColor: Color(0xffeeeeee),
     highlightColor: Color(0xffeeeeee),
   );
 
@@ -135,7 +135,7 @@ class AppTheme {
     appBarTheme: AppBarTheme(backgroundColor: Color(0xff262729)),
 
     /// Card Theme
-    cardTheme: CardTheme(color: Color(0xff1b1b1c)),
+    cardTheme: CardThemeData(color: Color(0xff1b1b1c)),
     cardColor: Color(0xff1b1b1c),
 
     /// Colorscheme
@@ -164,16 +164,17 @@ class AppTheme {
         foregroundColor: Colors.white),
 
     /// Bottom AppBar Theme
-    bottomAppBarTheme: BottomAppBarTheme(color: Color(0xff464c52), elevation: 2),
+    bottomAppBarTheme: BottomAppBarThemeData(color: Color(0xff464c52), elevation: 2),
 
     /// Tab bar Theme
-    tabBarTheme: TabBarTheme(
+    tabBarTheme: TabBarThemeData(
       unselectedLabelColor: Color(0xff495057),
       labelColor: AppTheme.primaryColor,
       indicatorSize: TabBarIndicatorSize.label,
       indicator: UnderlineTabIndicator(
         borderSide: BorderSide(color: AppTheme.primaryColor, width: 2.0),
       ),
+      indicatorColor: Colors.white,
     ),
 
     /// Slider Theme
@@ -194,7 +195,6 @@ class AppTheme {
     ),
 
     ///Other Color
-    indicatorColor: Colors.white,
     disabledColor: Color(0xffa3a3a3),
     highlightColor: Color(0xff47484b),
     splashColor: Colors.white.withAlpha(100),

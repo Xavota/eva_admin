@@ -55,7 +55,7 @@ class AuthService {
     _loginType = LoginType.kNone;
     loggedUserNumber = "";
     loggedUserData = null;
-    Debug.log("loggedUserData $loggedUserData", overrideColor: Colors.green);
+    //Debug.log("loggedUserData $loggedUserData", overrideColor: Colors.green);
   }
 
   static Future<Map<String, String>?> loginAdmin(
@@ -86,7 +86,7 @@ class AuthService {
       Map<String, dynamic> data) async {
     final response =
     await DBManager.instance!.validatePasswordUser(data['userNumber'], data['pin']);
-    Debug.log(response?? "", overrideColor: Colors.lightGreen);
+    //Debug.log(response?? "", overrideColor: Colors.lightGreen);
 
     if (response == null) {
       return {"server": "Hubo un error con el servidor,"
@@ -136,7 +136,7 @@ class AuthService {
         return {"pin": "NIP o usuario inválidos, intente de nuevo o contacte con su médico"};
       }
       loggedUserData = data[0];
-      Debug.log("loggedUserData $loggedUserData", overrideColor: Colors.green);
+      //Debug.log("loggedUserData $loggedUserData", overrideColor: Colors.green);
     }
     else if (_loginType == LoginType.kSecretary) {
       final data = await DBManager.instance!.getSecretary(userNumber: loggedUserNumber);
@@ -146,7 +146,7 @@ class AuthService {
         return {"pin": "NIP o usuario inválidos, intente de nuevo o contacte con su médico"};
       }
       loggedUserData = data;
-      Debug.log("loggedUserData $loggedUserData", overrideColor: Colors.green);
+      //Debug.log("loggedUserData $loggedUserData", overrideColor: Colors.green);
     }
     else if (_loginType == LoginType.kPatient) {
       final data = await DBManager.instance!.getPatients(userNumber: loggedUserNumber);
@@ -156,7 +156,7 @@ class AuthService {
         return {"pin": "NIP o usuario inválidos, intente de nuevo o contacte con su médico"};
       }
       loggedUserData = data[0];
-      Debug.log("loggedUserData $loggedUserData", overrideColor: Colors.green);
+      //Debug.log("loggedUserData $loggedUserData", overrideColor: Colors.green);
     }
 
     return null;
