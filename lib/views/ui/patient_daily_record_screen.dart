@@ -75,14 +75,14 @@ class _PatientDalyRecordScreenState extends State<PatientDalyRecordScreen> with 
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     MyText.titleMedium(
-                      "Edición de Tratante",
+                      "Edición de Paciente",
                       fontSize: 18,
                       fontWeight: 600,
                     ),
                     MyBreadcrumb(
                       children: [
                         MyBreadcrumbItem(name: 'Médico'),
-                        MyBreadcrumbItem(name: 'Edición Tratante', active: true),
+                        MyBreadcrumbItem(name: 'Edición Paciente', active: true),
                       ],
                     ),
                   ],
@@ -234,29 +234,31 @@ class _PatientDalyRecordScreenState extends State<PatientDalyRecordScreen> with 
                                 children: [
                                   MyText.labelMedium("Ingesta de Medicamentos", fontWeight: 600, muted: true),
                                   MySpacing.height(15),
-                                  Wrap(
-                                    spacing: 16,
-                                    children: [false, true].map((takenMedicine) => InkWell(
-                                      onTap: () => controller.onChangeMedications(takenMedicine),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Radio<bool>(
-                                            value: takenMedicine,
-                                            activeColor: theme.colorScheme.primary,
-                                            groupValue: controller.medications,
-                                            onChanged: (value) => controller.onChangeMedications(value),
-                                            visualDensity: getCompactDensity,
-                                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                          ),
-                                          MySpacing.width(8),
-                                          MyText.labelMedium(
-                                            takenMedicine ? "Sí" : "No",
-                                          ),
-                                        ],
+                                  RadioGroup(
+                                    groupValue: controller.medications,
+                                    onChanged: (value) => controller.onChangeMedications(value),
+                                    child: Wrap(
+                                      spacing: 16,
+                                      children: [false, true].map((takenMedicine) => InkWell(
+                                        onTap: () => controller.onChangeMedications(takenMedicine),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Radio<bool>(
+                                              value: takenMedicine,
+                                              activeColor: theme.colorScheme.primary,
+                                              visualDensity: getCompactDensity,
+                                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                            ),
+                                            MySpacing.width(8),
+                                            MyText.labelMedium(
+                                              takenMedicine ? "Sí" : "No",
+                                            ),
+                                          ],
+                                        ),
                                       ),
+                                      ).toList(),
                                     ),
-                                    ).toList(),
                                   ),
                                 ],
                               ),
@@ -268,29 +270,62 @@ class _PatientDalyRecordScreenState extends State<PatientDalyRecordScreen> with 
                                 children: [
                                   MyText.labelMedium("Ejercicio Realizado", fontWeight: 600, muted: true),
                                   MySpacing.height(15),
-                                  Wrap(
-                                    spacing: 16,
-                                    children: [false, true].map((exercise) => InkWell(
-                                      onTap: () => controller.onChangeExercise(exercise),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Radio<bool>(
-                                            value: exercise,
-                                            activeColor: theme.colorScheme.primary,
-                                            groupValue: controller.exercise,
-                                            onChanged: (value) => controller.onChangeExercise(value),
-                                            visualDensity: getCompactDensity,
-                                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                          ),
-                                          MySpacing.width(8),
-                                          MyText.labelMedium(
-                                            exercise ? "Sí" : "No",
-                                          ),
-                                        ],
+                                  MyText.labelSmall("Pesas", fontWeight: 500, muted: true),
+                                  MySpacing.height(5),
+                                  RadioGroup(
+                                    groupValue: controller.weights,
+                                    onChanged: (value) => controller.onChangeWeights(value),
+                                    child: Wrap(
+                                      spacing: 16,
+                                      children: [false, true].map((weights) => InkWell(
+                                        onTap: () => controller.onChangeWeights(weights),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Radio<bool>(
+                                              value: weights,
+                                              activeColor: theme.colorScheme.primary,
+                                              visualDensity: getCompactDensity,
+                                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                            ),
+                                            MySpacing.width(8),
+                                            MyText.labelMedium(
+                                              weights ? "Sí" : "No",
+                                            ),
+                                          ],
+                                        ),
                                       ),
+                                      ).toList(),
                                     ),
-                                    ).toList(),
+                                  ),
+                                  MySpacing.height(10),
+                                  MyText.labelSmall("Cardio", fontWeight: 500, muted: true),
+                                  MySpacing.height(5),
+                                  RadioGroup(
+                                    groupValue: controller.cardio,
+                                    onChanged: (value) => controller.onChangeCardio(value),
+                                    child: Wrap(
+                                      spacing: 16,
+                                      children: [false, true].map((cardio) => InkWell(
+                                        onTap: () => controller.onChangeCardio(cardio),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Radio<bool>(
+                                              value: cardio,
+                                              activeColor: theme.colorScheme.primary,
+                                              visualDensity: getCompactDensity,
+                                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                            ),
+                                            MySpacing.width(8),
+                                            MyText.labelMedium(
+                                              cardio ? "Sí" : "No",
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      ).toList(),
+                                    ),
                                   ),
                                 ],
                               ),

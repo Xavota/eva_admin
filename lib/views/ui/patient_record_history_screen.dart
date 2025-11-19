@@ -19,7 +19,6 @@ import 'package:medicare/helpers/utils/ui_mixins.dart';
 
 import 'package:medicare/helpers/widgets/my_breadcrumb.dart';
 import 'package:medicare/helpers/widgets/my_breadcrumb_item.dart';
-import 'package:medicare/helpers/widgets/my_button.dart';
 import 'package:medicare/helpers/widgets/my_container.dart';
 import 'package:medicare/helpers/widgets/my_flex.dart';
 import 'package:medicare/helpers/widgets/my_flex_item.dart';
@@ -31,7 +30,6 @@ import 'package:medicare/model/daily_record_model.dart';
 import 'package:medicare/model/patient_list_model.dart';
 
 import 'package:medicare/views/layout/layout.dart';
-import 'package:syncfusion_flutter_core/core.dart';
 
 
 class _LineDescriptor {
@@ -127,7 +125,7 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
             );
           }).toList();
 
-          final bmiThresholds = controller.getBMIThresholds();
+          //final bmiThresholds = controller.getBMIThresholds();
 
           final minValues = controller.getMinValues(leftBorderValues);
           final maxValues = controller.getMaxValues(leftBorderValues);
@@ -138,7 +136,7 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
 
           final weightVerticalGraphPadding = 10.0;
           final waistVerticalGraphPadding = 10.0;
-          final sleepTimeVerticalGraphPadding = 1.0;
+          //final sleepTimeVerticalGraphPadding = 1.0;
           final bloodPressureGraphPadding = 10.0;
           final sugarLevelVerticalGraphPadding = 10.0;
           
@@ -178,7 +176,8 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
           }
 
 
-          final weightGoalLines = bmiThresholds.mapIndexed<_GoalLineDescriptor?>(
+          final List<_GoalLineDescriptor> weightGoalLines = [];
+          /*bmiThresholds.mapIndexed<_GoalLineDescriptor?>(
                 (i, e) {
               double realHeight = e.$2;
               final lineColor = multiLerpOklab([Colors.amber, Colors.lightGreen, Colors.redAccent], i / 7);
@@ -191,7 +190,7 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
             },
           ).where((e) => e != null)
               .map<_GoalLineDescriptor>((e) => e!)
-              .toList();
+              .toList();*/
           double? realMinWeight = minValues.weight;
           double? realMaxWeight = maxValues.weight;
           double? weightGoal = controller.loggedPatient?.weightGoal;
@@ -219,6 +218,62 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
             realMaxWaist = math.max(realMaxWaist?? 0.0, waistGoal);
           }
 
+          final bloodPressureGoalLines = <_GoalLineDescriptor>[];
+          /*[
+           _GoalLineDescriptor(180.0, "Hipertensión crítica (Sistólica)", color: Colors.pink.shade900),
+           _GoalLineDescriptor(140.0, "Presión alta etapa 2 (Sistólica)", color: Colors.pink.shade800),
+           _GoalLineDescriptor(130.0, "Presión alta etapa 1 (Sistólica)", color: Colors.pink.shade600),
+           _GoalLineDescriptor(120.0, "Presión elevada (Sistólica)", color: Colors.pink.shade400),
+
+           _GoalLineDescriptor(120.0, "Hipertensión crítica (Diastólica)", color: Colors.blue.shade900, alignment: Alignment.bottomRight),
+           _GoalLineDescriptor(90.0, "Presión alta etapa 2 (Diastólica)", color: Colors.blue.shade800),
+           _GoalLineDescriptor(80.0, "Presión alta etapa 1 (Diastólica)", color: Colors.blue.shade600),
+         ]*/
+          double? realMinDiastolic = minValues.diastolicBloodPressure;
+          double? realMaxDiastolic = maxValues.diastolicBloodPressure;
+          double? diastolicGoal = controller.loggedPatient?.diastolicPressureGoal;
+          if (diastolicGoal != null) {
+            bloodPressureGoalLines.add(_GoalLineDescriptor(
+              diastolicGoal,
+              "Meta diastólica",
+              color: Colors.purpleAccent,
+            ));
+            realMinDiastolic = math.min(realMinDiastolic?? 999999.9, diastolicGoal);
+            realMaxDiastolic = math.max(realMaxDiastolic?? 0.0, diastolicGoal);
+          }
+
+          double? realMinSystolic = minValues.systolicBloodPressure;
+          double? realMaxSystolic = maxValues.systolicBloodPressure;
+          double? systolicGoal = controller.loggedPatient?.systolicPressureGoal;
+          if (systolicGoal != null) {
+            bloodPressureGoalLines.add(_GoalLineDescriptor(
+              systolicGoal,
+              "Meta sistólica",
+              color: Colors.purpleAccent,
+            ));
+            realMinSystolic = math.min(realMinSystolic?? 999999.9, systolicGoal);
+            realMaxSystolic = math.max(realMaxSystolic?? 0.0, systolicGoal);
+          }
+
+          final sugarLevelGoalLines = <_GoalLineDescriptor>[];
+          /*[
+            _GoalLineDescriptor(70, "Bajo Azúcar", color: Colors.redAccent),
+            _GoalLineDescriptor(100, "Alto Azúcar (Ayunas)", color: Colors.deepOrangeAccent),
+            _GoalLineDescriptor(140, "Alto Azúcar (Después de comer)", color: Colors.red),
+          ],*/
+          double? realMinSugarLevel = minValues.sugarLevel;
+          double? realMaxSugarLevel = maxValues.sugarLevel;
+          double? sugarGoal = controller.loggedPatient?.sugarGoal;
+          if (sugarGoal != null) {
+            sugarLevelGoalLines.add(_GoalLineDescriptor(
+              sugarGoal,
+              "Meta ayuno",
+              color: Colors.purpleAccent,
+            ));
+            realMinSugarLevel = math.min(realMinSugarLevel?? 999999.9, sugarGoal);
+            realMaxSugarLevel = math.max(realMaxSugarLevel?? 0.0, sugarGoal);
+          }
+
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -234,7 +289,7 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
                     ),
                     MyBreadcrumb(
                       children: [
-                        MyBreadcrumbItem(name: 'Tratante'),
+                        MyBreadcrumbItem(name: 'Paciente'),
                         MyBreadcrumbItem(name: 'Mis mediciones', active: true),
                       ],
                     ),
@@ -254,29 +309,31 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
                       MySpacing.height(20),
                       MyText.labelMedium("Periodo de Tiempo", fontWeight: 600, muted: true),
                       MySpacing.height(15),
-                      Wrap(
-                        spacing: 16,
-                        children: TimePeriod.values.map((period) => InkWell(
-                          onTap: () => controller.onPeriodChange(period),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Radio<TimePeriod>(
-                                value: period,
-                                activeColor: theme.colorScheme.primary,
-                                groupValue: controller.historyPeriod,
-                                onChanged: (value) => controller.onPeriodChange(value),
-                                visualDensity: getCompactDensity,
-                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              MySpacing.width(8),
-                              MyText.labelMedium(
-                                period.name.capitalize!,
-                              ),
-                            ],
+                      RadioGroup(
+                        groupValue: controller.historyPeriod,
+                        onChanged: (value) => controller.onPeriodChange(value),
+                        child: Wrap(
+                          spacing: 16,
+                          children: TimePeriod.values.map((period) => InkWell(
+                            onTap: () => controller.onPeriodChange(period),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Radio<TimePeriod>(
+                                  value: period,
+                                  activeColor: theme.colorScheme.primary,
+                                  visualDensity: getCompactDensity,
+                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                MySpacing.width(8),
+                                MyText.labelMedium(
+                                  period.name.capitalize!,
+                                ),
+                              ],
+                            ),
                           ),
+                          ).toList(),
                         ),
-                        ).toList(),
                       ),
                       if (controller.recordHistory.isNotEmpty)
                         MyFlex(
@@ -289,177 +346,284 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Center(child: MyText.titleLarge("            Peso", fontWeight: 800, muted: true)),
-                                  MySpacing.height(10),
-                                  if (minValues.weight != null)
-                                    Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 55.0, bottom: 10.0),
-                                        child: Wrap(
-                                          alignment: WrapAlignment.center,
-                                          runAlignment: WrapAlignment.center,
-                                          spacing: 10.0,
-                                          runSpacing: 10.0,
-                                          children: [
-                                            MyText.bodyLarge("Peso inicial: ${firstValues.weight} Kg", fontWeight: 600,),
-                                            MyText.bodyLarge("Peso final: ${lastValues.weight} Kg", fontWeight: 600,),
-                                            MyText.bodyLarge("Diferencia: ${((lastValues.weight! - firstValues.weight!) * 100).round() / 100.0} Kg", fontWeight: 600,),
+                                  Column(
+                                    children: [
+                                      Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(left: 60.0),
+                                          child: MyText.titleLarge("Peso", fontWeight: 800, muted: true),
+                                        ),
+                                      ),
+                                      MySpacing.height(10),
+                                      if (minValues.weight != null)
+                                        Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 55.0, bottom: 10.0),
+                                            child: Wrap(
+                                              alignment: WrapAlignment.center,
+                                              runAlignment: WrapAlignment.center,
+                                              spacing: 10.0,
+                                              runSpacing: 10.0,
+                                              children: [
+                                                MyText.bodyLarge("Peso inicial: ${firstValues.weight} Kg", fontWeight: 600,),
+                                                MyText.bodyLarge("Peso final: ${lastValues.weight} Kg", fontWeight: 600,),
+                                                MyText.bodyLarge("Diferencia: ${((lastValues.weight! - firstValues.weight!) * 100).round() / 100.0} Kg", fontWeight: 600,),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      if (realMinWeight != null)
+                                        createDataGraph(
+                                          height: 400.0,
+                                          minY: realMinWeight - weightVerticalGraphPadding,
+                                          maxY: realMaxWeight! + weightVerticalGraphPadding,
+                                          minX: 0,
+                                          maxX: (controller.timePeriodDays - 1).toDouble(),
+                                          leftSideUnits: (value) {
+                                            return MyText.labelMedium("$value Kg");
+                                          },
+                                          bottomUnitsInterval: math.max(recordHistoryPair.length / 10.0, 1.0),
+                                          bottomSideUnits: (value) {
+                                            int i = value.toInt();
+                                            if (i >= recordHistoryPair.length) return Text("");
+                                            return Transform.rotate(
+                                              angle: -0.5,
+                                              child: MyText.labelMedium(shortDateFormatter.format(recordHistoryPair[i].$1)),
+                                            );
+                                          },
+                                          lines: [
+                                            _LineDescriptor(
+                                              "Peso",
+                                              recordHistoryPair.mapIndexed<double?>((i, e) {
+                                                return (i == 0 && e.$2.weight == null) ? leftBorderValues.weight : e.$2.weight;
+                                              }).toList(),//..insert(0, leftBorderValues.weight),
+                                              Colors.red,
+                                              color2: Colors.green,
+                                              splitUpDownData: true,
+                                            ),
                                           ],
+                                          goalLines: weightGoalLines,
+                                          getDate: (i) => shortDateFormatter.format(dateSteps[i]),
+                                          showDotInfo: (lineIndex, i) {
+                                            if (i >= dateSteps.length) return false;
+                                            final index = recordHistory.indexWhere((e) => datesAreSameDay(dateSteps[i], e.date));
+                                            return index != -1 && recordHistory[index].weight != null;
+                                          },
+                                        )
+                                      else
+                                        Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 60.0),
+                                            child: MyText.bodyLarge(
+                                              "No hay mediciones de peso registrados."
+                                                  "\nAsegurate de registrar tu progreso diario.",
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                    ),
-                                  if (realMinWeight != null)
-                                    createDataGraph(
-                                      height: 400.0,
-                                      minY: realMinWeight - weightVerticalGraphPadding,
-                                      maxY: realMaxWeight! + weightVerticalGraphPadding,
-                                      minX: 0,
-                                      maxX: (controller.timePeriodDays - 1).toDouble(),
-                                      leftSideUnits: (value) {
-                                        return MyText.labelMedium("$value Kg");
-                                      },
-                                      bottomUnitsInterval: math.max(recordHistoryPair.length / 10.0, 1.0),
-                                      bottomSideUnits: (value) {
-                                        int i = value.toInt();
-                                        if (i >= recordHistoryPair.length) return Text("");
-                                        return Transform.rotate(
-                                          angle: -0.5,
-                                          child: MyText.labelMedium(shortDateFormatter.format(recordHistoryPair[i].$1)),
-                                        );
-                                      },
-                                      lines: [
-                                        _LineDescriptor(
-                                          "Peso",
-                                          recordHistoryPair.mapIndexed<double?>((i, e) {
-                                            return (i == 0 && e.$2.weight == null) ? leftBorderValues.weight : e.$2.weight;
-                                          }).toList(),//..insert(0, leftBorderValues.weight),
-                                          Colors.red,
-                                          color2: Colors.green,
-                                          splitUpDownData: true,
-                                        ),
-                                      ],
-                                      goalLines: weightGoalLines,
-                                      getDate: (i) => shortDateFormatter.format(dateSteps[i]),
-                                      showDotInfo: (lineIndex, i) {
-                                        if (i >= dateSteps.length) return false;
-                                        final index = recordHistory.indexWhere((e) => datesAreSameDay(dateSteps[i], e.date));
-                                        return index != -1 && recordHistory[index].weight != null;
-                                      },
-                                    )
-                                  else
-                                    Center(
-                                      child: MyText.bodyLarge(
-                                        "No hay mediciones de peso registrados."
-                                            "\nAsegurate de registrar tu progreso diario.",
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
+                                    ],
+                                  ),
                                   MySpacing.height(20),
-                                  Center(child: MyText.titleLarge("            Cintura", fontWeight: 800, muted: true)),
-                                  MySpacing.height(10),
-                                  if (realMinWaist != null)
-                                    createDataGraph(
-                                      height: 400.0,
-                                      minY: realMinWaist - waistVerticalGraphPadding,
-                                      maxY: realMaxWaist! + waistVerticalGraphPadding,
-                                      minX: 0,
-                                      maxX: (controller.timePeriodDays - 1).toDouble(),
-                                      leftSideUnits: (value) {
-                                        return MyText.labelMedium("$value cm");
-                                      },
-                                      bottomUnitsInterval: math.max(recordHistoryPair.length / 10.0, 1.0),
-                                      bottomSideUnits: (value) {
-                                        int i = value.toInt();
-                                        if (i >= recordHistoryPair.length) return Text("");
-                                        return Transform.rotate(
-                                          angle: -0.5,
-                                          child: MyText.labelMedium(shortDateFormatter.format(recordHistoryPair[i].$1)),
-                                        );
-                                      },
-                                      lines: [
-                                        _LineDescriptor(
-                                          "Cintura",
-                                          recordHistoryPair.mapIndexed<double?>((i, e) {
-                                            return (i == 0 && e.$2.waist == null) ? leftBorderValues.waist : e.$2.waist;
-                                          }).toList(),
-                                          Colors.blue,
+                                  Column(
+                                    children: [
+                                      Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(left: 60.0),
+                                          child: MyText.titleLarge("Cintura", fontWeight: 800, muted: true),
                                         ),
-                                      ],
-                                      goalLines: waistGoalLines,
-                                      getDate: (i) => shortDateFormatter.format(dateSteps[i]),
-                                      showDotInfo: (lineIndex, i) {
-                                        if (i >= dateSteps.length) return false;
-                                        final index = recordHistory.indexWhere((e) => datesAreSameDay(dateSteps[i], e.date));
-                                        return index != -1 && recordHistory[index].waist != null;
-                                      },
-                                    )
-                                  else
-                                    Center(
-                                      child: MyText.bodyLarge(
-                                        "No hay medidas de cintura registradas."
-                                            "\nAsegurate de registrar tu progreso diario.",
-                                        textAlign: TextAlign.center,
                                       ),
-                                    ),
-                                  MySpacing.height(20),
-                                  Center(child: MyText.titleLarge("            Tiempo de Sueño", fontWeight: 800, muted: true)),
-                                  MySpacing.height(10),
-                                  if (minValues.sleepTime != null)
-                                    Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 55.0, bottom: 10.0),
-                                        child: Wrap(
-                                          alignment: WrapAlignment.center,
-                                          runAlignment: WrapAlignment.center,
-                                          spacing: 10.0,
-                                          runSpacing: 10.0,
-                                          children: [
-                                            MyText.bodyLarge("Promedio semanal: ${weekAverageValues.sleepTime}h", fontWeight: 600,),
-                                            MyText.bodyLarge("Promedio del periodo: ${averageValues.sleepTime}h", fontWeight: 600,),
-                                            MyText.bodyLarge("Días promediados por valor: $averageCount", fontWeight: 600,),
+                                      MySpacing.height(10),
+                                      if (realMinWaist != null)
+                                        createDataGraph(
+                                          height: 400.0,
+                                          minY: realMinWaist - waistVerticalGraphPadding,
+                                          maxY: realMaxWaist! + waistVerticalGraphPadding,
+                                          minX: 0,
+                                          maxX: (controller.timePeriodDays - 1).toDouble(),
+                                          leftSideUnits: (value) {
+                                            return MyText.labelMedium("$value cm");
+                                          },
+                                          bottomUnitsInterval: math.max(recordHistoryPair.length / 10.0, 1.0),
+                                          bottomSideUnits: (value) {
+                                            int i = value.toInt();
+                                            if (i >= recordHistoryPair.length) return Text("");
+                                            return Transform.rotate(
+                                              angle: -0.5,
+                                              child: MyText.labelMedium(shortDateFormatter.format(recordHistoryPair[i].$1)),
+                                            );
+                                          },
+                                          lines: [
+                                            _LineDescriptor(
+                                              "Cintura",
+                                              recordHistoryPair.mapIndexed<double?>((i, e) {
+                                                return (i == 0 && e.$2.waist == null) ? leftBorderValues.waist : e.$2.waist;
+                                              }).toList(),
+                                              Colors.blue,
+                                            ),
                                           ],
+                                          goalLines: waistGoalLines,
+                                          getDate: (i) => shortDateFormatter.format(dateSteps[i]),
+                                          showDotInfo: (lineIndex, i) {
+                                            if (i >= dateSteps.length) return false;
+                                            final index = recordHistory.indexWhere((e) => datesAreSameDay(dateSteps[i], e.date));
+                                            return index != -1 && recordHistory[index].waist != null;
+                                          },
+                                        )
+                                      else
+                                        Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 60.0),
+                                            child: MyText.bodyLarge(
+                                              "No hay medidas de cintura registradas."
+                                                  "\nAsegurate de registrar tu progreso diario.",
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  MySpacing.height(20),
+                                  Column(
+                                    children: [
+                                      Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(left: 60.0),
+                                          child: MyText.titleLarge("Tiempo de Sueño", fontWeight: 800, muted: true),
                                         ),
                                       ),
-                                    ),
-                                  if (minValues.sleepTime != null)
-                                    createBarGraph(
-                                      height: 400.0,
-                                      minY: 0,
-                                      maxY: 12,
-                                      barGroups: sleepTimeBars.map<_BarGroupDescriptor>((e) {
-                                        return _BarGroupDescriptor("Tiempo de Sueño", [(toY: e.$2, fromY: null)], Colors.deepPurpleAccent);
-                                      }).toList(),
-                                      leftSideUnits: (value) {
-                                        return MyText.labelMedium("$value h");
-                                      },
-                                      bottomUnitsInterval: math.max(recordHistoryPair.length / 10.0, 1.0),
-                                      bottomSideUnits: (value) {
-                                        int i = value.toInt();
-                                        if (i >= recordHistoryPair.length) return Text("");
-                                        return Transform.rotate(
-                                          angle: -0.8,
-                                          child: MyText.labelMedium(shortDateFormatter.format(sleepTimeBars[i].$1)),
-                                        );
-                                      },
-                                      getDate: (i) => shortDateFormatter.format(sleepTimeBars[i].$1),
-                                      goalLines: [
+                                      MySpacing.height(10),
+                                      if (minValues.sleepTime != null)
+                                        Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 55.0, bottom: 10.0),
+                                            child: Wrap(
+                                              alignment: WrapAlignment.center,
+                                              runAlignment: WrapAlignment.center,
+                                              spacing: 10.0,
+                                              runSpacing: 10.0,
+                                              children: [
+                                                MyText.bodyLarge("Promedio semanal: ${weekAverageValues.sleepTime}h", fontWeight: 600,),
+                                                MyText.bodyLarge("Promedio del periodo: ${averageValues.sleepTime}h", fontWeight: 600,),
+                                                MyText.bodyLarge("Días promediados por valor: $averageCount", fontWeight: 600,),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      if (minValues.sleepTime != null)
+                                        createBarGraph(
+                                            height: 400.0,
+                                            minY: 0,
+                                            maxY: 12,
+                                            barGroups: sleepTimeBars.map<_BarGroupDescriptor>((e) {
+                                              return _BarGroupDescriptor("Tiempo de Sueño", [(toY: e.$2, fromY: null)], Colors.deepPurpleAccent);
+                                            }).toList(),
+                                            leftSideUnits: (value) {
+                                              return MyText.labelMedium("$value h");
+                                            },
+                                            bottomUnitsInterval: math.max(recordHistoryPair.length / 10.0, 1.0),
+                                            bottomSideUnits: (value) {
+                                              int i = value.toInt();
+                                              if (i >= recordHistoryPair.length) return Text("");
+                                              return Transform.rotate(
+                                                angle: -0.8,
+                                                child: MyText.labelMedium(shortDateFormatter.format(sleepTimeBars[i].$1)),
+                                              );
+                                            },
+                                            getDate: (i) => shortDateFormatter.format(sleepTimeBars[i].$1),
+                                            /*goalLines: [
                                         _GoalLineDescriptor(8, "Sueño normal", color: Colors.green),
-                                      ],
+                                      ],*/
 
-                                      getDotInfoText: (index, fromY, toY) {
-                                        final date = shortDateFormatter.format(dateSteps[index]);
-                                        //return '📅 $date\n📈 ${toY.toStringAsFixed(2)} h';
-                                        return '📈 ${toY.toStringAsFixed(2)} h';
-                                      }
-                                    )
-                                  else
-                                    Center(
-                                      child: MyText.bodyLarge(
-                                        "No hay mediciones del tiempo de sueño registradas."
-                                            "\Asegurate de registrar tu progreso diario.",
-                                        textAlign: TextAlign.center,
+                                            getDotInfoText: (index, fromY, toY) {
+                                              //final date = shortDateFormatter.format(dateSteps[index]);
+                                              //return '📅 $date\n📈 ${toY.toStringAsFixed(2)} h';
+                                              return '📈 ${toY.toStringAsFixed(2)} h';
+                                            }
+                                        )
+                                      else
+                                        Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 60.0),
+                                            child: MyText.bodyLarge(
+                                              "No hay mediciones del tiempo de sueño registradas."
+                                                  "\nAsegurate de registrar tu progreso diario.",
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  MySpacing.height(20),
+                                  Column(
+                                    children: [
+                                      Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(left: 60.0),
+                                          child: MyText.titleLarge("Ingesta de Medicamento", fontWeight: 800, muted: true),
+                                        ),
                                       ),
-                                    ),
+                                      MySpacing.height(10),
+                                      if (firstValues.medications != null)
+                                        createDataGraph(
+                                          height: 400.0,
+                                          minY: -2,
+                                          maxY: 2,
+                                          minX: 0,
+                                          maxX: (controller.timePeriodDays - 1).toDouble(),
+                                          leftSideUnits: (value) {
+                                            final index = value.toInt();
+                                            if (index != -1 && index != 1) return MyText.labelMedium("");
+                                            return MyText.labelMedium(index == -1 ? "No" : "Sí", textAlign: TextAlign.right,);
+                                          },
+                                          bottomUnitsInterval: math.max(recordHistoryPair.length / 10.0, 1.0),
+                                          leftUnitsInterval: 1,
+                                          bottomSideUnits: (value) {
+                                            int i = value.toInt();
+                                            if (i >= recordHistoryPair.length) return Text("");
+                                            return Transform.rotate(
+                                              angle: -0.5,
+                                              child: MyText.labelMedium(shortDateFormatter.format(recordHistoryPair[i].$1)),
+                                            );
+                                          },
+                                          lines: [
+                                            _LineDescriptor(
+                                              "Ingesta de Medicamento",
+                                              recordHistoryPair.mapIndexed<double?>((i, e) {
+                                                final state = (i == 0 && e.$2.medications == null) ? leftBorderValues.medications : e.$2.medications;
+                                                return state == null ? null : (state ? 1 : -1).toDouble();
+                                              }).toList(),
+                                              Colors.blue,
+                                            ),
+                                          ],
+                                          goalLines: [
+                                            _GoalLineDescriptor(0, ""),
+                                          ],
+                                          getDate: (i) => shortDateFormatter.format(dateSteps[i]),
+                                          getDotInfo: (value, i) {
+                                            if (value == null) return "";
+                                            final index = (value * 0.5 + 0.5).toInt();
+                                            if (index < 0 || index > 1) return "";
+                                            return index == 0 ? "No" : "Sí";
+                                          },
+                                          showDotInfo: (lineIndex, i) {
+                                            if (i >= dateSteps.length) return false;
+                                            final index = recordHistory.indexWhere((e) => datesAreSameDay(dateSteps[i], e.date));
+                                            return index != -1 && recordHistory[index].medications != null;
+                                          },
+                                        )
+                                      else
+                                        Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 60.0),
+                                            child: MyText.bodyLarge(
+                                              "No hay mediciones de la ingesta de medicamentos registradas."
+                                                  "\nAsegurate de registrar tu progreso diario.",
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ],
                               ),
                             ),
@@ -468,152 +632,345 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Center(child: MyText.titleLarge("            Presión Arterial", fontWeight: 800, muted: true)),
-                                  MySpacing.height(10),
-                                  if (minValues.systolicBloodPressure != null &&
-                                      minValues.diastolicBloodPressure != null)
-                                    createDataGraph(
-                                      showLineNames: true,
-                                      height: 400.0,
-                                      minY: math.min(minValues.systolicBloodPressure!, minValues.diastolicBloodPressure!) - bloodPressureGraphPadding,
-                                      maxY: math.max(maxValues.systolicBloodPressure!, maxValues.diastolicBloodPressure!) + bloodPressureGraphPadding,
-                                      minX: 0,
-                                      maxX: (controller.timePeriodDays - 1).toDouble(),
-                                      leftSideUnits: (value) {
-                                        return MyText.labelMedium("$value mmHg");
-                                      },
-                                      bottomUnitsInterval: math.max(recordHistoryPair.length / 10.0, 1.0),
-                                      bottomSideUnits: (value) {
-                                        int i = value.toInt();
-                                        if (i >= recordHistoryPair.length) return Text("");
-                                        return Transform.rotate(
-                                          angle: -0.5,
-                                          child: MyText.labelMedium(shortDateFormatter.format(recordHistoryPair[i].$1)),
-                                        );
-                                      },
-                                      lines: [
-                                        _LineDescriptor(
-                                          "Presión sistólica",
-                                          recordHistoryPair.mapIndexed<double?>((i, e) {
-                                            return (i == 0 && e.$2.systolicBloodPressure == null) ? leftBorderValues.systolicBloodPressure : e.$2.systolicBloodPressure;
-                                          }).toList(),
-                                          Colors.pink,
+                                  Column(
+                                    children: [
+                                      Center(child: Padding(
+                                        padding: const EdgeInsets.only(left: 60.0),
+                                        child: MyText.titleLarge("Presión Arterial", fontWeight: 800, muted: true),
+                                      )),
+                                      MySpacing.height(10),
+                                      if (realMinSystolic != null &&
+                                          realMinDiastolic != null)
+                                        createDataGraph(
+                                          showLineNames: true,
+                                          height: 400.0,
+                                          minY: math.min(minValues.systolicBloodPressure!, minValues.diastolicBloodPressure!) - bloodPressureGraphPadding,
+                                          maxY: math.max(maxValues.systolicBloodPressure!, maxValues.diastolicBloodPressure!) + bloodPressureGraphPadding,
+                                          minX: 0,
+                                          maxX: (controller.timePeriodDays - 1).toDouble(),
+                                          leftSideUnits: (value) {
+                                            return MyText.labelMedium("$value mmHg");
+                                          },
+                                          bottomUnitsInterval: math.max(recordHistoryPair.length / 10.0, 1.0),
+                                          bottomSideUnits: (value) {
+                                            int i = value.toInt();
+                                            if (i >= recordHistoryPair.length) return Text("");
+                                            return Transform.rotate(
+                                              angle: -0.5,
+                                              child: MyText.labelMedium(shortDateFormatter.format(recordHistoryPair[i].$1)),
+                                            );
+                                          },
+                                          lines: [
+                                            _LineDescriptor(
+                                              "Presión sistólica",
+                                              recordHistoryPair.mapIndexed<double?>((i, e) {
+                                                return (i == 0 && e.$2.systolicBloodPressure == null) ? leftBorderValues.systolicBloodPressure : e.$2.systolicBloodPressure;
+                                              }).toList(),
+                                              Colors.pink,
+                                            ),
+                                            _LineDescriptor(
+                                              "Presión diastólica",
+                                              recordHistoryPair.mapIndexed<double?>((i, e) {
+                                                return (i == 0 && e.$2.diastolicBloodPressure == null) ? leftBorderValues.diastolicBloodPressure : e.$2.diastolicBloodPressure;
+                                              }).toList(),
+                                              Colors.blue,
+                                            ),
+                                          ],
+                                          goalLines: bloodPressureGoalLines,
+                                          getDate: (i) => shortDateFormatter.format(dateSteps[i]),
+                                          showDotInfo: (lineIndex, i) {
+                                            if (i >= dateSteps.length) return false;
+                                            final index = recordHistory.indexWhere((e) => datesAreSameDay(dateSteps[i], e.date));
+                                            return index != -1 && (lineIndex == 0 ? recordHistory[index].systolicBloodPressure : recordHistory[index].diastolicBloodPressure) != null;
+                                          },
+                                        )
+                                      else
+                                        Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 60.0),
+                                            child: MyText.bodyLarge(
+                                              "No hay mediciones de presión arterial registradas."
+                                                  "\nAsegurate de registrar tu progreso diario.",
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
                                         ),
-                                        _LineDescriptor(
-                                          "Presión diastólica",
-                                          recordHistoryPair.mapIndexed<double?>((i, e) {
-                                            return (i == 0 && e.$2.diastolicBloodPressure == null) ? leftBorderValues.diastolicBloodPressure : e.$2.diastolicBloodPressure;
-                                          }).toList(),
-                                          Colors.blue,
+                                    ],
+                                  ),
+                                  MySpacing.height(20),
+                                  Column(
+                                    children: [
+                                      Center(child: Padding(
+                                        padding: const EdgeInsets.only(left: 60.0),
+                                        child: MyText.titleLarge("Azúcar en Sangre", fontWeight: 800, muted: true),
+                                      )),
+                                      MySpacing.height(10),
+                                      if (realMinSugarLevel != null)
+                                        createDataGraph(
+                                          height: 400.0,
+                                          minY: minValues.sugarLevel! - sugarLevelVerticalGraphPadding,
+                                          maxY: maxValues.sugarLevel! + sugarLevelVerticalGraphPadding,
+                                          minX: 0,
+                                          maxX: (controller.timePeriodDays - 1).toDouble(),
+                                          leftSideUnits: (value) {
+                                            return MyText.labelMedium("$value\nmg/dL");
+                                          },
+                                          bottomUnitsInterval: math.max(recordHistoryPair.length / 10.0, 1.0),
+                                          bottomSideUnits: (value) {
+                                            int i = value.toInt();
+                                            if (i >= recordHistoryPair.length) return Text("");
+                                            return Transform.rotate(
+                                              angle: -0.5,
+                                              child: MyText.labelMedium(shortDateFormatter.format(recordHistoryPair[i].$1)),
+                                            );
+                                          },
+                                          lines: [
+                                            _LineDescriptor(
+                                              "Nivel de azúcar",
+                                              recordHistoryPair.mapIndexed<double?>((i, e) {
+                                                return (i == 0 && e.$2.sugarLevel == null) ? leftBorderValues.sugarLevel : e.$2.sugarLevel;
+                                              }).toList(),
+                                              Colors.blue,
+                                            ),
+                                          ],
+                                          goalLines: sugarLevelGoalLines,
+                                          getDate: (i) => shortDateFormatter.format(dateSteps[i]),
+                                          showDotInfo: (lineIndex, i) {
+                                            if (i >= dateSteps.length) return false;
+                                            final index = recordHistory.indexWhere((e) => datesAreSameDay(dateSteps[i], e.date));
+                                            return index != -1 && recordHistory[index].sugarLevel != null;
+                                          },
+                                        )
+                                      else
+                                        Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 60.0),
+                                            child: MyText.bodyLarge(
+                                              "No hay mediciones del azúcar en sangre registradas."
+                                                  "\nAsegurate de registrar tu progreso diario.",
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
                                         ),
-                                      ],
-                                      goalLines: [
-                                        _GoalLineDescriptor(180.0, "Hipertensión crítica (Sistólica)", color: Colors.pink.shade900),
-                                        _GoalLineDescriptor(140.0, "Presión alta etapa 2 (Sistólica)", color: Colors.pink.shade800),
-                                        _GoalLineDescriptor(130.0, "Presión alta etapa 1 (Sistólica)", color: Colors.pink.shade600),
-                                        _GoalLineDescriptor(120.0, "Presión elevada (Sistólica)", color: Colors.pink.shade400),
+                                    ],
+                                  ),
+                                  MySpacing.height(20),
+                                  Column(
+                                    children: [
+                                      Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(left: 60.0),
+                                          child: MyText.titleLarge("Estado de ánimo", fontWeight: 800, muted: true),
+                                        ),
+                                      ),
+                                      MySpacing.height(10),
+                                      if (firstValues.emotionalState != null)
+                                        createDataGraph(
+                                          height: 400.0,
+                                          minY: -3,
+                                          maxY: 3,
+                                          minX: 0,
+                                          maxX: (controller.timePeriodDays - 1).toDouble(),
+                                          leftSideUnits: (value) {
+                                            final index = 2 - value.toInt();
+                                            if (index < 0 || index >= EmotionalState.values.length) return MyText.labelMedium("");
+                                            return MyText.labelMedium(EmotionalState.values[index].name, textAlign: TextAlign.right,);
+                                          },
+                                          bottomUnitsInterval: math.max(recordHistoryPair.length / 10.0, 1.0),
+                                          leftUnitsInterval: 1,
+                                          bottomSideUnits: (value) {
+                                            int i = value.toInt();
+                                            if (i >= recordHistoryPair.length) return Text("");
+                                            return Transform.rotate(
+                                              angle: -0.5,
+                                              child: MyText.labelMedium(shortDateFormatter.format(recordHistoryPair[i].$1)),
+                                            );
+                                          },
+                                          lines: [
+                                            _LineDescriptor(
+                                              "Estado de ánimo",
+                                              recordHistoryPair.mapIndexed<double?>((i, e) {
+                                                final state = (i == 0 && e.$2.emotionalState == null) ? leftBorderValues.emotionalState : e.$2.emotionalState;
+                                                return state == null ? null : (2 - state.index).toDouble();
+                                              }).toList(),
+                                              Colors.blue,
+                                            ),
+                                          ],
+                                          goalLines: sugarLevelGoalLines,
+                                          getDate: (i) => shortDateFormatter.format(dateSteps[i]),
+                                          getDotInfo: (value, i) {
+                                            if (value == null) return "";
+                                            final index = 2 - value.toInt();
+                                            if (index < 0 || index >= EmotionalState.values.length) return "";
+                                            return EmotionalState.values[index].name;
+                                          },
+                                          showDotInfo: (lineIndex, i) {
+                                            if (i >= dateSteps.length) return false;
+                                            final index = recordHistory.indexWhere((e) => datesAreSameDay(dateSteps[i], e.date));
+                                            return index != -1 && recordHistory[index].emotionalState != null;
+                                          },
+                                        )
+                                      else
+                                        Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 60.0),
+                                            child: MyText.bodyLarge(
+                                              "No hay mediciones del estado de ánimo registradas."
+                                                  "\nAsegurate de registrar tu progreso diario.",
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  MySpacing.height(20),
+                                  Column(
+                                    children: [
+                                      Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(left: 60.0),
+                                          child: MyText.titleLarge("Exercicio Realizado", fontWeight: 800, muted: true),
+                                        ),
+                                      ),
+                                      MySpacing.height(10),
+                                      if (firstValues.weight != null || firstValues.cardio != null)
+                                        createDataGraph(
+                                          height: 400.0,
+                                          minY: -2,
+                                          maxY: 2,
+                                          minX: 0,
+                                          maxX: (controller.timePeriodDays - 1).toDouble(),
+                                          leftSideUnits: (value) {
+                                            final index = value.toInt();
+                                            if (index != -1 && index != 1) return MyText.labelMedium("");
+                                            return MyText.labelMedium(index == -1 ? "No" : "Sí", textAlign: TextAlign.right,);
+                                          },
+                                          bottomUnitsInterval: math.max(recordHistoryPair.length / 10.0, 1.0),
+                                          leftUnitsInterval: 1,
+                                          bottomSideUnits: (value) {
+                                            int i = value.toInt();
+                                            if (i >= recordHistoryPair.length) return Text("");
+                                            return Transform.rotate(
+                                              angle: -0.5,
+                                              child: MyText.labelMedium(shortDateFormatter.format(recordHistoryPair[i].$1)),
+                                            );
+                                          },
+                                          lines: [
+                                            _LineDescriptor(
+                                              "Ejercicio",
+                                              recordHistoryPair.mapIndexed<double?>((i, e) {
+                                                final weights = (i == 0 && e.$2.weights == null) ? leftBorderValues.weights : e.$2.weights;
+                                                final cardio = (i == 0 && e.$2.cardio == null) ? leftBorderValues.cardio : e.$2.cardio;
+                                                return weights == null && cardio == null ? null : (((weights?? false) || (cardio?? false)) ? 1 : -1).toDouble();
+                                              }).toList(),
+                                              Colors.blue,
+                                            ),
+                                          ],
+                                          goalLines: [
+                                            _GoalLineDescriptor(0, ""),
+                                          ],
+                                          getDate: (i) => shortDateFormatter.format(dateSteps[i]),
+                                          getDotInfo: (value, i) {
+                                            if (value == null || i == null || i >= dateSteps.length) return "";
+                                            final index = recordHistory.indexWhere((e) => datesAreSameDay(dateSteps[i], e.date));
+                                            bool? weights = recordHistory[index].weights;
+                                            bool? cardio = recordHistory[index].cardio;
+                                            if (weights == null && cardio == null) return "";
+                                            weights = weights?? false;
+                                            cardio = cardio?? false;
 
-                                        _GoalLineDescriptor(120.0, "Hipertensión crítica (Diastólica)", color: Colors.blue.shade900, alignment: Alignment.bottomRight),
-                                        _GoalLineDescriptor(90.0, "Presión alta etapa 2 (Diastólica)", color: Colors.blue.shade800),
-                                        _GoalLineDescriptor(80.0, "Presión alta etapa 1 (Diastólica)", color: Colors.blue.shade600),
-                                      ],
-                                      getDate: (i) => shortDateFormatter.format(dateSteps[i]),
-                                      showDotInfo: (lineIndex, i) {
-                                        if (i >= dateSteps.length) return false;
-                                        final index = recordHistory.indexWhere((e) => datesAreSameDay(dateSteps[i], e.date));
-                                        return index != -1 && (lineIndex == 0 ? recordHistory[index].systolicBloodPressure : recordHistory[index].diastolicBloodPressure) != null;
-                                      },
-                                    )
-                                  else
-                                    Center(
-                                      child: MyText.bodyLarge(
-                                        "No hay mediciones de presión arterial registradas."
-                                            "\nAsegurate de registrar tu progreso diario.",
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  MySpacing.height(20),
-                                  Center(child: MyText.titleLarge("            Azuca en Sangre", fontWeight: 800, muted: true)),
-                                  MySpacing.height(10),
-                                  if (minValues.sugarLevel != null)
-                                    createDataGraph(
-                                      height: 400.0,
-                                      minY: minValues.sugarLevel! - sugarLevelVerticalGraphPadding,
-                                      maxY: maxValues.sugarLevel! + sugarLevelVerticalGraphPadding,
-                                      minX: 0,
-                                      maxX: (controller.timePeriodDays - 1).toDouble(),
-                                      leftSideUnits: (value) {
-                                        return MyText.labelMedium("$value\nmg/dL");
-                                      },
-                                      bottomUnitsInterval: math.max(recordHistoryPair.length / 10.0, 1.0),
-                                      bottomSideUnits: (value) {
-                                        int i = value.toInt();
-                                        if (i >= recordHistoryPair.length) return Text("");
-                                        return Transform.rotate(
-                                          angle: -0.5,
-                                          child: MyText.labelMedium(shortDateFormatter.format(recordHistoryPair[i].$1)),
-                                        );
-                                      },
-                                      lines: [
-                                        _LineDescriptor(
-                                          "Nivel de azucar",
-                                          recordHistoryPair.mapIndexed<double?>((i, e) {
-                                            return (i == 0 && e.$2.sugarLevel == null) ? leftBorderValues.sugarLevel : e.$2.sugarLevel;
-                                          }).toList(),
-                                          Colors.blue,
+                                            String finalText = "";
+                                            if (!weights && !cardio) {
+                                              return "No";
+                                            }
+                                            if (weights) {
+                                              finalText += "Pesas";
+                                            }
+                                            if (cardio) {
+                                              if (weights) {
+                                                finalText += " y ";
+                                              }
+                                              finalText += "Cardio";
+                                            }
+
+                                            return finalText;
+                                          },
+                                          showDotInfo: (lineIndex, i) {
+                                            if (i >= dateSteps.length) return false;
+                                            final index = recordHistory.indexWhere((e) => datesAreSameDay(dateSteps[i], e.date));
+                                            return index != -1 && (recordHistory[index].weights != null || recordHistory[index].cardio != null);
+                                          },
+                                          getDotColor: (value, i) {
+                                            if (i >= dateSteps.length) return null;
+                                            final index = recordHistory.indexWhere((e) => datesAreSameDay(dateSteps[i], e.date));
+                                            bool? weights = recordHistory[index].weights;
+                                            bool? cardio = recordHistory[index].cardio;
+                                            if (weights == null && cardio == null) return null;
+                                            weights = weights?? false;
+                                            cardio = cardio?? false;
+
+                                            if (weights) {
+                                              if (!cardio) {
+                                                return Colors.redAccent;
+                                              }
+                                              return Colors.green;
+                                            }
+                                            if (cardio) {
+                                              return Colors.lightBlueAccent;
+                                            }
+
+                                            return Color.fromARGB(255, 100, 100, 100);
+                                          }
+                                        )
+                                      else
+                                        Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.only(left: 60.0),
+                                            child: MyText.bodyLarge(
+                                              "No hay mediciones del ejercicio realizado registradas."
+                                                  "\nAsegurate de registrar tu progreso diario.",
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
                                         ),
-                                      ],
-                                      goalLines: [
-                                        _GoalLineDescriptor(70, "Bajo Azucar", color: Colors.redAccent),
-                                        _GoalLineDescriptor(100, "Alto Azucar (Ayunas)", color: Colors.deepOrangeAccent),
-                                        _GoalLineDescriptor(140, "Alto Azucar (Después de comer)", color: Colors.red),
-                                      ],
-                                      getDate: (i) => shortDateFormatter.format(dateSteps[i]),
-                                      showDotInfo: (lineIndex, i) {
-                                        if (i >= dateSteps.length) return false;
-                                        final index = recordHistory.indexWhere((e) => datesAreSameDay(dateSteps[i], e.date));
-                                        return index != -1 && recordHistory[index].sugarLevel != null;
-                                      },
-                                    )
-                                  else
-                                    Center(
-                                      child: MyText.bodyLarge(
-                                        "No hay mediciones del azucar en sangre registradas."
-                                            "\nAsegurate de registrar tu progreso diario.",
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
+                                    ],
+                                  ),
                                   MySpacing.height(20),
-                                  Center(child: MyText.titleLarge("Otras mediciones", fontWeight: 800, muted: true)),
-                                  MySpacing.height(10),
-                                  if (minValues.sugarLevel != null)
-                                    createCalendarGraph(
-                                      height: 400.0,
-                                      firstDate: DateTime.now(),
-                                      lastDate: DateTime.now(),
-                                      daysData: controller.completeRecordHistory.map<_CalendarDayDescriptor>((e) =>
-                                          _CalendarDayDescriptor(
-                                            e.date,
-                                            emotionalState: e.emotionalState,
-                                            medication: e.medications,
-                                            exercise: e.exercise,
-                                          )
-                                      ).toList(),
-                                      medicationColor: Colors.deepOrangeAccent,
-                                      exerciseColor: Colors.lightBlue,
-                                      emotionalColor1: Color.fromARGB(255, 30, 255, 30),
-                                      emotionalColor2: Color.fromARGB(255, 255, 30, 30),
-                                      showDataNames: true,
-                                      showNumStatistics: true,
-                                    )
-                                  else
-                                    Center(
-                                      child: MyText.bodyLarge(
-                                        "No hay mediciones del azucar en sangre registradas."
-                                            "\nAsegurate de registrar tu progreso diario.",
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
+                                  /*Column(
+                                    children: [
+                                      Center(child: MyText.titleLarge("Otras mediciones", fontWeight: 800, muted: true)),
+                                      MySpacing.height(10),
+                                      if (minValues.sugarLevel != null)
+                                        createCalendarGraph(
+                                          height: 400.0,
+                                          firstDate: DateTime.now(),
+                                          lastDate: DateTime.now(),
+                                          daysData: controller.completeRecordHistory.map<_CalendarDayDescriptor>((e) =>
+                                              _CalendarDayDescriptor(
+                                                e.date,
+                                                emotionalState: e.emotionalState,
+                                                medication: e.medications,
+                                                exercise: e.weights,
+                                              )
+                                          ).toList(),
+                                          medicationColor: Colors.deepOrangeAccent,
+                                          exerciseColor: Colors.lightBlue,
+                                          emotionalColor1: Color.fromARGB(255, 30, 255, 30),
+                                          emotionalColor2: Color.fromARGB(255, 255, 30, 30),
+                                          showDataNames: true,
+                                          showNumStatistics: true,
+                                        )
+                                      else
+                                        Center(
+                                          child: MyText.bodyLarge(
+                                            "No hay mediciones del azúcar en sangre registradas."
+                                                "\nAsegurate de registrar tu progreso diario.",
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  MySpacing.height(20),*/
                                 ],
                               ),
                             ),
@@ -641,8 +998,10 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
     Widget Function(double)? bottomSideUnits,
     double? leftUnitsInterval, double? bottomUnitsInterval,
     List<_GoalLineDescriptor> goalLines = const [],
-    String Function(int)? getDate, bool Function(int, int)? showDotInfo,
+    String Function(int)? getDate, String Function(double?, int?)? getDotInfo,
+    bool Function(int, int)? showDotInfo,
     bool showLineNames = false,
+    Color? Function(double value, int i)? getDotColor,
   }) {
     return Column(
       children: [
@@ -690,11 +1049,11 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
                       final index = spot.x.toInt();
                       if (!(showDotInfo?.call(0, index)?? true)) return null;
 
-                      final value = spot.y;
+                      final value = getDotInfo?.call(spot.y, spot.x.toInt())?? spot.y.toStringAsFixed(2);
                       final date = getDate?.call(index);// (index >= 0 && index < dates.length) ? dates[index] : 'Unknown';
 
                       return LineTooltipItem(
-                        '${date != null ? '📅 $date\n' : ''}📈 ${value.toStringAsFixed(2)}',
+                        '${date != null ? '📅 $date\n' : ''}📈 $value',
                         TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
                       );
                     }).toList();
@@ -766,7 +1125,13 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
                   sideTitles: SideTitles(showTitles: false),
                 ),
               ),
-              lineBarsData: lines.mapIndexed<List<LineChartBarData>>((i, e) => _buildLine(i, e, showDotInfo: showDotInfo)).mapMany<LineChartBarData>((e) => e).toList(),
+              lineBarsData: lines
+                  .mapIndexed<List<LineChartBarData>>((i, e) => _buildLine(
+                i, e, showDotInfo: showDotInfo, getDotColor: getDotColor,
+                curveSmoothness: math.max(0.5 - 0.002632 * (maxX - minX - 30), 0.0),
+              ))
+                  .mapMany<LineChartBarData>((e) => e)
+                  .toList(),
               extraLinesData: ExtraLinesData(
                 horizontalLines: goalLines.map<HorizontalLine>((e) => _goalLine(e)).toList(),
               ),
@@ -779,8 +1144,11 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
   }
 
   List<LineChartBarData> _buildLine(
-      int i, _LineDescriptor desc,
-      {bool Function(int, int)? showDotInfo,}) {
+      int i, _LineDescriptor desc, {
+        bool Function(int, int)? showDotInfo,
+        Color? Function(double value, int i)? getDotColor,
+        double curveSmoothness = 0.1,
+      }) {
     if (desc.values.isEmpty || !desc.values.any((e) => e != null)) return [];
 
     /// TODO: ESTO ES PARA SEPARACIÓN DE LÍNEAS POR COLORES, YA QUE NO LO HAY
@@ -824,7 +1192,7 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
         r.add(LineChartBarData(
           isCurved: true,
           color: split.$1 ? desc.color1 : desc.color2,
-          curveSmoothness: 0.35,
+          curveSmoothness: curveSmoothness,
           preventCurveOverShooting: true,
           barWidth: 3,
           dotData: FlDotData(
@@ -848,10 +1216,11 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
     r.add(LineChartBarData(
       isCurved: true,
       color: desc.color1,
-      curveSmoothness: 0.35,
+      curveSmoothness: curveSmoothness,
       preventCurveOverShooting: true,
       barWidth: 3,
-      dotData: FlDotData(
+      dotData: getDotColor == null ?
+      FlDotData(
         show: true,
         checkToShowDot: (spot, data) {
           final index = spot.x.toInt();
@@ -860,6 +1229,19 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
           }*/
           return showDotInfo?.call(i, index)?? true;
         },
+      ) :
+      FlDotData(
+          show: true,
+          checkToShowDot: (spot, data) {
+            final index = spot.x.toInt();
+            /*if (showDotInfo != null) {
+            Debug.log("asking to show dot: $index");
+          }*/
+            return showDotInfo?.call(i, index)?? true;
+          },
+          getDotPainter: (spot, xPercentage, bar, index) {
+            return FlDotCirclePainter(color: getDotColor(spot.y, spot.x.toInt())?? desc.color1);
+          }
       ),
       belowBarData: BarAreaData(show: desc.barCutOffY != null, cutOffY: desc.barCutOffY?? 0.0, applyCutOffY: desc.barCutOffY != null),
       aboveBarData: BarAreaData(show: desc.barCutOffY != null, cutOffY: desc.barCutOffY?? 0.0, applyCutOffY: desc.barCutOffY != null),
@@ -953,7 +1335,7 @@ class _PatientRecordHistoryScreenState extends State<PatientRecordHistoryScreen>
 
                     final value = rod.toY;
                     //final value2 = rod.fromY;
-                    final date = getDate?.call(index);// (index >= 0 && index < dates.length) ? dates[index] : 'Unknown';
+                    //final date = getDate?.call(index);// (index >= 0 && index < dates.length) ? dates[index] : 'Unknown';
 
                     return BarTooltipItem(
                       //'${date != null ? '📅 $date\n' : ''}📈 ${value.toStringAsFixed(2)}',

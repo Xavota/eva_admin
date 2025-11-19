@@ -30,7 +30,8 @@ class PatientDalyRecordController extends MyController {
 
   EmotionalState? emotionalState;
   bool? medications;
-  bool? exercise;
+  bool? weights;
+  bool? cardio;
 
 
   Future<void> getTodayRecord() async {
@@ -53,8 +54,10 @@ class PatientDalyRecordController extends MyController {
     basicValidator.onChanged<EmotionalState?>('emotionalState')(emotionalState);
     medications = record.medications;
     basicValidator.onChanged<bool?>('medications')(medications);
-    exercise = record.exercise;
-    basicValidator.onChanged<bool?>('exercise')(exercise);
+    weights = record.weights;
+    basicValidator.onChanged<bool?>('weights')(weights);
+    cardio = record.cardio;
+    basicValidator.onChanged<bool?>('cardio')(cardio);
 
     update();
   }
@@ -87,7 +90,7 @@ class PatientDalyRecordController extends MyController {
     );
 
     basicValidator.addField(
-      'sugarLevel', label: "Azucar en Sangre",
+      'sugarLevel', label: "Azúcar en Sangre",
       controller: TextEditingController(),
       validators: [MyFloatingPointValidator(maxLengthBeforePoint: 3, maxLengthAfterPoint: 2)],
     );
@@ -102,8 +105,10 @@ class PatientDalyRecordController extends MyController {
     basicValidator.onChanged<EmotionalState?>('emotionalState')(emotionalState);
     medications = null;
     basicValidator.onChanged<bool?>('medications')(medications);
-    exercise = null;
-    basicValidator.onChanged<bool?>('exercise')(exercise);
+    weights = null;
+    basicValidator.onChanged<bool?>('weights')(weights);
+    cardio = null;
+    basicValidator.onChanged<bool?>('cardio')(cardio);
 
     super.onInit();
   }
@@ -121,8 +126,10 @@ class PatientDalyRecordController extends MyController {
     basicValidator.onChanged<EmotionalState?>('emotionalState')(emotionalState);
     medications = null;
     basicValidator.onChanged<bool?>('medications')(medications);
-    exercise = null;
-    basicValidator.onChanged<bool?>('exercise')(exercise);
+    weights = null;
+    basicValidator.onChanged<bool?>('weights')(weights);
+    cardio = null;
+    basicValidator.onChanged<bool?>('cardio')(cardio);
 
     //update();
   }
@@ -134,11 +141,11 @@ class PatientDalyRecordController extends MyController {
     return basicValidator.formKey;
   }
 
-  void disposeFormKey(GlobalKey<FormState> key) {
+  void /**/disposeFormKey(GlobalKey<FormState> key) {
     if (formKeys.contains(key)) {
       formKeys.remove(key);
     }
-    basicValidator.formKey = formKeys.last;
+    basicValidator.formKey = formKeys.isNotEmpty ? formKeys.last : GlobalKey();
   }
 
 
@@ -154,9 +161,15 @@ class PatientDalyRecordController extends MyController {
     update();
   }
 
-  void onChangeExercise(bool? value) {
-    exercise = value;
-    basicValidator.onChanged<bool?>('exercise')(exercise);
+  void onChangeWeights(bool? value) {
+    weights = value;
+    basicValidator.onChanged<bool?>('weights')(weights);
+    update();
+  }
+
+  void onChangeCardio(bool? value) {
+    cardio = value;
+    basicValidator.onChanged<bool?>('cardio')(cardio);
     update();
   }
 

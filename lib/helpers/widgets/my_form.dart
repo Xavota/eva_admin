@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 import 'package:blix_essentials/blix_essentials.dart';
+import 'package:get/get.dart';
 
 //Map<String, List<GlobalKey>> _formKeys = {};
 //Map<String, int> _formIndices = {};
 
+@Deprecated("Instead of this use addFormKey and getFormKey from your ContextInstance")
 class MyForm extends StatefulWidget {
   const MyForm({
     super.key, required this.addNewFormKey,

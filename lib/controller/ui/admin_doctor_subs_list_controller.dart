@@ -11,7 +11,7 @@ class _DoctorFilters {
   bool? status;
 
   bool patientPassFilter(DoctorModel doctor) {
-    if (name != null && name!.isNotEmpty && !doctor.fullName.contains(name!)) return false;
+    if (name != null && name!.isNotEmpty && !doctor.fullName.toLowerCase().contains(name!.toLowerCase())) return false;
     if (status != null && doctor.status != status) return false;
 
     return true;

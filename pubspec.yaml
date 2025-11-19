@@ -1,5 +1,5 @@
 name: medicare
-description: "A new Flutter project."
+description: "Una aplicación para doctores y pacientes"
 
 publish_to: none
 
@@ -45,12 +45,13 @@ dependencies:
   fl_chart: ^1.0.0
   cached_network_image: ^3.4.1
   pdfrx: ^2.1.14
-
-  blix_essentials:
-    path: ../blix_essentials
   super_drag_and_drop: ^0.9.1
   super_clipboard: ^0.9.1
   web: ^1.1.1
+  flutter_widget_from_html: ^0.17.1
+
+  blix_essentials:
+    path: ../blix_essentials
 
 
 dev_dependencies:

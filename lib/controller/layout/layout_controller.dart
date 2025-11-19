@@ -24,6 +24,11 @@ class LayoutController extends MyController {
     ThemeCustomizer.addListener(onChangeTheme);
   }
 
+  @override
+  void onInit() {
+    super.onInit();
+  }
+
   void onChangeTheme(ThemeCustomizer oldVal, ThemeCustomizer newVal) {
     themeCustomizer = newVal;
     update();

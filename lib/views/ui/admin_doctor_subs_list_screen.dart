@@ -104,71 +104,69 @@ class _AdminDoctorSubsListScreenState extends State<AdminDoctorSubsListScreen> w
                       MySpacing.height(15),
                       MyText.labelMedium("Estatus", fontWeight: 600, muted: true),
                       MySpacing.height(8),
-                      Row(
-                        children: [
-                          InkWell(
-                            onTap: () => controller.setStatusFilter(null),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Radio<bool?>(
-                                  value: null,
-                                  activeColor: theme.colorScheme.primary,
-                                  groupValue: controller.getStatusFilter(),
-                                  onChanged: (value) => controller.setStatusFilter(value),
-                                  visualDensity: getCompactDensity,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                MySpacing.width(8),
-                                MyText.labelMedium(
-                                  "Todos",
-                                ),
-                              ],
+                      RadioGroup<bool?>(
+                        groupValue: controller.getStatusFilter(),
+                        onChanged: (value) => controller.setStatusFilter(value),
+                        child: Row(
+                          children: [
+                            InkWell(
+                              onTap: () => controller.setStatusFilter(null),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Radio<bool?>(
+                                    value: null,
+                                    activeColor: theme.colorScheme.primary,
+                                    visualDensity: getCompactDensity,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  MySpacing.width(8),
+                                  MyText.labelMedium(
+                                    "Todos",
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 10.0,),
-                          InkWell(
-                            onTap: () => controller.setStatusFilter(true),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Radio<bool?>(
-                                  value: true,
-                                  activeColor: theme.colorScheme.primary,
-                                  groupValue: controller.getStatusFilter(),
-                                  onChanged: (value) => controller.setStatusFilter(value),
-                                  visualDensity: getCompactDensity,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                MySpacing.width(8),
-                                MyText.labelMedium(
-                                  "Activos",
-                                ),
-                              ],
+                            SizedBox(width: 10.0,),
+                            InkWell(
+                              onTap: () => controller.setStatusFilter(true),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Radio<bool?>(
+                                    value: true,
+                                    activeColor: theme.colorScheme.primary,
+                                    visualDensity: getCompactDensity,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  MySpacing.width(8),
+                                  MyText.labelMedium(
+                                    "Activos",
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 10.0,),
-                          InkWell(
-                            onTap: () => controller.setStatusFilter(false),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Radio<bool?>(
-                                  value: false,
-                                  activeColor: theme.colorScheme.primary,
-                                  groupValue: controller.getStatusFilter(),
-                                  onChanged: (value) => controller.setStatusFilter(value),
-                                  visualDensity: getCompactDensity,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                MySpacing.width(8),
-                                MyText.labelMedium(
-                                  "Archivados",
-                                ),
-                              ],
+                            SizedBox(width: 10.0,),
+                            InkWell(
+                              onTap: () => controller.setStatusFilter(false),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Radio<bool?>(
+                                    value: false,
+                                    activeColor: theme.colorScheme.primary,
+                                    visualDensity: getCompactDensity,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  MySpacing.width(8),
+                                  MyText.labelMedium(
+                                    "Archivados",
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       /*Wrap(
                         spacing: 16,
@@ -214,7 +212,7 @@ class _AdminDoctorSubsListScreenState extends State<AdminDoctorSubsListScreen> w
                             columns: [
                               DataColumn(label: MyText.labelMedium('Usuario', color: contentTheme.primary)),
                               DataColumn(label: MyText.labelMedium('Nombre', color: contentTheme.primary)),
-                              DataColumn(label: MyText.labelMedium('Tratantes', color: contentTheme.primary)),
+                              DataColumn(label: MyText.labelMedium('Pacientes', color: contentTheme.primary)),
                               DataColumn(label: MyText.labelMedium('Suscripciones', color: contentTheme.primary)),
                               DataColumn(label: MyText.labelMedium('Porcentaje', color: contentTheme.primary)),
                               DataColumn(label: MyText.labelMedium('Acciones', color: contentTheme.primary)),
@@ -245,11 +243,18 @@ class _AdminDoctorSubsListScreenState extends State<AdminDoctorSubsListScreen> w
                                 DataCell(SizedBox(width: 150, child: MyText.bodySmall(data.activePatients == 0 ? "0%" : "${((data.activePatientsWithSub / data.activePatients) * 100.0).round()}%"))),
                                 DataCell(
                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       MyContainer(
                                         onTap: () => controller.goDetailDoctorScreen(index),
                                         paddingAll: 8,
                                         color: contentTheme.secondary.withAlpha(32),
+                                        tooltip: MyContainer.shadow(
+                                          borderRadius: BorderRadius.circular(5.0),
+                                          color: Color.fromARGB(255, 245, 245, 245),
+                                          paddingAll: 10,
+                                          child: MyText.labelMedium("Detalles",),
+                                        ),
                                         child: Icon(LucideIcons.eye, size: 16),
                                       ),
                                       MySpacing.width(20),
@@ -257,6 +262,12 @@ class _AdminDoctorSubsListScreenState extends State<AdminDoctorSubsListScreen> w
                                         onTap: () => controller.goEditDoctorScreen(index),
                                         paddingAll: 8,
                                         color: contentTheme.secondary.withAlpha(32),
+                                        tooltip: MyContainer.shadow(
+                                          borderRadius: BorderRadius.circular(5.0),
+                                          color: Color.fromARGB(255, 245, 245, 245),
+                                          paddingAll: 10,
+                                          child: MyText.labelMedium("Editar",),
+                                        ),
                                         child: Icon(LucideIcons.pencil, size: 16),
                                       ),
                                     ],

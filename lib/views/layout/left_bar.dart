@@ -182,17 +182,18 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                       if (AuthService.loginType == LoginType.kNone)
                         MySpacing.height(16),
                       if (AuthService.loginType == LoginType.kAdmin || AuthService.loginType == LoginType.kDoctor)
-                        LabelWidget(isCondensed: isCondensed, label: "Admin Panel"),
+                        LabelWidget(isCondensed: isCondensed, label: AuthService.loginType == LoginType.kAdmin ? "Panel de Admin" : "Panel de Médico"),
                       if (AuthService.loginType == LoginType.kNone)
                         NavigationItem(iconData: LucideIcons.layout_dashboard, title: "Dashboard", isCondensed: isCondensed, route: '/dashboard'),
                       if (AuthService.loginType == LoginType.kDoctor)
                         MenuWidget(
                           iconData: LucideIcons.user_plus,
                           isCondensed: isCondensed,
-                          title: "Tratantes",
+                          title: "Pacientes",
                           children: [
                             MenuItem(title: "Listado", isCondensed: isCondensed, route: '/doctor/patient/list'),
-                            MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/doctor/patient/add'),
+                            MenuItem(title: "Lista Información", isCondensed: isCondensed, route: '/doctor/patient/info_list'),
+                            MenuItem(title: "Ingresar Nuevo", isCondensed: isCondensed, route: '/doctor/patient/add'),
                           ],
                         ),
                       if (AuthService.loginType == LoginType.kDoctor)
@@ -206,7 +207,7 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                             MenuItem(title: "Detalles", isCondensed: isCondensed, route: '/doctor/secretary/detail'),
                           ],
                         ),
-                      if (AuthService.loginType == LoginType.kDoctor)
+                      /*if (AuthService.loginType == LoginType.kDoctor)
                         MenuWidget(
                           iconData: LucideIcons.calendar,
                           isCondensed: isCondensed,
@@ -214,12 +215,12 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                           children: [
                             MenuItem(title: "Listado", isCondensed: isCondensed, route: '/doctor/dates/list'),
                           ],
-                        ),
+                        ),*/
                       if (AuthService.loginType == LoginType.kSecretary)
                         MenuWidget(
                           iconData: LucideIcons.user_plus,
                           isCondensed: isCondensed,
-                          title: "Tratantes",
+                          title: "Pacientes",
                           children: [
                             MenuItem(title: "Listado", isCondensed: isCondensed, route: '/secretary/patient/list'),
                           ],
@@ -242,6 +243,7 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                           children: [
                             MenuItem(title: "Listado", isCondensed: isCondensed, route: '/panel/doctor/list'),
                             MenuItem(title: "Suscripciones", isCondensed: isCondensed, route: '/panel/doctor_subs/list'),
+                            MenuItem(title: "Ganancias", isCondensed: isCondensed, route: '/panel/doctor_earnings/list'),
                             MenuItem(title: "Registrar", isCondensed: isCondensed, route: '/panel/doctor/add'),
                           ],
                         ),
@@ -261,6 +263,16 @@ class _LeftBarState extends State<LeftBar> with SingleTickerProviderStateMixin, 
                           title: "Mis Recetas",
                           children: [
                             MenuItem(title: "Médico ${(AuthService.loggedUserData as PatientListModel).owner.fullName}", isCondensed: isCondensed, route: '/patient/prescription/list'),
+                          ],
+                        ),
+                      if (AuthService.loginType == LoginType.kPatient)
+                        MenuWidget(
+                          iconData: LucideIcons.scroll_text,
+                          isCondensed: isCondensed,
+                          title: "Mis Estudios",
+                          children: [
+                            //MenuItem(title: "Médico ${(AuthService.loggedUserData as PatientListModel).owner.fullName}", isCondensed: isCondensed, route: '/patient/studies/list'),
+                            MenuItem(title: "Ver y cargar", isCondensed: isCondensed, route: '/patient/studies/list'),
                           ],
                         ),
                       if (AuthService.loginType == LoginType.kPatient)

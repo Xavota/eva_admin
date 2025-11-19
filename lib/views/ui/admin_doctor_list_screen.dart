@@ -90,71 +90,69 @@ class _AdminDoctorListScreenState extends State<AdminDoctorListScreen> with UIMi
                           )
                         ],
                       ),
-                      Row(
-                        children: [
-                          InkWell(
-                            onTap: () => controller.setActiveFilter(null),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Radio<bool?>(
-                                  value: null,
-                                  activeColor: theme.colorScheme.primary,
-                                  groupValue: controller.activeFilter,
-                                  onChanged: (value) => controller.setActiveFilter(value),
-                                  visualDensity: getCompactDensity,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                MySpacing.width(8),
-                                MyText.labelMedium(
-                                  "Todos",
-                                ),
-                              ],
+                      RadioGroup<bool?>(
+                        groupValue: controller.activeFilter,
+                        onChanged: (value) => controller.setActiveFilter(value),
+                        child: Row(
+                          children: [
+                            InkWell(
+                              onTap: () => controller.setActiveFilter(null),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Radio<bool?>(
+                                    value: null,
+                                    activeColor: theme.colorScheme.primary,
+                                    visualDensity: getCompactDensity,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  MySpacing.width(8),
+                                  MyText.labelMedium(
+                                    "Todos",
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 10.0,),
-                          InkWell(
-                            onTap: () => controller.setActiveFilter(true),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Radio<bool?>(
-                                  value: true,
-                                  activeColor: theme.colorScheme.primary,
-                                  groupValue: controller.activeFilter,
-                                  onChanged: (value) => controller.setActiveFilter(value),
-                                  visualDensity: getCompactDensity,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                MySpacing.width(8),
-                                MyText.labelMedium(
-                                  "Activos",
-                                ),
-                              ],
+                            SizedBox(width: 10.0,),
+                            InkWell(
+                              onTap: () => controller.setActiveFilter(true),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Radio<bool?>(
+                                    value: true,
+                                    activeColor: theme.colorScheme.primary,
+                                    visualDensity: getCompactDensity,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  MySpacing.width(8),
+                                  MyText.labelMedium(
+                                    "Activos",
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 10.0,),
-                          InkWell(
-                            onTap: () => controller.setActiveFilter(false),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Radio<bool?>(
-                                  value: false,
-                                  activeColor: theme.colorScheme.primary,
-                                  groupValue: controller.activeFilter,
-                                  onChanged: (value) => controller.setActiveFilter(value),
-                                  visualDensity: getCompactDensity,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                MySpacing.width(8),
-                                MyText.labelMedium(
-                                  "Archivados",
-                                ),
-                              ],
+                            SizedBox(width: 10.0,),
+                            InkWell(
+                              onTap: () => controller.setActiveFilter(false),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Radio<bool?>(
+                                    value: false,
+                                    activeColor: theme.colorScheme.primary,
+                                    visualDensity: getCompactDensity,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  MySpacing.width(8),
+                                  MyText.labelMedium(
+                                    "Archivados",
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       /*Wrap(
                         spacing: 16,
@@ -232,6 +230,7 @@ class _AdminDoctorListScreenState extends State<AdminDoctorListScreen> with UIMi
                                 DataCell(SizedBox(width: 150, child: MyText.bodySmall(data.status ? "Activo" : "Archivado"))),
                                 DataCell(
                                   Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       MyContainer(
                                         onTap: () => controller.changeDoctorStatus(index, !data.status).then((response) {
@@ -249,6 +248,12 @@ class _AdminDoctorListScreenState extends State<AdminDoctorListScreen> with UIMi
                                         }),
                                         paddingAll: 8,
                                         color: contentTheme.secondary.withAlpha(32),
+                                        tooltip: MyContainer.shadow(
+                                          borderRadius: BorderRadius.circular(5.0),
+                                          color: Color.fromARGB(255, 245, 245, 245),
+                                          paddingAll: 10,
+                                          child: MyText.labelMedium("${(data.status ? "A" : "Desa")}rchivar",),
+                                        ),
                                         child: Icon(data.status ? LucideIcons.archive : LucideIcons.archive_restore, size: 16),
                                       ),
                                       MySpacing.width(20),
@@ -256,6 +261,12 @@ class _AdminDoctorListScreenState extends State<AdminDoctorListScreen> with UIMi
                                         onTap: () => controller.goDetailDoctorScreen(index),
                                         paddingAll: 8,
                                         color: contentTheme.secondary.withAlpha(32),
+                                        tooltip: MyContainer.shadow(
+                                          borderRadius: BorderRadius.circular(5.0),
+                                          color: Color.fromARGB(255, 245, 245, 245),
+                                          paddingAll: 10,
+                                          child: MyText.labelMedium("Detalles",),
+                                        ),
                                         child: Icon(LucideIcons.eye, size: 16),
                                       ),
                                       MySpacing.width(20),
@@ -263,6 +274,12 @@ class _AdminDoctorListScreenState extends State<AdminDoctorListScreen> with UIMi
                                         onTap: () => controller.goEditDoctorScreen(index),
                                         paddingAll: 8,
                                         color: contentTheme.secondary.withAlpha(32),
+                                        tooltip: MyContainer.shadow(
+                                          borderRadius: BorderRadius.circular(5.0),
+                                          color: Color.fromARGB(255, 245, 245, 245),
+                                          paddingAll: 10,
+                                          child: MyText.labelMedium("Editar",),
+                                        ),
                                         child: Icon(LucideIcons.pencil, size: 16),
                                       ),
                                     ],

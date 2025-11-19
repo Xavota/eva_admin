@@ -147,6 +147,19 @@ class _AdminPremiumPostsAddScreenState extends State<AdminPremiumPostsAddScreen>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  Theme(
+                                    data: ThemeData(colorScheme: colorScheme),
+                                    child: CheckboxListTile(
+                                      value: controller.free,
+                                      onChanged: (value) => controller.onFreeCheckboxChange(instanceIndex, value?? false),
+                                      controlAffinity: ListTileControlAffinity.leading,
+                                      contentPadding: MySpacing.x(0),
+                                      visualDensity: VisualDensity.compact,
+                                      dense: true,
+                                      title: MyText.bodySmall("Contenido Gratis", fontWeight: 600),
+                                    ),
+                                  ),
+                                  MySpacing.height(20.0),
                                   commonTextField(
                                     title: "Título", hintText: "Título de la publicación",
                                     teController: controller.basicValidator.getController("title"),

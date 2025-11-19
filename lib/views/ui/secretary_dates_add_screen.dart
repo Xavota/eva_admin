@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:get/get.dart';
+import 'package:medicare/helpers/widgets/my_popups.dart';
 import 'package:multi_select_flutter/multi_select_flutter.dart';
 
 import 'package:medicare/app_constant.dart';
@@ -30,7 +33,7 @@ import 'package:medicare/views/layout/layout.dart';
 
 import 'package:medicare/model/patient_list_model.dart';
 
-import 'package:medicare/controller/ui/secretary-date_add_controller.dart';
+import 'package:medicare/controller/ui/secretary_date_add_controller.dart';
 
 
 import 'package:blix_essentials/blix_essentials.dart';
@@ -43,50 +46,133 @@ class SecretaryDatesAddScreen extends StatefulWidget {
   State<SecretaryDatesAddScreen> createState() => _SecretaryDatesAddScreenState();
 }
 
-class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with UIMixin {
-  SecretaryDateAddController controller = Get.put(SecretaryDateAddController());
+class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with SingleTickerProviderStateMixin, UIMixin {
+  late SecretaryDateAddController stateController;// = Get.put(SecretaryDateAddController(this));
 
-  bool fistBuild = true;
+  int instanceIndex = -1;
+
+  // 1 -> initState
+  // 2 -> firstFrame
+  // 4 -> firstPostFrame
+  // 8 -> showSnackBar
+  int actionFlags = 0;
+  bool hasActionFlag(int flag) => (actionFlags & flag) == flag;
+  void toggleActionFlag(int flag) { actionFlags ^= flag; }
+  void setActionFlag(int flag, bool set) { actionFlags = set ? actionFlags | flag : actionFlags & (~flag); }
+  void executeOnFlagAndToggle(int flag, void Function() onFlag) {
+    if (hasActionFlag(flag)) { // firstPostFrame
+      setActionFlag(flag, false);
+      onFlag();
+    }
+  }
+
+  String snackBarMsg = "Test snak";
+  Color snackBarColor = Colors.green;
+  Color snackBarTextColor = Colors.black;
+
+
 
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (fistBuild) {
-        fistBuild = false;
-        controller.clearForm();
-      }
-    });
+    setActionFlag(7, true); // initState | firstFrame | firstPostFrame
+
+    stateController = Get.put(
+      SecretaryDateAddController(),
+      tag: 'secretary_date_add_controller',
+    );
   }
+
+  void builderInitState(SecretaryDateAddController controller) {
+    instanceIndex = controller.contextInstance.addInstance();
+    controller.updatePatientsInfo(instanceIndex);
+  }
+
+  void builderFirstPostFrame(SecretaryDateAddController controller) {
+    controller.clearForm(instanceIndex);
+  }
+
+  void builderPostFrame(SecretaryDateAddController controller) {
+    executeOnFlagAndToggle(4, () { // firstPostFrame
+      builderFirstPostFrame(controller);
+    });
+    executeOnFlagAndToggle(8, () { // showSnackBar
+      MyPopups.simpleToastMessage(snackBarMsg, snackBarColor, snackBarTextColor);
+    });
+
+    if (!hasActionFlag(2) && controller.contextInstance.updateInstanceIndex != instanceIndex) return;
+    setActionFlag(2, false);
+  }
+
+  void builderDispose(SecretaryDateAddController controller) {
+    controller.contextInstance.disposeInstance(instanceIndex);
+  }
+
+
+  void prepareSnackBar(SecretaryDateAddController controller, String msg, Color color, Color textColor) {
+    setActionFlag(8, true);
+    snackBarMsg = msg;
+    snackBarColor = color;
+    snackBarTextColor = textColor;
+    controller.contextInstance.doUpdate(instanceIndex);
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Layout(
       child: GetBuilder(
-        init: controller,
-        tag: 'admin_patient_add_controller',
+        init: stateController,
+        tag: 'secretary_date_add_controller',
+        dispose: (controller) {
+          builderDispose(controller.controller!);
+        },
         builder: (controller) {
+          executeOnFlagAndToggle(1, () { // initState
+            builderInitState(controller);
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) { builderPostFrame(controller); });
+
+          double? titlesSize(double? width, double extraPadding) {
+            return width == null ? null : width + extraPadding;
+          }
+
+          double contentPadding = 20.0;
+
+
+          final globalKey = controller.contextInstance.getContentKey(instanceIndex, "global");
+          final formKey = controller.contextInstance.getFormKey(instanceIndex, "form");
+          final globalSize = controller.contextInstance.getContentSize(instanceIndex, "global");
+
           return Column(
+            key: globalKey,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: MySpacing.x(flexSpacing),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    MyText.titleMedium(
-                      "Agendar Cita",
-                      fontSize: 18,
-                      fontWeight: 600,
-                    ),
-                    MyBreadcrumb(
-                      children: [
-                        MyBreadcrumbItem(name: 'Secretaria'),
-                        MyBreadcrumbItem(name: 'Agendar Cita', active: true),
-                      ],
-                    ),
-                  ],
+                child: SizedBox(
+                  width: titlesSize(
+                    globalSize?.width,
+                    contentPadding,
+                  ),
+                  child: Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      MyText.titleMedium(
+                        "Agendar Cita",
+                        fontSize: 18,
+                        fontWeight: 600,
+                      ),
+                      MyBreadcrumb(
+                        children: [
+                          MyBreadcrumbItem(name: 'Secretaria'),
+                          MyBreadcrumbItem(name: 'Agendar Cita', active: true),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
               MySpacing.height(flexSpacing),
@@ -95,9 +181,8 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
                 child: MyContainer(
                   paddingAll: 20,
                   borderRadiusAll: 12,
-                  child: MyForm(
-                    addNewFormKey: controller.addNewFormKey,
-                    disposeFormKey: controller.disposeFormKey,
+                  child: Form(
+                    key: formKey,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -112,6 +197,7 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   commonTextField(
+                                    controller,
                                     title: "Número de Teléfono", hintText: "Número de teléfono",
                                     validator: controller.basicValidator.getValidation("phoneNumber"),
                                     teController: controller.basicValidator.getController("phoneNumber"),
@@ -127,70 +213,62 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   selectDateTime(
+                                    controller,
                                     title: "Fecha de la Cita",
                                     hintText: "Fecha y hora",
                                   ),
-                                  /*commonTextField(
-                                    title: "Fecha de la Cita",
-                                    hintText: "Selecciona una fecha",
-                                    validator: controller.basicValidator.getValidation("date"),
-                                    teController: controller.basicValidator.getController("date"),
-                                    prefixIcon: Icon(LucideIcons.cake, size: 16),
-                                    onTap: controller.pickDate,
-                                    readOnly: true,
-                                  ),*/
                                 ],
                               ),
                             ),
                           ],
                         ),
                         MySpacing.height(20),
-                        MyText.labelMedium("Tratante", fontWeight: 600, muted: true),
+                        MyText.labelMedium("Paciente", fontWeight: 600, muted: true),
                         MySpacing.height(15),
-                        Wrap(
-                          spacing: 16,
-                          children: [
-                            InkWell(
-                              onTap: () => controller.onChangeTempPatient(false),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Radio<bool>(
-                                    value: false,
-                                    activeColor: theme.colorScheme.primary,
-                                    groupValue: controller.tempPatient,
-                                    onChanged: (value) => controller.onChangeTempPatient(false),
-                                    visualDensity: getCompactDensity,
-                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  ),
-                                  MySpacing.width(8),
-                                  MyText.labelMedium(
-                                    "Registrado",
-                                  ),
-                                ],
+                        RadioGroup(
+                          groupValue: controller.data[instanceIndex]!.tempPatient,
+                          onChanged: (value) => controller.onChangeTempPatient(instanceIndex, value),
+                          child: Wrap(
+                            spacing: 16,
+                            children: [
+                              InkWell(
+                                onTap: () => controller.onChangeTempPatient(instanceIndex, false),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Radio<bool>(
+                                      value: false,
+                                      activeColor: theme.colorScheme.primary,
+                                      visualDensity: getCompactDensity,
+                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    MySpacing.width(8),
+                                    MyText.labelMedium(
+                                      "Registrado",
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            InkWell(
-                              onTap: () => controller.onChangeTempPatient(true),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Radio<bool>(
-                                    value: true,
-                                    activeColor: theme.colorScheme.primary,
-                                    groupValue: controller.tempPatient,
-                                    onChanged: (value) => controller.onChangeTempPatient(true),
-                                    visualDensity: getCompactDensity,
-                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                  ),
-                                  MySpacing.width(8),
-                                  MyText.labelMedium(
-                                    "Temporal",
-                                  ),
-                                ],
+                              InkWell(
+                                onTap: () => controller.onChangeTempPatient(instanceIndex, true),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Radio<bool>(
+                                      value: true,
+                                      activeColor: theme.colorScheme.primary,
+                                      visualDensity: getCompactDensity,
+                                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    MySpacing.width(8),
+                                    MyText.labelMedium(
+                                      "Temporal",
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                         MySpacing.height(20),
                         MyFlex(
@@ -201,15 +279,16 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (controller.tempPatient)
+                                  if (controller.data[instanceIndex]!.tempPatient)
                                     commonTextField(
+                                      controller,
                                       title: "Nombre Completo", hintText: "Nombre completo",
                                       validator: controller.basicValidator.getValidation("tempFullName"),
                                       teController: controller.basicValidator.getController("tempFullName"),
                                       prefixIcon: Icon(LucideIcons.user_round, size: 16),
                                     ),
-                                  if (!controller.tempPatient)
-                                    selectPatientDropdown(),
+                                  if (!controller.data[instanceIndex]!.tempPatient)
+                                    selectPatientDropdown(controller),
                                 ],
                               ),
                             ),
@@ -218,12 +297,12 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  if (controller.tempPatient)
+                                  if (controller.data[instanceIndex]!.tempPatient)
                                     MyText.labelMedium("Motivo de Consulta", fontWeight: 600, muted: true),
-                                  if (controller.tempPatient)
+                                  if (controller.data[instanceIndex]!.tempPatient)
                                     MySpacing.height(8),
-                                  if (controller.tempPatient)
-                                    consultationReasons(),
+                                  if (controller.data[instanceIndex]!.tempPatient)
+                                    consultationReasons(controller),
                                 ],
                               ),
                             ),
@@ -235,16 +314,14 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
                           children: [
                             MyContainer(
                               onTap: () {
-                                controller.onRegister().then((validationError) {
+                                controller.onRegister(instanceIndex).then((validationError) {
                                   if (validationError != null) {
-                                    if (!context.mounted) return;
-                                    simpleSnackBar(context, validationError, contentTheme.danger);
+                                    prepareSnackBar(controller, validationError, contentTheme.danger, contentTheme.onDanger);
                                   }
                                   else {
                                     controller.manager.getPatients(doctorOwnerID: AuthService.loggedUserNumber);
-                                    controller.updatePatientsInfo();
-                                    if (!context.mounted) return;
-                                    simpleSnackBar(context, "Cita agendada con éxito", contentTheme.success);
+                                    controller.updatePatientsInfo(instanceIndex);
+                                    prepareSnackBar(controller, "Cita agendada con éxito", contentTheme.success, contentTheme.onSuccess);
                                   }
                                 });
                               },
@@ -253,6 +330,15 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
                               borderRadiusAll: 8,
                               child: MyText.labelMedium("Agendar", color: contentTheme.onPrimary, fontWeight: 600),
                             ),
+                            /*MyContainer(
+                              onTap: () {
+                                controller.getOffAll();
+                              },
+                              padding: MySpacing.xy(12, 8),
+                              color: contentTheme.primary,
+                              borderRadiusAll: 8,
+                              child: MyText.labelMedium("getOffAll", color: contentTheme.onPrimary, fontWeight: 600),
+                            ),*/
                           ],
                         )
                       ],
@@ -267,7 +353,7 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
     );
   }
 
-  Widget commonTextField({
+  Widget commonTextField(SecretaryDateAddController controller, {
     String? title, String? hintText, bool readOnly = false,
     String? Function(String?)? validator, Widget? prefixIcon,
     void Function()? onTap, TextEditingController? teController,
@@ -302,12 +388,12 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
     );
   }
 
-  Widget selectPatientDropdown(){
+  Widget selectPatientDropdown(SecretaryDateAddController controller){
     return DropdownButtonFormField<PatientListModel>(
         dropdownColor: contentTheme.background,
         isDense: true,
         style: MyTextStyle.bodySmall(),
-        items: controller.patients
+        items: controller.data[instanceIndex]!.patients
             .map((patient) => DropdownMenuItem<PatientListModel>(
           value: patient,
           child: MyText.bodySmall("${patient.userNumber} ${patient.fullName}"),
@@ -315,7 +401,7 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
             .toList(),
         icon: Icon(LucideIcons.chevron_down, size: 20),
         decoration: InputDecoration(
-          hintText: "Elige Tratante",
+          hintText: "Elige Paciente",
           hintStyle: MyTextStyle.bodySmall(xMuted: true),
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           contentPadding: MySpacing.all(12),
@@ -323,48 +409,19 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
           isDense: true,
           prefixIcon: Icon(LucideIcons.user, size: 16),
           floatingLabelBehavior: FloatingLabelBehavior.never,
-        ),
-        onChanged: controller.onChangeSelectedPatient,
-    );
-    /*return Container(
-      key: ValueKey(controller.selectedPatient?.fullName?? "NoPatient"),
-      child: DropdownButtonFormField<PatientListModel>(
-        dropdownColor: contentTheme.background,
-        value: controller.selectedPatient,
-        onChanged: controller.onChangeSelectedPatient,
-        decoration: InputDecoration(
-          hintText: "Elige Tratante",
-          hintStyle: MyTextStyle.bodyMedium(),
-          border: outlineInputBorder,
-          disabledBorder: outlineInputBorder,
-          enabledBorder: outlineInputBorder,
-          focusedBorder: outlineInputBorder,
-          contentPadding: MySpacing.all(12),
-          isCollapsed: true,
-          filled: true,
-          floatingLabelBehavior: FloatingLabelBehavior.never,
           errorText: controller.basicValidator.getError('userNumber'),
         ),
-        items: controller.patients.map((patient) {
-          return DropdownMenuItem<PatientListModel>(
-            value: patient,
-            child: MyText.labelMedium(
-              "${patient.userNumber} ${patient.fullName}",
-              fontWeight: 600,
-            ),
-          );
-        }).toList(),
-      ),
-    );*/
+        onChanged: (value) => controller.onChangeSelectedPatient(instanceIndex, value),
+    );
   }
 
-  Widget consultationReasons() {
+  Widget consultationReasons(SecretaryDateAddController controller) {
     return Container(
-      key: ValueKey(controller.consultationReasons.join()),
+      key: ValueKey(controller.data[instanceIndex]!.consultationReasons.join()),
       child: Column(
         children: [
           InputDecorator(
-            isEmpty: controller.consultationReasons.isEmpty,
+            isEmpty: controller.data[instanceIndex]!.consultationReasons.isEmpty,
             decoration: InputDecoration(
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               hintText: "A qué viene a consulta",
@@ -377,7 +434,7 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
               errorText: controller.basicValidator.getError('tempConsultReasons'),
             ),
             child: MultiSelectDialogField<ConsultationReason>(
-              initialValue: controller.consultationReasons,
+              initialValue: controller.data[instanceIndex]!.consultationReasons,
               items: ConsultationReason.values
                   .map((category) => MultiSelectItem<ConsultationReason>(
                 category,
@@ -396,23 +453,23 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
               ),
               buttonIcon: Icon(LucideIcons.chevron_down, size: 20),
               buttonText: Text(
-                controller.consultationReasons.isEmpty ? "" : "Motivos de consutla",
+                controller.data[instanceIndex]!.consultationReasons.isEmpty ? "" : "Motivos de consutla",
                 style: MyTextStyle.bodySmall(xMuted: true),
               ),
               chipDisplay: MultiSelectChipDisplay.none(),
               onConfirm: (values) {
-                controller.onConsultationChange(values);
+                controller.onConsultationChange(instanceIndex, values);
               },
             ),
           ),
           Wrap(
             spacing: 5.0,
             runSpacing: 5.0,
-            children: controller.consultationReasons.map<Widget>((item) {
+            children: controller.data[instanceIndex]!.consultationReasons.map<Widget>((item) {
               return InkWell(
                 onTap: () {
                   Debug.log("Removing: ${item.name}", overrideColor: Colors.red);
-                  controller.removeConsultation(item);
+                  controller.removeConsultation(instanceIndex, item);
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -437,12 +494,12 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
     );
   }
 
-  Widget selectDateTime({String? title, String? hintText}) {
+  Widget selectDateTime(SecretaryDateAddController controller, {String? title, String? hintText}) {
     Debug.log("controller.basicValidator.errors: ${controller.basicValidator.errors}");
     return Container(
-      key: ValueKey(controller.selectedDate.toString()),
+      key: ValueKey(controller.data[instanceIndex]!.selectedDate.toString()),
       child: InputDecorator(
-        isEmpty: controller.selectedDate == null,
+        isEmpty: controller.data[instanceIndex]!.selectedDate == null,
         decoration: InputDecoration(
           //border: OutlineInputBorder(borderSide: BorderSide(color: Colors.transparent)),
           hintText: "",
@@ -465,7 +522,7 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
               MySpacing.height(8),
             MyButton.outlined(
               onPressed: () {
-                controller.pickDateTime();
+                controller.pickDateTime(instanceIndex);
               },
               borderColor: colorScheme.primary,
               padding: MySpacing.xy(16, 16),
@@ -479,8 +536,9 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
                   ),
                   MySpacing.width(10),
                   MyText.labelMedium(
-                      controller.selectedDate != null
-                          ? "${dateFormatter.format(controller.selectedDate!)} ${timeFormatter.format(controller.selectedDate!)}"
+                      controller.data[instanceIndex]!.selectedDate != null
+                          ? "${dateFormatter.format(controller.data[instanceIndex]!.selectedDate!)}"
+                          " ${timeFormatter.format(controller.data[instanceIndex]!.selectedDate!)}"
                           : hintText?? "Select Date & Time",
                       fontWeight: 600,
                       color: colorScheme.primary),
@@ -491,5 +549,22 @@ class _SecretaryDatesAddScreenState extends State<SecretaryDatesAddScreen> with 
         ),
       ),
     );
+  }
+
+
+  void simpleToastMessage(SecretaryDateAddController controller, String text, Color color) {
+    if (!mounted || !context.mounted) return; // makes sure the State is still alive
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      clipBehavior: Clip.antiAliasWithSaveLayer,
+      elevation: 0,
+      shape: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
+      width: 300,
+      behavior: SnackBarBehavior.floating,
+      duration: Duration(milliseconds: 1200),
+      //animation: Tween<double>(begin: 0, end: 300).animate(controller.animationController),
+      content: MyText.labelLarge(text, fontWeight: 600, color: contentTheme.onPrimary),
+      backgroundColor: color,
+    ));
   }
 }

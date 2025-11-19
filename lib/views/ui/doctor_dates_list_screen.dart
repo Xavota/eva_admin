@@ -150,7 +150,7 @@ class _DoctorDatesListScreenState extends State<DoctorDatesListScreen> with UIMi
                                         onTap: () => controller.changePatientStatus(index, !data.status).then((response) {
                                           if (context.mounted) {
                                             if (response) {
-                                              simpleSnackBar(context, "Tratante ${(data.status ? "" : "des")}archivado con éxito", contentTheme.success);// Color(0XFFAA236E));
+                                              simpleSnackBar(context, "Paciente ${(data.status ? "" : "des")}archivado con éxito", contentTheme.success);// Color(0XFFAA236E));
                                             }
                                             else {
                                               simpleSnackBar(context, "Hubo un error en el servidor, intenta de nuevo más tarde", contentTheme.danger);// Color(0XFFAA236E));

@@ -5,6 +5,8 @@ import 'package:medicare/helpers/storage/local_storage.dart';
 import 'package:medicare/helpers/theme/app_notifire.dart';
 import 'package:medicare/helpers/theme/app_style.dart';
 import 'package:medicare/helpers/theme/theme_customizer.dart';
+import 'package:medicare/helpers/widgets/my_popups.dart';
+import 'package:medicare/views/ui/error_pages/error_404_screen.dart';
 import 'package:medicare/routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -57,10 +59,12 @@ Future<void> main() async {
   AppStyle.init();
   await ThemeCustomizer.init();
 
-  runApp(ChangeNotifierProvider<AppNotifier>(
-    create: (context) => AppNotifier(),
-    child: const MyApp(),
-  ));
+  runApp(
+    ChangeNotifierProvider<AppNotifier>(
+      create: (context) => AppNotifier(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -69,9 +73,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<AppNotifier>(
-      builder: (_, notifier, ___) {
+      builder: (_, notifier, _) {
         //return GetMaterialApp.router(
         return GetMaterialApp(
+          scaffoldMessengerKey: rootScaffoldMessengerKey,
           /*routerDelegate: GetDelegate(
             notFoundRoute: GetPage(
               name: '/not-found',
@@ -79,6 +84,15 @@ class MyApp extends StatelessWidget {
             ),
           ),
           routeInformationParser: GetInformationParser(),*/
+          unknownRoute: GetPage(
+            name: '/error/404',
+            page: () => Error404Screen(),
+          ),
+          onUnknownRoute: (settings) {
+            Debug.log("onUnknownRoute ${settings.name}", overrideColor: Colors.red);
+            settings.printError();
+            return null;
+          },
           routingCallback: (routing) {
             Debug.log('Navigated to: ${routing?.current}', overrideColor: Colors.pinkAccent);
             Debug.log('Previous route: ${routing?.previous}', overrideColor: Colors.pinkAccent);

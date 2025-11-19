@@ -23,8 +23,6 @@ class AdminPremiumBooksListInstanceData {
   List<Completer<double>> providersCompleter = [];
   String currentHeader = "";
   String currentSubHeader = "";
-
-  final PageController simplePageController = PageController(initialPage: 0);
 }
 
 class AdminPremiumBooksListController extends MyController {

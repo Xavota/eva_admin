@@ -6,19 +6,21 @@ import 'package:flutter/services.dart';
 
 class PremiumVideoModel extends PremiumParentModel{
   final String tile;
-  final String description;
-  final List<String> images;
+  final bool free;
+  final String frontPage;
+  final String embed;
 
-  PremiumVideoModel(super.id, this.tile, this.description, this.images);
+  PremiumVideoModel(super.id, this.tile, this.free, this.frontPage, this.embed);
 
   static PremiumVideoModel fromJSON(Map<String,dynamic> json){
     JSONDecoder jsonDecoder = JSONDecoder(json);
 
     String tile = jsonDecoder.getString('title');
-    String description = jsonDecoder.getString('description');
-    List<String> images = jsonDecoder.getObjectList<String>('images');
+    bool free = jsonDecoder.getInt('free') == 1;
+    String frontPage = jsonDecoder.getString('frontPage');
+    String embed = jsonDecoder.getString('embed');
 
-    return PremiumVideoModel(jsonDecoder.getId, tile, description, images);
+    return PremiumVideoModel(jsonDecoder.getId, tile, free, frontPage, embed);
   }
 
   static List<PremiumVideoModel> listFromJSON(List<dynamic> list) {

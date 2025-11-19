@@ -229,7 +229,7 @@ class _AdminPremiumPostsListScreenState extends State<AdminPremiumPostsListScree
                               ).toList(),
                             )
                           else
-                            MyText.bodySmall("No hay posts aún en esta categoría, agrega post para que los tratantes premium puedan ver."),
+                            MyText.bodySmall("No hay posts aún en esta categoría, agrega post para que los pacientes premium puedan ver."),
                           MySpacing.height(20),
                         ],
                       ),

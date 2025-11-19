@@ -69,14 +69,14 @@ class _SecretaryPatientDetailScreenState extends State<SecretaryPatientDetailScr
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     MyText.titleMedium(
-                      "Detalles del Tratante",
+                      "Detalles del Paciente",
                       fontSize: 18,
                       fontWeight: 600,
                     ),
                     MyBreadcrumb(
                       children: [
                         MyBreadcrumbItem(name: 'Secretaria'),
-                        MyBreadcrumbItem(name: 'Detalles Tratante', active: true),
+                        MyBreadcrumbItem(name: 'Detalles Paciente', active: true),
                       ],
                     ),
                   ],
@@ -116,6 +116,55 @@ class _SecretaryPatientDetailScreenState extends State<SecretaryPatientDetailScr
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           MyText.bodyMedium("Detalles", fontWeight: 600, muted: true),
+          MyForm(
+            addNewFormKey: controller.addNewPinFormKey,
+            disposeFormKey: controller.disposePinFormKey,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                SizedBox(
+                  width: 200.0,
+                  child: commonTextField(
+                    title: "Nuevo Nip", hintText: "####",
+                    validator: controller.pinValidator.getValidation('pin'),
+                    teController: controller.pinValidator.getController('pin'),
+                    prefixIcon: Icon(LucideIcons.lock),
+                    integer: true, length: 4,
+                  ),
+                ),
+                MySpacing.width(20.0),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 0.0),
+                  child: MyButton(
+                    onPressed: () {
+                      controller.changePatientPin().then((error) {
+                        if (error == null) {
+                          controller.clearPin();
+                          setState(() {});
+
+                          if (mounted) {
+                            simpleSnackBar(context, "NIP cambiado con éxito", contentTheme.success);
+                          }
+                        }
+                        else if (mounted) {
+                          simpleSnackBar(context, error.isEmpty ? "Ocurrió un error con el servidor. Intenta de nuevo más tarde" : error, contentTheme.danger);
+                        }
+                      });
+                    },
+                    elevation: 0,
+                    borderRadiusAll: 8,
+                    padding: MySpacing.xy(20, 16),
+                    backgroundColor: contentTheme.primary,
+                    child: MyText.labelMedium(
+                      "Cambiar NIP",
+                      fontWeight: 600,
+                      color: contentTheme.onPrimary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
           /*Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -196,18 +245,17 @@ class _SecretaryPatientDetailScreenState extends State<SecretaryPatientDetailScr
           MySpacing.height(20),
           Row(
             children: [
-              MyContainer(
-                onTap: () {
-                  _showActivateSubDialog(() => controller.updatePatientInfo(controller.patientIndex));
-                },
-                padding: MySpacing.xy(12, 8),
-                borderRadiusAll: 8,
-                color: contentTheme.primary,
-                child: MyText.labelSmall("Activar Suscripción", fontWeight: 600, color: contentTheme.onPrimary),
-              ),
-              if ((controller.subscriptionStatus?? SubscriptionStatus.kNotActive) != SubscriptionStatus.kNotActive)
-                MySpacing.width(10),
-              if ((controller.subscriptionStatus?? SubscriptionStatus.kNotActive) != SubscriptionStatus.kNotActive)
+              if ((controller.subscriptionStatus?? SubscriptionStatus.kNotActive) == SubscriptionStatus.kNotActive)
+                MyContainer(
+                  onTap: () {
+                    _showActivateSubDialog(() => controller.updatePatientInfo(controller.patientIndex));
+                  },
+                  padding: MySpacing.xy(12, 8),
+                  borderRadiusAll: 8,
+                  color: contentTheme.primary,
+                  child: MyText.labelSmall("Activar Suscripción", fontWeight: 600, color: contentTheme.onPrimary),
+                )
+              else
                 MyContainer(
                   onTap: () {
                     _showCancelAlert(() {
@@ -337,6 +385,44 @@ class _SecretaryPatientDetailScreenState extends State<SecretaryPatientDetailScr
           ),
         );
       },
+    );
+  }
+
+  Widget commonTextField({
+    String? title, String? hintText, bool readOnly = false,
+    String? Function(String?)? validator, Widget? prefixIcon,
+    void Function()? onTap, TextEditingController? teController,
+    bool integer = false, bool floatingPoint = false, int? length,
+    void Function(String)? onChange,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        MyText.labelMedium(title ?? "", fontWeight: 600, muted: true),
+        MySpacing.height(8),
+        TextFormField(
+          validator: validator,
+          readOnly: readOnly,
+          onTap: onTap ?? () {},
+          controller: teController,
+          keyboardType: integer ? TextInputType.phone : null,
+          maxLength: length != null ? (length + (!integer && floatingPoint ? 3 : 0)) : null,
+          inputFormatters: integer ? <TextInputFormatter>[FilteringTextInputFormatter.allow(RegExp(r'[0-9]'))]
+              : (floatingPoint ? <TextInputFormatter>[FloatingPointTextInputFormatter(maxDigitsBeforeDecimal: length, maxDigitsAfterDecimal: 2)] : null),
+          style: MyTextStyle.bodySmall(),
+          decoration: InputDecoration(
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            hintText: hintText,
+            counterText: "",
+            hintStyle: MyTextStyle.bodySmall(fontWeight: 600, muted: true),
+            isCollapsed: true,
+            isDense: true,
+            prefixIcon: prefixIcon,
+            contentPadding: MySpacing.all(16),
+          ),
+          onChanged: onChange,
+        ),
+      ],
     );
   }
 
@@ -532,43 +618,18 @@ class _ActivateSubWidgetState extends State<ActivateSubWidget> with UIMixin {
                         SizedBox(
                           width: 100.0,
                           child: commonTextField(
-                            title: "Días",
-                            hintText: "Días",
-                            validator: widget.controller.basicValidator.getValidation("durationDays"),
-                            teController: widget.controller.basicValidator.getController("durationDays"),
-                            integer: true, length: 2,
-                            onChange: (_) {
-                              final daysText = widget.controller.basicValidator.getController("durationDays")!.text;
-                              final monthsText = widget.controller.basicValidator.getController("durationMonths")!.text;
-                              final yearsText = widget.controller.basicValidator.getController("durationYears")!.text;
-                              final days = int.parse(daysText.isNotEmpty ? daysText : "0");
-                              final months = int.parse(monthsText.isNotEmpty ? monthsText : "0");
-                              final years = int.parse(yearsText.isNotEmpty ? yearsText : "0");
-                              widget.controller.changeCustomDuration(
-                                days, months, years,
-                              );
-                              setState(() {});
-                            },
-                          ),
-                        ),
-                        MySpacing.width(10),
-                        SizedBox(
-                          width: 100.0,
-                          child: commonTextField(
                             title: "Meses",
                             hintText: "Meses",
                             validator: widget.controller.basicValidator.getValidation("durationMonths"),
                             teController: widget.controller.basicValidator.getController("durationMonths"),
                             integer: true, length: 2,
                             onChange: (_) {
-                              final daysText = widget.controller.basicValidator.getController("durationDays")!.text;
                               final monthsText = widget.controller.basicValidator.getController("durationMonths")!.text;
                               final yearsText = widget.controller.basicValidator.getController("durationYears")!.text;
-                              final days = int.parse(daysText.isNotEmpty ? daysText : "0");
                               final months = int.parse(monthsText.isNotEmpty ? monthsText : "0");
                               final years = int.parse(yearsText.isNotEmpty ? yearsText : "0");
                               widget.controller.changeCustomDuration(
-                                days, months, years,
+                                months, years,
                               );
                               setState(() {});
                             },
@@ -584,14 +645,12 @@ class _ActivateSubWidgetState extends State<ActivateSubWidget> with UIMixin {
                             teController: widget.controller.basicValidator.getController("durationYears"),
                             integer: true, length: 2,
                             onChange: (_) {
-                              final daysText = widget.controller.basicValidator.getController("durationDays")!.text;
                               final monthsText = widget.controller.basicValidator.getController("durationMonths")!.text;
                               final yearsText = widget.controller.basicValidator.getController("durationYears")!.text;
-                              final days = int.parse(daysText.isNotEmpty ? daysText : "0");
                               final months = int.parse(monthsText.isNotEmpty ? monthsText : "0");
                               final years = int.parse(yearsText.isNotEmpty ? yearsText : "0");
                               widget.controller.changeCustomDuration(
-                                days, months, years,
+                                months, years,
                               );
                               setState(() {});
                             },

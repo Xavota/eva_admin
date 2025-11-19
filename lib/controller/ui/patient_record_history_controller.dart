@@ -128,7 +128,7 @@ class PatientRecordHistoryController extends MyController {
     }
     return DailyRecordModel(
       -1, loggedPatient!, history.first.date, weight, waist, sysBP, diaBP,
-      sugarLevel, EmotionalState.veryBad, sleepTime, false, false,
+      sugarLevel, EmotionalState.veryBad, sleepTime, false, false, false,
     );
   }
   DailyRecordModel getMaxValues([DailyRecordModel? leftBorder]) {
@@ -151,7 +151,7 @@ class PatientRecordHistoryController extends MyController {
     }
     return DailyRecordModel(
       -1, loggedPatient!, history.first.date, weight, waist, sysBP, diaBP,
-      sugarLevel, EmotionalState.veryBad, sleepTime, false, false,
+      sugarLevel, EmotionalState.veryGood, sleepTime, true, true, true,
     );
   }
   DailyRecordModel getFirstValues() {
@@ -164,6 +164,10 @@ class PatientRecordHistoryController extends MyController {
     double? diaBP;
     double? sugarLevel;
     double? sleepTime;
+    EmotionalState? emotionalState;
+    bool? medications;
+    bool? weights;
+    bool? cardio;
     for (final h in history) {
       weight ??= h.weight;
       waist ??= h.waist;
@@ -171,10 +175,15 @@ class PatientRecordHistoryController extends MyController {
       diaBP ??= h.diastolicBloodPressure;
       sugarLevel ??= h.sugarLevel;
       sleepTime ??= h.sleepTime;
+
+      emotionalState??= h.emotionalState;
+      medications??= h.medications;
+      weights??= h.weights;
+      cardio??= h.cardio;
     }
     return DailyRecordModel(
       -1, loggedPatient!, history.first.date, weight, waist, sysBP, diaBP,
-      sugarLevel, EmotionalState.veryBad, sleepTime, false, false,
+      sugarLevel, emotionalState, sleepTime, medications, weights, cardio,
     );
   }
   DailyRecordModel getLastValues() {
@@ -187,6 +196,10 @@ class PatientRecordHistoryController extends MyController {
     double? diaBP;
     double? sugarLevel;
     double? sleepTime;
+    EmotionalState? emotionalState;
+    bool? medications;
+    bool? weights;
+    bool? cardio;
     for (final h in history.reversed) {
       weight ??= h.weight;
       waist ??= h.waist;
@@ -194,10 +207,15 @@ class PatientRecordHistoryController extends MyController {
       diaBP ??= h.diastolicBloodPressure;
       sugarLevel ??= h.sugarLevel;
       sleepTime ??= h.sleepTime;
+
+      emotionalState??= h.emotionalState;
+      medications??= h.medications;
+      weights??= h.weights;
+      cardio??= h.cardio;
     }
     return DailyRecordModel(
       -1, loggedPatient!, history.first.date, weight, waist, sysBP, diaBP,
-      sugarLevel, EmotionalState.veryBad, sleepTime, false, false,
+      sugarLevel, emotionalState, sleepTime, medications, weights, cardio,
     );
   }
   DailyRecordModel getWeekAverageValues() {
@@ -247,7 +265,7 @@ class PatientRecordHistoryController extends MyController {
 
     return DailyRecordModel(
       -1, loggedPatient!, history.first.date, weight, waist, sysBP, diaBP,
-      sugarLevel, EmotionalState.veryBad, sleepTime, false, false,
+      sugarLevel, EmotionalState.neutral, sleepTime, false, false, false
     );
   }
   DailyRecordModel getLeftBorderValues() {
@@ -264,6 +282,10 @@ class PatientRecordHistoryController extends MyController {
     double? diaBP;
     double? sugarLevel;
     double? sleepTime;
+    EmotionalState? emotionalState;
+    bool? medications;
+    bool? weights;
+    bool? cardio;
     for (final h in history.reversed) {
       weight ??= h.weight;
       waist ??= h.waist;
@@ -271,11 +293,16 @@ class PatientRecordHistoryController extends MyController {
       diaBP ??= h.diastolicBloodPressure;
       sugarLevel ??= h.sugarLevel;
       sleepTime ??= h.sleepTime;
+
+      emotionalState??= h.emotionalState;
+      medications??= h.medications;
+      weights??= h.weights;
+      cardio??= h.cardio;
     }
 
     return DailyRecordModel(
       -1, loggedPatient!, history.first.date, weight, waist, sysBP, diaBP,
-      sugarLevel, EmotionalState.veryBad, sleepTime, false, false,
+      sugarLevel, emotionalState, sleepTime, medications, weights, cardio,
     );
   }
 

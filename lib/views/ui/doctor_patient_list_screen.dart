@@ -46,7 +46,7 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> with 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final tableFlexWidth = (1541 - 940 - (1920 - screenWidth));
+    final tableFlexWidth = (1541 - 838 - (1920 - screenWidth));
 
     return Layout(
       child: GetBuilder(
@@ -62,14 +62,14 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> with 
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     MyText.titleMedium(
-                      "Listado de Tratantes",
+                      "Listado de Pacientes",
                       fontSize: 18,
                       fontWeight: 600,
                     ),
                     MyBreadcrumb(
                       children: [
                         MyBreadcrumbItem(name: 'Médico'),
-                        MyBreadcrumbItem(name: 'Lista Tratantes', active: true),
+                        MyBreadcrumbItem(name: 'Lista Pacientes', active: true),
                       ],
                     ),
                   ],
@@ -88,81 +88,79 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> with 
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          MyText.bodyMedium("Listado de Tratantes", fontWeight: 600, muted: true),
+                          MyText.bodyMedium("Listado de Pacientes", fontWeight: 600, muted: true),
                           MyContainer(
                             onTap: controller.addPatient,
                             padding: MySpacing.xy(12, 8),
                             borderRadiusAll: 8,
                             color: contentTheme.primary,
-                            child: MyText.labelSmall("Registrar Tratante", fontWeight: 600, color: contentTheme.onPrimary),
+                            child: MyText.labelSmall("Registrar Paciente", fontWeight: 600, color: contentTheme.onPrimary),
                           )
                         ],
                       ),
-                      Row(
-                        children: [
-                          InkWell(
-                            onTap: () => controller.setActiveFilter(null),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Radio<bool?>(
-                                  value: null,
-                                  activeColor: theme.colorScheme.primary,
-                                  groupValue: controller.activeFilter,
-                                  onChanged: (value) => controller.setActiveFilter(value),
-                                  visualDensity: getCompactDensity,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                MySpacing.width(8),
-                                MyText.labelMedium(
-                                  "Todos",
-                                ),
-                              ],
+                      RadioGroup(
+                        groupValue: controller.activeFilter,
+                        onChanged: (value) => controller.setActiveFilter(value),
+                        child: Row(
+                          children: [
+                            InkWell(
+                              onTap: () => controller.setActiveFilter(null),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Radio<bool?>(
+                                    value: null,
+                                    activeColor: theme.colorScheme.primary,
+                                    visualDensity: getCompactDensity,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  MySpacing.width(8),
+                                  MyText.labelMedium(
+                                    "Todos",
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 10.0,),
-                          InkWell(
-                            onTap: () => controller.setActiveFilter(true),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Radio<bool?>(
-                                  value: true,
-                                  activeColor: theme.colorScheme.primary,
-                                  groupValue: controller.activeFilter,
-                                  onChanged: (value) => controller.setActiveFilter(value),
-                                  visualDensity: getCompactDensity,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                MySpacing.width(8),
-                                MyText.labelMedium(
-                                  "Activos",
-                                ),
-                              ],
+                            SizedBox(width: 10.0,),
+                            InkWell(
+                              onTap: () => controller.setActiveFilter(true),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Radio<bool?>(
+                                    value: true,
+                                    activeColor: theme.colorScheme.primary,
+                                    visualDensity: getCompactDensity,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  MySpacing.width(8),
+                                  MyText.labelMedium(
+                                    "Activos",
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 10.0,),
-                          InkWell(
-                            onTap: () => controller.setActiveFilter(false),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Radio<bool?>(
-                                  value: false,
-                                  activeColor: theme.colorScheme.primary,
-                                  groupValue: controller.activeFilter,
-                                  onChanged: (value) => controller.setActiveFilter(value),
-                                  visualDensity: getCompactDensity,
-                                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                ),
-                                MySpacing.width(8),
-                                MyText.labelMedium(
-                                  "Archivados",
-                                ),
-                              ],
+                            SizedBox(width: 10.0,),
+                            InkWell(
+                              onTap: () => controller.setActiveFilter(false),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Radio<bool?>(
+                                    value: false,
+                                    activeColor: theme.colorScheme.primary,
+                                    visualDensity: getCompactDensity,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                  MySpacing.width(8),
+                                  MyText.labelMedium(
+                                    "Archivados",
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       MySpacing.height(20),
                       if (controller.patients.isNotEmpty)
@@ -222,12 +220,13 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> with 
                                   DataCell(SizedBox(width: 75, child: MyText.bodySmall(Utils.getDateStringFromDateTime(data.birthDate)))),
                                   DataCell(SizedBox(width: 80, child: MyText.bodySmall(data.phoneNumber))),
                                   DataCell(Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       MyContainer(
                                         onTap: () => controller.changePatientStatus(index, !data.status).then((response) {
                                           if (context.mounted) {
                                             if (response) {
-                                              simpleSnackBar(context, "Tratante ${(data.status ? "" : "des")}archivado con éxito", contentTheme.success);// Color(0XFFAA236E));
+                                              simpleSnackBar(context, "Paciente ${(data.status ? "" : "des")}archivado con éxito", contentTheme.success);// Color(0XFFAA236E));
                                             }
                                             else {
                                               simpleSnackBar(context, "Hubo un error en el servidor, intenta de nuevo más tarde", contentTheme.danger);// Color(0XFFAA236E));
@@ -239,29 +238,53 @@ class _DoctorPatientListScreenState extends State<DoctorPatientListScreen> with 
                                         }),
                                         paddingAll: 8,
                                         color: contentTheme.secondary.withAlpha(32),
+                                        tooltip: MyContainer.shadow(
+                                          borderRadius: BorderRadius.circular(5.0),
+                                          color: Color.fromARGB(255, 245, 245, 245),
+                                          paddingAll: 10,
+                                          child: MyText.labelMedium("${(data.status ? "A" : "Desa")}rchivar",),
+                                        ),
                                         child: Icon(data.status ? LucideIcons.archive : LucideIcons.archive_restore, size: 16),
                                       ),
-                                      MySpacing.width(20),
+                                      /*MySpacing.width(20),
                                       MyContainer(
                                         onTap: () => controller.goDetailScreen(index),
                                         paddingAll: 8,
                                         color: contentTheme.secondary.withAlpha(32),
+                                        tooltip: MyContainer.shadow(
+                                          borderRadius: BorderRadius.circular(5.0),
+                                          color: Color.fromARGB(255, 245, 245, 245),
+                                          paddingAll: 10,
+                                          child: MyText.labelMedium("Detalles",),
+                                        ),
                                         child: Icon(LucideIcons.eye, size: 16),
-                                      ),
+                                      ),*/
                                       MySpacing.width(20),
                                       MyContainer(
                                         onTap: () => controller.goEditScreen(index),
                                         paddingAll: 8,
                                         color: contentTheme.secondary.withAlpha(32),
+                                        tooltip: MyContainer.shadow(
+                                          borderRadius: BorderRadius.circular(5.0),
+                                          color: Color.fromARGB(255, 245, 245, 245),
+                                          paddingAll: 10,
+                                          child: MyText.labelMedium("Editar",),
+                                        ),
                                         child: Icon(LucideIcons.pencil, size: 16),
                                       ),
-                                      MySpacing.width(20),
+                                      /*MySpacing.width(20),
                                       MyContainer(
                                         onTap: () => controller.goPrescriptionScreen(index),
                                         paddingAll: 8,
                                         color: contentTheme.secondary.withAlpha(32),
+                                        tooltip: MyContainer.shadow(
+                                          borderRadius: BorderRadius.circular(5.0),
+                                          color: Color.fromARGB(255, 245, 245, 245),
+                                          paddingAll: 10,
+                                          child: MyText.labelMedium("Recetas médicas",),
+                                        ),
                                         child: Icon(LucideIcons.scroll, size: 16),
-                                      ),
+                                      ),*/
                                     ],
                                   ),
                                   ),

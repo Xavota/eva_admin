@@ -38,6 +38,8 @@ class AdminPremiumBookEditInstanceData {
   String currentSubHeader = "";
   int postIndex = -1;
 
+  bool free = false;
+
   final TextEditingController dropZoneTControllerFrontPage = TextEditingController();
   final TextEditingController dropZoneTControllerBook = TextEditingController();
 
@@ -100,6 +102,8 @@ class AdminPremiumBooksEditController extends MyController {
 
     data[instanceIndex]!.selectedBook = postsList[data[instanceIndex]!.postIndex];
 
+    data[instanceIndex]!.free = data[instanceIndex]!.selectedBook!.free;
+
     basicValidator.getController('title')!.text = data[instanceIndex]!.selectedBook!.tile;
     data[instanceIndex]!.dropZoneTControllerFrontPage.text = data[instanceIndex]!.selectedBook!.frontPage;
     data[instanceIndex]!.dropZoneTControllerBook.text = data[instanceIndex]!.selectedBook!.book;
@@ -117,11 +121,11 @@ class AdminPremiumBooksEditController extends MyController {
     return basicValidator.formKey;
   }
 
-  void disposeFormKey(GlobalKey<FormState> key) {
+  void /**/disposeFormKey(GlobalKey<FormState> key) {
     if (formKeys.contains(key)) {
       formKeys.remove(key);
     }
-    basicValidator.formKey = formKeys.last;
+    basicValidator.formKey = formKeys.isNotEmpty ? formKeys.last : GlobalKey();
   }
 
   void loadFrontPage(int instanceIndex, String name, Uint8List fileData, String mime) {
@@ -135,6 +139,12 @@ class AdminPremiumBooksEditController extends MyController {
   }
 
 
+  void onFreeCheckboxChange(int instanceIndex, bool newValue) {
+    data[instanceIndex]!.free = newValue;
+    contextInstance.doUpdate(instanceIndex);
+  }
+
+
   String getPreviousScreenRoute(int instanceIndex) {
     return '/panel/premium/books/${data[instanceIndex]!.currentHeader}/${data[instanceIndex]!.currentSubHeader}/list';
   }
@@ -143,10 +153,6 @@ class AdminPremiumBooksEditController extends MyController {
     Get.toNamed('/panel/premium/books/${data[instanceIndex]!.currentHeader}/${data[instanceIndex]!.currentSubHeader}/list');
   }
 
-  /// TODO: AÚN FALTA CAMBIAR ESTA FUNCIÓN PARA QUE NO SUBA UN LIBRO NUEVO, SINO
-  /// QUE EDITE EL ANTERIOR. TIENE QUE VER SI LA IMAGEN Y EL LIBRO QUE SE ESTÁN
-  /// SUBIENDO SON NUEVOS O SON LOS QUE YA ESTABA, PARA DETERMINAR SI MANDA A
-  /// BORRAR LOS ANTERIORES O NO.
   Future<String?> onEdit(int instanceIndex) async {
     String? validationError;
 
@@ -165,7 +171,10 @@ class AdminPremiumBooksEditController extends MyController {
       String bookName = data[instanceIndex]!.selectedBook!.book;
 
       if (data[instanceIndex]!.frontPage?.uploadInfo != null) {
-        manager.deleteFile(frontPageName, "images/premium_books/");
+        final deleteErrors = await manager.deleteFile(frontPageName, "images/premium_books/");
+        if (deleteErrors != null) {
+          return "Hubo un error con el servidor, intenta de nuevo más tarde.";
+        }
 
         var frontPageUpload = await manager.uploadFile(
           data[instanceIndex]!.frontPage!.uploadInfo!.name, data[instanceIndex]!.frontPage!.uploadInfo!.data,
@@ -180,7 +189,10 @@ class AdminPremiumBooksEditController extends MyController {
       }
 
       if (data[instanceIndex]!.bookFile != null) {
-        manager.deleteFile(bookName, "pdf/premium_books/");
+        final deleteErrors = await manager.deleteFile(bookName, "pdf/premium_books/");
+        if (deleteErrors != null) {
+          return "Hubo un error con el servidor, intenta de nuevo más tarde.";
+        }
 
         final bookUpload = await manager.uploadFile(
           data[instanceIndex]!.bookFile!.name, data[instanceIndex]!.bookFile!.data,
@@ -195,7 +207,7 @@ class AdminPremiumBooksEditController extends MyController {
       }
 
       var errors = await manager.editPremiumBook(
-        basicValidator.getData(), data[instanceIndex]!.selectedBook!.id, frontPageName, bookName,
+        basicValidator.getData(), data[instanceIndex]!.selectedBook!.id, data[instanceIndex]!.free, frontPageName, bookName,
       );
       if (errors != null) {
         if (errors.containsKey("server")) {

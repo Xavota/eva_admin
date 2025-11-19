@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:blix_essentials/blix_essentials.dart';
 import 'package:flutter/material.dart';
 
 
@@ -11,10 +12,11 @@ class _InstanceKeyInfo {
 }
 
 class _InstanceInfo {
-  _InstanceInfo(this.instanceKeys, this.canUpdate) : pendingUpdateActions = [];
-  _InstanceInfo.empty() : instanceKeys = {}, canUpdate = false, pendingUpdateActions = [];
+  _InstanceInfo(this.instanceKeys, this.formKeys, this.canUpdate) : pendingUpdateActions = [];
+  _InstanceInfo.empty() : instanceKeys = {}, formKeys = {}, canUpdate = false, pendingUpdateActions = [];
 
   Map<String, _InstanceKeyInfo> instanceKeys;
+  Map<String, GlobalKey<FormState>> formKeys;
   bool canUpdate;
 
   List<String> pendingUpdateActions;
@@ -32,6 +34,20 @@ class ContextInstance {
   GlobalKey? getContentKey(int instanceIndex, String name) {
     return _instancesInfo[instanceIndex]!.instanceKeys[name]?.globalKey;
   }
+  GlobalKey<FormState>? getFormKey(int instanceIndex, String name) {
+    return _instancesInfo[instanceIndex]!.formKeys[name];
+  }
+  GlobalKey<FormState>? getPrevFormKey(int instanceIndex, String name) {
+    if (_instancesInfo.entries.length <= 1) return null;
+    int lastIndex = _instancesInfo.keys.fold<int>(-1, (i, e) {
+      if (e < instanceIndex) {
+        i = math.max(i, e);
+      }
+      return i;
+    });
+    if (lastIndex == -1) return null;
+    return _instancesInfo[lastIndex]!.formKeys[name];
+  }
   Size? getContentSize(int instanceIndex, String keyName) {
     return _instancesInfo[instanceIndex]!.instanceKeys[keyName]?.contentSize;
   }
@@ -40,6 +56,20 @@ class ContextInstance {
   }
   double? getContentHeight(int instanceIndex, String keyName) {
     return _instancesInfo[instanceIndex]!.instanceKeys[keyName]?.contentSize?.height;
+  }
+  int getInstancesCount() {
+    return _instancesInfo.length;
+  }
+  void printInstanceKeys() {
+    String printText = "";
+    for (final instance in _instancesInfo.entries) {
+      printText += "Instance: ${instance.key}, Keys: {";
+      for (final k in instance.value.instanceKeys.entries) {
+        printText += "${k.key}: ${k.value.globalKey}, ";
+      }
+      printText += "}";
+    }
+    Debug.log(printText);
   }
 
   int addInstance() {
@@ -55,17 +85,23 @@ class ContextInstance {
   }
 
   void disposeInstance(int index) {
-    _instancesInfo.remove(index);
     onInstanceRemoved?.call(index);
+    _instancesInfo.remove(index);
   }
 
 
   void addInstanceKey(int index, String name) {
     _instancesInfo[index]!.instanceKeys[name] = _InstanceKeyInfo(GlobalKey());
   }
+  void addFormKey(int index, String name) {
+    _instancesInfo[index]!.formKeys[name] = GlobalKey<FormState>();
+  }
 
   void removeInstanceKey(int index, String name) {
     _instancesInfo[index]!.instanceKeys.remove(name);
+  }
+  void removeFormKey(int index, String name) {
+    _instancesInfo[index]!.formKeys.remove(name);
   }
 
   void doUpdate(int instanceIndex, [bool preventDuplicates = false]) {

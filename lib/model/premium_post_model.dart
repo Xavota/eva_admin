@@ -7,18 +7,20 @@ import 'package:flutter/services.dart';
 class PremiumPostModel extends PremiumParentModel{
   final String tile;
   final String description;
+  final bool free;
   final List<String> images;
 
-  PremiumPostModel(super.id, this.tile, this.description, this.images);
+  PremiumPostModel(super.id, this.tile, this.description, this.free, this.images);
 
   static PremiumPostModel fromJSON(Map<String,dynamic> json){
     JSONDecoder jsonDecoder = JSONDecoder(json);
 
     String tile = jsonDecoder.getString('title');
     String description = jsonDecoder.getString('description');
+    bool free = jsonDecoder.getInt('free') == 1;
     List<String> images = jsonDecoder.getObjectList<String>('images');
 
-    return PremiumPostModel(jsonDecoder.getId, tile, description, images);
+    return PremiumPostModel(jsonDecoder.getId, tile, description, free, images);
   }
 
   static List<PremiumPostModel> listFromJSON(List<dynamic> list) {

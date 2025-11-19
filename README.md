@@ -1,6 +1,6 @@
-# medicare
+# EvaApp
 
-A new Flutter project.
+Una aplicación para doctores y pacientes
 
 ## Getting Started
 

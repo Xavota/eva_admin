@@ -59,7 +59,7 @@ class _PatientPrescriptionDetailScreenState extends State<PatientPrescriptionDet
                     ),
                     MyBreadcrumb(
                       children: [
-                        MyBreadcrumbItem(name: 'Tratante'),
+                        MyBreadcrumbItem(name: 'Paciente'),
                         MyBreadcrumbItem(name: 'Vista Receta', active: true),
                       ],
                     ),

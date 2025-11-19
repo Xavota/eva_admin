@@ -51,10 +51,12 @@ class AuthService {
   static Future<void> logout() async {
     if (_loginType == LoginType.kNone) return;
 
-    await LocalStorage.setLoggedIn(LoginType.kNone);
     _loginType = LoginType.kNone;
     loggedUserNumber = "";
     loggedUserData = null;
+
+    await LocalStorage.setLoggedIn(LoginType.kNone);
+
     //Debug.log("loggedUserData $loggedUserData", overrideColor: Colors.green);
   }
 

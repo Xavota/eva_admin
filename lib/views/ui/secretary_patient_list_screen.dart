@@ -65,14 +65,14 @@ class _SecretaryPatientListScreenState extends State<SecretaryPatientListScreen>
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     MyText.titleMedium(
-                      "Listado de Tratantes",
+                      "Listado de Pacientes",
                       fontSize: 18,
                       fontWeight: 600,
                     ),
                     MyBreadcrumb(
                       children: [
                         MyBreadcrumbItem(name: 'Secretaria'),
-                        MyBreadcrumbItem(name: 'Lista Tratantes', active: true),
+                        MyBreadcrumbItem(name: 'Lista Pacientes', active: true),
                       ],
                     ),
                   ],
@@ -87,7 +87,7 @@ class _SecretaryPatientListScreenState extends State<SecretaryPatientListScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      MyText.bodyMedium("Listado de Tratantes", fontWeight: 600, muted: true),
+                      MyText.bodyMedium("Listado de Pacientes", fontWeight: 600, muted: true),
                       MySpacing.height(15),
                       commonTextField(
                         title: "Nombre", hintText: "Nombre",
@@ -312,12 +312,13 @@ class _SecretaryPatientListScreenState extends State<SecretaryPatientListScreen>
                                     null => "-"
                                   }))),
                                   DataCell(Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       /*MyContainer(
                                         onTap: () => controller.changePatientStatus(index, !data.status).then((response) {
                                           if (context.mounted) {
                                             if (response) {
-                                              simpleSnackBar(context, "Tratante ${(data.status ? "" : "des")}archivado con éxito", contentTheme.success);// Color(0XFFAA236E));
+                                              simpleSnackBar(context, "Paciente ${(data.status ? "" : "des")}archivado con éxito", contentTheme.success);// Color(0XFFAA236E));
                                             }
                                             else {
                                               simpleSnackBar(context, "Hubo un error en el servidor, intenta de nuevo más tarde", contentTheme.danger);// Color(0XFFAA236E));
@@ -336,6 +337,12 @@ class _SecretaryPatientListScreenState extends State<SecretaryPatientListScreen>
                                         onTap: () => controller.goDetailScreen(index),
                                         paddingAll: 8,
                                         color: contentTheme.secondary.withAlpha(32),
+                                        tooltip: MyContainer.shadow(
+                                          borderRadius: BorderRadius.circular(5.0),
+                                          color: Color.fromARGB(255, 245, 245, 245),
+                                          paddingAll: 10,
+                                          child: MyText.labelMedium("Detalles",),
+                                        ),
                                         child: Icon(LucideIcons.eye, size: 16),
                                       ),
                                       /*MySpacing.width(20),

@@ -42,13 +42,13 @@ class DoctorPatientListController extends MyController {
     Get.toNamed('/doctor/patient/edit/$index');
   }
 
-  void goDetailScreen(int index) {
+  /*void goDetailScreen(int index) {
     Get.toNamed('/doctor/patient/detail/$index');
-  }
+  }*/
 
-  void goPrescriptionScreen(int index) {
+  /*void goPrescriptionScreen(int index) {
     Get.toNamed('/doctor/patient/$index/prescription/list');
-  }
+  }*/
 
   void addPatient() {
     Get.toNamed('/doctor/patient/add');

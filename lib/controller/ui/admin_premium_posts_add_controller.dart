@@ -86,6 +86,8 @@ class AdminPremiumPostsAddController extends MyController {
   String _currentHeader = "";
   String _currentSubHeader = "";
 
+  bool free = false;
+
   final List<_PostImage> _images = [];
   final List<_PostImage> _deletedImages = [];
   List<ImageProvider> get imageProviders {
@@ -132,11 +134,11 @@ class AdminPremiumPostsAddController extends MyController {
     return basicValidator.formKey;
   }
 
-  void disposeFormKey(GlobalKey<FormState> key) {
+  void /**/disposeFormKey(GlobalKey<FormState> key) {
     if (formKeys.contains(key)) {
       formKeys.remove(key);
     }
-    basicValidator.formKey = formKeys.last;
+    basicValidator.formKey = formKeys.isNotEmpty ? formKeys.last : GlobalKey();
   }
 
   void loadImage(int instanceIndex, String name, Uint8List data, String mime) {
@@ -154,6 +156,12 @@ class AdminPremiumPostsAddController extends MyController {
     _images.removeAt(index);
     Debug.log("Removed: $index");
 
+    contextInstance.doUpdate(instanceIndex);
+  }
+
+
+  void onFreeCheckboxChange(int instanceIndex, bool newValue) {
+    free = newValue;
     contextInstance.doUpdate(instanceIndex);
   }
 
@@ -177,7 +185,7 @@ class AdminPremiumPostsAddController extends MyController {
       loading = true;
       contextInstance.doUpdate(instanceIndex);
       var registerInfo = await manager.registerPremiumPost(
-        basicValidator.getData(), _currentHeader, _currentSubHeader,
+        basicValidator.getData(), free, _currentHeader, _currentSubHeader,
       );
       if (registerInfo.errors != null) {
         if (registerInfo.errors!.containsKey("server")) {

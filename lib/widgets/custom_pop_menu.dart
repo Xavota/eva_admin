@@ -43,6 +43,8 @@ class _CustomPopupMenuState extends State<CustomPopupMenu>
   OverlayEntry? _overlayEntry;
   OverlayEntry? _overlayEntry1;
 
+  bool fistBuild = true;
+
   @override
   void initState() {
     _key = LabeledGlobalKey("popup-button");

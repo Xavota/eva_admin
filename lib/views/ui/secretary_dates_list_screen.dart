@@ -147,12 +147,13 @@ class _SecretaryDatesListScreenState extends State<SecretaryDatesListScreen> wit
                                   DataCell(SizedBox(width: 120, child: MyText.bodySmall(controller.getDateFormatted(data.date)))),
                                   DataCell(SizedBox(width: math.max(tableFlexWidth * 0.4, 240), child: MyText.bodySmall(controller.getConsulReasons(data)))),
                                   /*DataCell(Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       /*MyContainer(
                                         onTap: () => controller.changePatientStatus(index, !data.status).then((response) {
                                           if (context.mounted) {
                                             if (response) {
-                                              simpleSnackBar(context, "Tratante ${(data.status ? "" : "des")}archivado con éxito", contentTheme.success);// Color(0XFFAA236E));
+                                              simpleSnackBar(context, "Paciente ${(data.status ? "" : "des")}archivado con éxito", contentTheme.success);// Color(0XFFAA236E));
                                             }
                                             else {
                                               simpleSnackBar(context, "Hubo un error en el servidor, intenta de nuevo más tarde", contentTheme.danger);// Color(0XFFAA236E));

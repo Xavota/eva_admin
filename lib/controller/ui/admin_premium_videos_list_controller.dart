@@ -17,15 +17,13 @@ import 'package:medicare/model/premium_video_model.dart';
 import 'package:medicare/db_manager.dart';
 
 class AdminPremiumVideosListInstanceData {
-  List<PremiumVideoModel>? content;
-  List<List<(double?, ImageProvider)>> providers = [];
-  List<List<Completer<double>>> providersCompleter = [];
+  List<PremiumVideoModel>? videos;
+  List<(double?, ImageProvider)> providers = [];
+  List<Completer<double>> providersCompleter = [];
   String currentHeader = "";
   String currentSubHeader = "";
 
-  int selectedPost = 0;
-  int selectedPostCarousel = 0;
-  final PageController simplePageController = PageController(initialPage: 0);
+  int selectedVideo = -1;
 }
 
 class AdminPremiumVideosListController extends MyController {
@@ -53,14 +51,14 @@ class AdminPremiumVideosListController extends MyController {
   Future<void> updateInfo(int instanceIndex, [String? header, String? subHeader]) async {
     data[instanceIndex]!.currentHeader = header?? data[instanceIndex]!.currentHeader;
     data[instanceIndex]!.currentSubHeader = subHeader?? data[instanceIndex]!.currentSubHeader;
-    data[instanceIndex]!.content =
-    (await manager.premiumContent[PremiumContentTypes.kVideos]
-                                [data[instanceIndex]!.currentHeader]
-                                [data[instanceIndex]!.currentSubHeader])
-        ?.map<PremiumVideoModel>((e) => e as PremiumVideoModel).toList();
-    Debug.log("content[instanceIndex]: ${data[instanceIndex]!.content}", overrideColor: Colors.red);
+    data[instanceIndex]!.videos =
+        (await manager.premiumContent[PremiumContentTypes.kVideos]
+        [data[instanceIndex]!.currentHeader]
+        [data[instanceIndex]!.currentSubHeader])
+            ?.map<PremiumVideoModel>((e) => e as PremiumVideoModel).toList();
+    Debug.log("videos[instanceIndex]: ${data[instanceIndex]!.videos}", overrideColor: Colors.red);
     headerNotExist = false;
-    if (data[instanceIndex]!.content == null) {
+    if (data[instanceIndex]!.videos == null) {
       headerNotExist = true;
       contextInstance.doUpdate(instanceIndex);
       return;
@@ -68,143 +66,118 @@ class AdminPremiumVideosListController extends MyController {
 
     data[instanceIndex]!.providersCompleter = [];
     data[instanceIndex]!.providers = [];
-    for (int p = 0; p < data[instanceIndex]!.content!.length; ++p) {
-      final post = data[instanceIndex]!.content![p];
-      data[instanceIndex]!.providersCompleter.add(
-        List.generate(
-          post.images.length,
-              (i) => Completer()..future.then((aspect) {
-                final provider = data[instanceIndex]!.providers[p][i].$2;
-                data[instanceIndex]!.providers[p][i] = (aspect, provider);
-              }),
+    for (int b = 0; b < data[instanceIndex]!.videos!.length; ++b) {
+      int videoIndex = b;
+      data[instanceIndex]!.providersCompleter.add(Completer()..future.then((aspect) {
+        final provider = data[instanceIndex]!.providers[videoIndex].$2;
+        data[instanceIndex]!.providers[videoIndex] = (aspect, provider);
+      }));
+
+
+      final video = data[instanceIndex]!.videos![b];
+
+      final image = CachedNetworkImageProvider(
+          manager.getUploadUrl("images/premium_videos/${video.frontPage}"));
+
+      image
+          .resolve(ImageConfiguration())
+          .addListener(
+        ImageStreamListener(
+              (ImageInfo info, bool _) {
+            data[instanceIndex]!.providersCompleter[videoIndex]
+                .complete(info.image.width / info.image.height);
+          },
         ),
       );
-      data[instanceIndex]!.providers.add(post.images.mapIndexed<(double?, ImageProvider)>((i, e) {
-        final image = CachedNetworkImageProvider(
-            manager.getUploadUrl("images/premium_posts/$e"));
 
-        image
-            .resolve(ImageConfiguration())
-            .addListener(
-          ImageStreamListener(
-            (ImageInfo info, bool _) {
-              data[instanceIndex]!.providersCompleter[p][i]
-                  .complete(info.image.width / info.image.height);
-            },
-          ),
-        );
-
-        return (null, image);
-      }).toList());
+      data[instanceIndex]!.providers.add((null, image));
     }
 
     Future.wait(
       data[instanceIndex]!.providersCompleter
-          .fold<List<Future<dynamic>>>(
-        [], (i, e) => i..addAll(e.map((e) => e.future)),
+          .map<Future<dynamic>>(
+            (e) => e.future,
       ),
     ).then((_) {
-      //final aspects = data[instanceIndex]!.providers.fold<List<double?>>([], (i, e) => i..addAll(e.map((f) => f.$1)));
-      /*for (var a in aspects) {
-        Debug.log("Aspect: $a", overrideColor: Colors.deepOrange);
-      }*/
       contextInstance.doUpdate(instanceIndex);
     });
 
     contextInstance.doUpdate(instanceIndex);
+
+    Debug.log("Videos length: ${data[instanceIndex]!.videos!.length}");
   }
 
-  void goAddPost(int instanceIndex) {
-    Get.toNamed('/panel/premium/posts/'
+  void goAddVideo(int instanceIndex) {
+    Get.toNamed('/panel/premium/videos/'
         '${Uri.encodeComponent(data[instanceIndex]!.currentHeader)}/'
         '${Uri.encodeComponent(data[instanceIndex]!.currentSubHeader)}/add');
   }
 
-  void goEditPost(int instanceIndex, int postIndex) {
-    Get.toNamed('/panel/premium/posts/'
+  void goEditVideo(int instanceIndex, [int? videoIndex]) {
+    Get.toNamed('/panel/premium/videos/'
         '${Uri.encodeComponent(data[instanceIndex]!.currentHeader)}/'
         '${Uri.encodeComponent(data[instanceIndex]!.currentSubHeader)}/'
-        '$postIndex/edit');
+        '${videoIndex?? data[instanceIndex]!.selectedVideo}/edit');
   }
 
-  Future<Map<String, String>?> removeSubHeader(int instanceIndex) {
-    return manager.deletePremiumContentHeader(data[instanceIndex]!.currentSubHeader, data[instanceIndex]!.currentHeader);
+  Future<Map<String, String>?> removeSubHeader(int instanceIndex) async {
+    final errors = await manager.deletePremiumContentHeader(data[instanceIndex]!.currentSubHeader, data[instanceIndex]!.currentHeader);
+    if (errors != null) return errors;
+
+    await manager.getPremiumContent();
+    await updateInfo(instanceIndex);
+
+    return null;
   }
 
-  Future<Map<String, String>?> removePost(int instanceIndex, int postIndex) {
-    return manager.deletePremiumPost(data[instanceIndex]!.content![postIndex].id);
+  Future<Map<String, String>?> removeVideo(int instanceIndex, [int? videoIndex]) async {
+    final errors = await manager.deletePremiumVideo(data[instanceIndex]!.videos![videoIndex?? data[instanceIndex]!.selectedVideo].id);
+    if (errors != null) return errors;
+
+    await manager.getPremiumContentSubHeader(
+      PremiumContentTypes.kVideos,
+      data[instanceIndex]!.currentHeader,
+      data[instanceIndex]!.currentSubHeader,
+    );
+    await updateInfo(instanceIndex);
+
+    return null;
   }
 
 
   void onChangeSelectedPost(int instanceIndex, int newPost) {
-    data[instanceIndex]!.selectedPost = newPost;
+    data[instanceIndex]!.selectedVideo = newPost;
     contextInstance.doUpdate(instanceIndex);
   }
 
   void goPrevPost(int instanceIndex) {
-    data[instanceIndex]!.selectedPost = math.max(data[instanceIndex]!.selectedPost - 1,  0);
+    data[instanceIndex]!.selectedVideo = math.max(data[instanceIndex]!.selectedVideo - 1,  0);
     contextInstance.doUpdate(instanceIndex);
   }
 
   void goNextPost(int instanceIndex) {
-    data[instanceIndex]!.selectedPost = math.min(
-      data[instanceIndex]!.selectedPost + 1,
-      (data[instanceIndex]!.content?.length?? 0) - 1,
+    data[instanceIndex]!.selectedVideo = math.min(
+      data[instanceIndex]!.selectedVideo + 1,
+      (data[instanceIndex]!.videos?.length?? 0) - 1,
     );
     contextInstance.doUpdate(instanceIndex);
   }
 
   bool hasPrevPost(int instanceIndex) {
-    return data[instanceIndex]!.selectedPost > 0;
+    return data[instanceIndex]!.selectedVideo > 0;
   }
 
   bool hasNextPost(int instanceIndex) {
-    return (data[instanceIndex]!.selectedPost + 1) <
-        (data[instanceIndex]!.content?.length?? 0);
+    return (data[instanceIndex]!.selectedVideo + 1) <
+        (data[instanceIndex]!.videos?.length?? 0);
   }
 
 
-  void onChangePostCarousel(int instanceIndex, int value) {
-    data[instanceIndex]!.selectedPostCarousel = value;
-    contextInstance.doUpdate(instanceIndex);
+  String getVideoTitle(int instanceIndex, [int? videoIndex]) {
+    return data[instanceIndex]!.videos![videoIndex?? data[instanceIndex]!.selectedVideo].tile;
   }
 
-  void goPrevCarouselImage(int instanceIndex, int postIndex) {
-    data[instanceIndex]!.simplePageController.previousPage(duration: Duration(milliseconds: 600), curve: Curves.ease);
-
-    data[instanceIndex]!.selectedPostCarousel = math.max(
-      data[instanceIndex]!.selectedPostCarousel - 1, 0,
-    );
-
-    contextInstance.doUpdate(instanceIndex);
-  }
-
-  void goNextCarouselImage(int instanceIndex, int postIndex) {
-    data[instanceIndex]!.simplePageController.nextPage(duration: Duration(milliseconds: 600), curve: Curves.ease);
-
-    data[instanceIndex]!.selectedPostCarousel = math.min(
-      data[instanceIndex]!.selectedPostCarousel + 1,
-      data[instanceIndex]!.providers[postIndex].length - 1,
-    );
-
-    contextInstance.doUpdate(instanceIndex);
-  }
-
-  bool hasPrevImage(int instanceIndex) {
-    return data[instanceIndex]!.selectedPostCarousel > 0;
-  }
-
-  bool hasNextImage(int instanceIndex, int postIndex) {
-    return (data[instanceIndex]!.selectedPostCarousel + 1) <
-        data[instanceIndex]!.providers[postIndex].length;
-  }
-
-  void resetCarousel(int instanceIndex, [bool jumpToPage = false]) {
-    if (jumpToPage) {
-      data[instanceIndex]!.simplePageController.jumpToPage(
-        data[instanceIndex]!.simplePageController.initialPage,
-      );
-    }
-    data[instanceIndex]!.selectedPostCarousel = 0;
+  String getVideoEmbed(int instanceIndex, [int? videoIndex]) {
+    return data[instanceIndex]!.videos![videoIndex?? data[instanceIndex]!.selectedVideo].embed;
   }
 }

@@ -112,7 +112,7 @@ class _AdminPremiumBooksEditScreenState extends State<AdminPremiumBooksEditScree
                         children: [
                           MyBreadcrumbItem(name: 'Admin'),
                           MyBreadcrumbItem(name: 'Contenido Premium', route: controller.getPreviousScreenRoute(instanceIndex)),
-                          MyBreadcrumbItem(name: 'Ediar Libro', active: true),
+                          MyBreadcrumbItem(name: 'Editar Libro', active: true),
                         ],
                       ),
                     ],
@@ -143,6 +143,19 @@ class _AdminPremiumBooksEditScreenState extends State<AdminPremiumBooksEditScree
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  Theme(
+                                    data: ThemeData(colorScheme: colorScheme),
+                                    child: CheckboxListTile(
+                                      value: controller.data[instanceIndex]!.free,
+                                      onChanged: (value) => controller.onFreeCheckboxChange(instanceIndex, value?? false),
+                                      controlAffinity: ListTileControlAffinity.leading,
+                                      contentPadding: MySpacing.x(0),
+                                      visualDensity: VisualDensity.compact,
+                                      dense: true,
+                                      title: MyText.bodySmall("Contenido Gratis", fontWeight: 600),
+                                    ),
+                                  ),
+                                  MySpacing.height(20.0),
                                   commonTextField(
                                     title: "Título", hintText: "Título del libro",
                                     teController: controller.basicValidator.getController("title"),

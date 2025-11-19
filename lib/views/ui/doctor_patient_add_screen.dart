@@ -73,14 +73,14 @@ class _DoctorPatientAddScreenState extends State<DoctorPatientAddScreen> with UI
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     MyText.titleMedium(
-                      "Registrar Tratante",
+                      "Registrar Paciente",
                       fontSize: 18,
                       fontWeight: 600,
                     ),
                     MyBreadcrumb(
                       children: [
                         MyBreadcrumbItem(name: 'Médico'),
-                        MyBreadcrumbItem(name: 'Registrar Tratante', active: true),
+                        MyBreadcrumbItem(name: 'Registrar Paciente', active: true),
                       ],
                     ),
                   ],
@@ -127,19 +127,21 @@ class _DoctorPatientAddScreenState extends State<DoctorPatientAddScreen> with UI
                                   ),
                                   MySpacing.height(20),
                                   commonTextField(
-                                    title: "Peso (kg)", hintText: "Su peso en kilogramos",
-                                    validator: controller.basicValidator.getValidation("weight"),
-                                    teController: controller.basicValidator.getController("weight"),
+                                    title: "Edad", hintText: "Edad",
+                                    validator: controller.basicValidator.getValidation("age"),
+                                    teController: controller.basicValidator.getController("age"),
                                     prefixIcon: Icon(LucideIcons.person_standing, size: 16),
-                                    floatingPoint: true, length: 3,
+                                    integer: true, length: 3,
                                   ),
                                   MySpacing.height(20),
                                   commonTextField(
-                                    title: "Altura (m)", hintText: "Su altura en metros",
-                                    validator: controller.basicValidator.getValidation("height"),
-                                    teController: controller.basicValidator.getController("height"),
-                                    prefixIcon: Icon(LucideIcons.person_standing, size: 16),
-                                    floatingPoint: true, length: 3,
+                                    title: "Fecha de Nacimiento",
+                                    hintText: "Selecciona una fecha",
+                                    validator: controller.basicValidator.getValidation("birthDate"),
+                                    teController: controller.basicValidator.getController("birthDate"),
+                                    prefixIcon: Icon(LucideIcons.cake, size: 16),
+                                    onTap: controller.pickDate,
+                                    readOnly: true,
                                   ),
                                   MySpacing.height(20),
                                   commonTextField(
@@ -164,65 +166,65 @@ class _DoctorPatientAddScreenState extends State<DoctorPatientAddScreen> with UI
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  commonTextField(
+                                  /*commonTextField(
                                     validator: controller.basicValidator.getValidation("pin"),
                                     teController: controller.basicValidator.getController("pin"),
                                     title: "NIP", hintText: "NIP",
                                     prefixIcon: Icon(LucideIcons.lock, size: 16),
                                     integer: true, length: 4,
                                   ),
-                                  MySpacing.height(20),
-                                  commonTextField(
-                                    title: "Edad", hintText: "Edad",
-                                    validator: controller.basicValidator.getValidation("age"),
-                                    teController: controller.basicValidator.getController("age"),
-                                    prefixIcon: Icon(LucideIcons.person_standing, size: 16),
-                                    integer: true, length: 3,
-                                  ),
-                                  MySpacing.height(20),
+                                  MySpacing.height(20),*/
                                   MyText.labelMedium("Sexo", fontWeight: 600, muted: true),
                                   MySpacing.height(15),
-                                  Wrap(
-                                    spacing: 16,
-                                    children: Sex.values.map((gender) => InkWell(
-                                        onTap: () => controller.onChangeSex(gender),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Radio<Sex>(
-                                              value: gender,
-                                              activeColor: theme.colorScheme.primary,
-                                              groupValue: controller.sex,
-                                              onChanged: (value) => controller.onChangeSex(value),
-                                              visualDensity: getCompactDensity,
-                                              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                            ),
-                                            MySpacing.width(8),
-                                            MyText.labelMedium(
-                                              gender.name.capitalize!,
-                                            ),
-                                          ],
+                                  RadioGroup(
+                                    groupValue: controller.sex,
+                                    onChanged: (value) => controller.onChangeSex(value),
+                                    child: Wrap(
+                                      spacing: 16,
+                                      children: Sex.values.map((gender) => InkWell(
+                                          onTap: () => controller.onChangeSex(gender),
+                                          child: Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Radio<Sex>(
+                                                value: gender,
+                                                activeColor: theme.colorScheme.primary,
+                                                visualDensity: getCompactDensity,
+                                                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                              ),
+                                              MySpacing.width(8),
+                                              MyText.labelMedium(
+                                                gender.name.capitalize!,
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ).toList(),
+                                      ).toList(),
+                                    ),
                                   ),
                                   MySpacing.height(30),
+                                  commonTextField(
+                                    title: "Peso (kg)", hintText: "Su peso en kilogramos",
+                                    validator: controller.basicValidator.getValidation("weight"),
+                                    teController: controller.basicValidator.getController("weight"),
+                                    prefixIcon: Icon(LucideIcons.person_standing, size: 16),
+                                    floatingPoint: true, length: 3,
+                                  ),
+                                  MySpacing.height(20),
+                                  commonTextField(
+                                    title: "Altura (m)", hintText: "Su altura en metros",
+                                    validator: controller.basicValidator.getValidation("height"),
+                                    teController: controller.basicValidator.getController("height"),
+                                    prefixIcon: Icon(LucideIcons.person_standing, size: 16),
+                                    floatingPoint: true, length: 3,
+                                  ),
+                                  MySpacing.height(20),
                                   commonTextField(
                                     title: "Cintura (cm)", hintText: "Medida de su cintura",
                                     validator: controller.basicValidator.getValidation("waist"),
                                     teController: controller.basicValidator.getController("waist"),
                                     prefixIcon: Icon(LucideIcons.person_standing, size: 16),
                                     floatingPoint: true, length: 3,
-                                  ),
-                                  MySpacing.height(20),
-                                  commonTextField(
-                                    title: "Fecha de Nacimiento",
-                                    hintText: "Selecciona una fecha",
-                                    validator: controller.basicValidator.getValidation("birthDate"),
-                                    teController: controller.basicValidator.getController("birthDate"),
-                                    prefixIcon: Icon(LucideIcons.cake, size: 16),
-                                    onTap: controller.pickDate,
-                                    readOnly: true,
                                   ),
                                   MySpacing.height(20),
                                   MyText.labelMedium("Motivo de Consulta", fontWeight: 600, muted: true),
@@ -397,7 +399,7 @@ class _DoctorPatientAddScreenState extends State<DoctorPatientAddScreen> with UI
                                     controller.calculateUserID();
                                     controller.manager.getPatients(doctorOwnerID: AuthService.loggedUserNumber);
                                     if (!context.mounted) return;
-                                    simpleSnackBar(context, "Tratante registrado con éxito", contentTheme.success);// Color(0xFF35639D));
+                                    simpleSnackBar(context, "Paciente registrado con éxito", contentTheme.success);// Color(0xFF35639D));
                                   }
                                 });
                               },

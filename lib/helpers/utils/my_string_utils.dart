@@ -242,15 +242,16 @@ class MyStringUtils {
     lines.length > maxLines);
   }
 
-  static String textCutout(String plainText, [int maxChars = 256]) {
-    final trimmedText = plainText.trim().replaceAll(RegExp(r'(\n)+'), '\n');
+  static String textCutout(String plainText,
+      {int maxChars = 256, bool singleLine = false, int maxLines = 4}) {
+    final trimmedText = plainText.trim().replaceAll(RegExp(r'(\n)+'), singleLine ? ' ' : '\n');
     if (trimmedText.length <= maxChars) {
-      final r = limitLines(trimmedText);
+      final r = limitLines(trimmedText, maxLines);
       return "${r.$1}${r.$2 ? "${r.$1.endsWith('.') ? " " : ""}..." : ""}";
     }
 
     String r = trimmedText.substring(0, maxChars);
-    final limited = limitLines(r);
+    final limited = limitLines(r, maxLines);
     r = limited.$1.substring(0, limited.$2 ? null : limited.$1.lastIndexOf(' ')).trim();
     return "$r${r.endsWith('.') ? " " : ""}...";
   }

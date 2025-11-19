@@ -1,15 +1,12 @@
 import 'dart:math' as math;
-
-import 'package:blix_essentials/blix_essentials.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
 
 import 'package:flutter_lucide/flutter_lucide.dart';
 
 import 'package:get/get.dart';
+import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 
 import 'package:medicare/controller/ui/admin_premium_videos_list_controller.dart';
-import 'package:medicare/db_manager.dart';
 import 'package:medicare/helpers/theme/admin_theme.dart';
 
 import 'package:medicare/helpers/utils/utils.dart';
@@ -25,6 +22,8 @@ import 'package:medicare/helpers/widgets/my_list_extension.dart';
 import 'package:medicare/helpers/widgets/responsive.dart';
 
 import 'package:medicare/views/layout/layout.dart';
+
+import 'package:blix_essentials/blix_essentials.dart';
 
 
 class AdminPremiumVideosListScreen extends StatefulWidget {
@@ -62,6 +61,9 @@ class _AdminPremiumVideosListScreenState extends State<AdminPremiumVideosListScr
   Widget build(BuildContext context) {
     Debug.log(MyScreenMedia.getTypeFromWidth(MediaQuery.of(context).size.width).name, overrideColor: Colors.purpleAccent);
 
+    final screenSize = MediaQuery.of(context).size;
+    final screenType = MyScreenMedia.getTypeFromWidth(screenSize.width);
+
     return Layout(
       externalChild: Stack(
         children: [
@@ -77,7 +79,7 @@ class _AdminPremiumVideosListScreenState extends State<AdminPremiumVideosListScr
                 shape: BoxShape.circle,
                 color: ContentThemeColor.primary.color,
                 onTap: () {
-                  controller.goAddPost(instanceIndex);
+                  controller.goAddVideo(instanceIndex);
                 },
                 child: Icon(
                   Icons.add,
@@ -93,8 +95,6 @@ class _AdminPremiumVideosListScreenState extends State<AdminPremiumVideosListScr
         init: controller,
         tag: 'admin_premium_content_controller',
         builder: (controller) {
-          final screenSize = MediaQuery.of(context).size;
-
           double contentPadding = 20.0;
 
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -107,9 +107,11 @@ class _AdminPremiumVideosListScreenState extends State<AdminPremiumVideosListScr
           final globalSize = controller.contextInstance.getContentSize(instanceIndex, "global");
           final contentWidth = controller.contextInstance.getContentWidth(instanceIndex, "content");
 
-          final cardsWidth = contentWidth == null ? null : Utils.getColumnsWidth(
-            contentWidth, minWidth: 300.0, spacing: 1.0, hardLimitMin: 3,
+          double? cardsWidth = contentWidth == null ? null : Utils.getColumnsWidth(
+              contentWidth, minWidth: 400.0, spacing: 1.0, hardLimitMax: 3
           );
+          final cardsHeight = cardsWidth == null ? null : math.min(cardsWidth * 1.414, 900);
+          cardsWidth = cardsHeight == null ? null : cardsHeight / 1.414;
 
           double? titlesSize(double? width, double extraPadding) {
             return width == null ? null : width + extraPadding;
@@ -158,11 +160,7 @@ class _AdminPremiumVideosListScreenState extends State<AdminPremiumVideosListScr
                                           simpleSnackBar(context, e.value, contentTheme.danger);
                                         }
                                       }
-                                      return;
                                     }
-
-                                    await controller.manager.getPremiumContent();
-                                    controller.updateInfo(instanceIndex);
                                   });
                                 },
                                 child: Center(child: MyText.labelSmall("Borrar categoría", fontWeight: 700, color: contentTheme.onDanger,)),
@@ -189,7 +187,6 @@ class _AdminPremiumVideosListScreenState extends State<AdminPremiumVideosListScr
                         key: controller.contextInstance.getContentKey(instanceIndex, "content"),
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          //MyText.bodyMedium("Posts", fontWeight: 600, muted: true),
                           Center(child: MyText.titleLarge(controller.data[instanceIndex]!.currentSubHeader, fontWeight: 700, muted: true)),
                           MySpacing.height(10),
                           Row(
@@ -197,39 +194,26 @@ class _AdminPremiumVideosListScreenState extends State<AdminPremiumVideosListScr
                             children: List.generate(70, (i) => MyContainer(width: 2.5, height: 2.5, shape: BoxShape.circle, color: Colors.black54,)),
                           ),
                           MySpacing.height(15),
-                          if (controller.data[instanceIndex]!.content != null && controller.data[instanceIndex]!.content!.isNotEmpty)
-                            Wrap(
-                              spacing: 1.0,
-                              runSpacing: 1.0,
-                              children: controller.data[instanceIndex]!.providers.mapIndexed<Widget>((i, e) =>
-                                _contentThumbnailCard(
-                                  cardsWidth, e[0].$2,
-                                  onTap: () {
-                                    final screenType = MyScreenMedia.getTypeFromWidth(screenSize.width);
-                                    if (screenType.isMobile || screenType.isTablet) {
-                                      _showPostMobile(
-                                        i,
-                                        screenWidth: screenSize.width, screenHeight: screenSize.height,
-                                        minHorizontalMargin: 80.0, minVerticalMargin: 40.0,
-                                        minCarouselWidth: 300.0, minCarouselHeight: 300.0,
-                                        titleHeight: 50.0, maxDetailsHeight: 200.0, maxWidth: 500.0,
-                                      );
-                                    }
-                                    else {
-                                      _showPostWide(
-                                        i,
-                                        screenWidth: screenSize.width, screenHeight: screenSize.height,
-                                        minHorizontalMargin: 80.0, minVerticalMargin: 40.0,
-                                        minCarouselWidth: 500.0, minCarouselHeight: 500.0,
-                                        minDetailsWidth: 350.0, maxDetailsWidth: 450.0,
-                                      );
-                                    }
-                                  },
-                                ),
-                              ).toList(),
+                          if (controller.data[instanceIndex]!.videos != null && controller.data[instanceIndex]!.videos!.isNotEmpty)
+                            Center(
+                              child: Wrap(
+                                spacing: 1.0,
+                                runSpacing: 1.0,
+                                alignment: WrapAlignment.center,
+                                runAlignment: WrapAlignment.center,
+                                children: controller.data[instanceIndex]!.providers.mapIndexed<Widget>((i, e) =>
+                                    _contentThumbnailCard(
+                                      cardsWidth, e.$2,
+                                      onTap: () {
+                                        //controller.showVideoPreview(instanceIndex, i);
+                                        _showVideo(i, screenSize.height, screenType.isMobile || screenType.isTablet);
+                                      },
+                                    ),
+                                ).toList(),
+                              ),
                             )
                           else
-                            MyText.bodySmall("No hay posts aún en esta categoría, agrega post para que los tratantes premium puedan ver."),
+                            MyText.bodySmall("No hay videos aún en esta categoría, agrega videos para que los pacientes premium puedan ver."),
                           MySpacing.height(20),
                         ],
                       ),
@@ -262,7 +246,7 @@ class _AdminPremiumVideosListScreenState extends State<AdminPremiumVideosListScr
       onTap: onTap,
       child: Container(
         width: width,
-        height: width == null ? null : width * 1.4,
+        height: width == null ? null : width * 0.5625, // 16:9
         decoration: BoxDecoration(
           image: DecorationImage(
             image: image,
@@ -273,50 +257,15 @@ class _AdminPremiumVideosListScreenState extends State<AdminPremiumVideosListScr
     );
   }
 
-  void _showPostWide(int postIndex, {
-    required double screenWidth, required double screenHeight,
-    required double minHorizontalMargin, required double minVerticalMargin,
-    required double minCarouselWidth, required double minCarouselHeight,
-    required double minDetailsWidth, required double maxDetailsWidth,
-  }) {
-    controller.resetCarousel(instanceIndex);
-    controller.onChangeSelectedPost(instanceIndex, postIndex);
-
+  void _showVideo(int videoIndex, double screenHeight,  bool mobile) {
+    controller.data[instanceIndex]!.selectedVideo = videoIndex;
     showDialog(
       context: context,
       builder: (context) {
-        return PostDialogWide(
+        return _VideoDialog(
           controller: controller, instanceIndex: instanceIndex,
-          postIndex: postIndex,
-          screenWidth: screenWidth, screenHeight: screenHeight,
-          minHorizontalMargin: minHorizontalMargin, minVerticalMargin: minVerticalMargin,
-          minCarouselWidth: minCarouselWidth, minCarouselHeight: minCarouselHeight,
-          minDetailsWidth: minDetailsWidth, maxDetailsWidth: maxDetailsWidth,
+          screenHeight: screenHeight, mobile: mobile,
           contentTheme: contentTheme, colorScheme: colorScheme,
-        );
-      },
-    );
-  }
-
-  void _showPostMobile(int postIndex, {
-    required double screenWidth, required double screenHeight,
-    required double minHorizontalMargin, required double minVerticalMargin,
-    required double minCarouselWidth, required double minCarouselHeight,
-    required double titleHeight, required double maxDetailsHeight, required double maxWidth,
-  }) {
-    controller.resetCarousel(instanceIndex);
-    controller.onChangeSelectedPost(instanceIndex, postIndex);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return PostDialogMobile(
-          controller: controller, instanceIndex: instanceIndex,
-          screenWidth: screenWidth, screenHeight: screenHeight,
-          minHorizontalMargin: minHorizontalMargin, minVerticalMargin: minVerticalMargin,
-          minCarouselWidth: minCarouselWidth, minCarouselHeight: minCarouselHeight,
-          titleHeight: titleHeight, maxDetailsHeight: maxDetailsHeight,
-          maxWidth: maxWidth,
         );
       },
     );
@@ -343,15 +292,15 @@ class _AdminPremiumVideosListScreenState extends State<AdminPremiumVideosListScr
                     child: Row(
                       children: [
                         Expanded(
-                            child: MyText.labelLarge('Borra Categoría',
+                            child: MyText.labelLarge('Borrar Categoría',
                                 fontWeight: 600)),
                         InkWell(
-                            onTap: () => Navigator.pop(context),
-                            child: Icon(
-                              LucideIcons.x,
-                              size: 20,
-                              color: colorScheme.onSurface.withAlpha(127),
-                            ),
+                          onTap: () => Navigator.pop(context),
+                          child: Icon(
+                            LucideIcons.x,
+                            size: 20,
+                            color: colorScheme.onSurface.withAlpha(127),
+                          ),
                         ),
                       ],
                     ),
@@ -360,7 +309,7 @@ class _AdminPremiumVideosListScreenState extends State<AdminPremiumVideosListScr
                   Padding(
                     padding: MySpacing.all(16),
                     child: MyText.bodySmall("¿Seguro que quiere borrar esta categoría?\n"
-                        "Todos los posts e imágenes en esta serán eliminados igualmente.",
+                        "Todos los videos en esta serán eliminados igualmente.",
                         fontWeight: 600),
                   ),
                   Divider(height: 0, thickness: 1),
@@ -408,93 +357,112 @@ class _AdminPremiumVideosListScreenState extends State<AdminPremiumVideosListScr
   }
 }
 
-class AppScrollBehavior extends MaterialScrollBehavior {
+class HtmlEmbed extends StatefulWidget {
+  final String html;
+  const HtmlEmbed(this.html, {super.key});
+
   @override
-  Set<PointerDeviceKind> get dragDevices =>
-      {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-      };
+  State<HtmlEmbed> createState() => _HtmlEmbedState();
 }
 
+class _HtmlEmbedState extends State<HtmlEmbed> {
+  @override
+  void initState() {
+    super.initState();
+    Debug.log("init state: embed: ${widget.html}", overrideColor: Colors.red);
+  }
 
-class PostDialogWide extends StatefulWidget {
-  const PostDialogWide({super.key,
-    required this.controller, required this.instanceIndex,
-    required this.postIndex,
-    required this.screenWidth, required this.screenHeight,
-    required this.minHorizontalMargin, required this.minVerticalMargin,
-    required this.minCarouselWidth, required this.minCarouselHeight,
-    required this.minDetailsWidth, required this.maxDetailsWidth,
-    required this.contentTheme, required this.colorScheme,
-  });
+  @override
+  void dispose() {
+    Debug.log("dispose: embed: ${widget.html}", overrideColor: Colors.red);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return HtmlWidget(
+      widget.html,
+      renderMode: RenderMode.column,
+      // optional: constrain width/height if your iframes are large
+      //factoryBuilder: () => WidgetFactory()..iframeAllowFullscreen = true,
+    );
+  }
+}
+
+class _VideoDialog extends StatefulWidget {
+  const _VideoDialog({required this.controller, required this.instanceIndex,
+    required this.screenHeight, required this.mobile,
+    required this.contentTheme, required this.colorScheme,});
 
   final AdminPremiumVideosListController controller;
   final int instanceIndex;
-  final int postIndex;
 
-  final double screenWidth;
   final double screenHeight;
-  final double minHorizontalMargin;
-  final double minVerticalMargin;
-  final double minCarouselWidth;
-  final double minCarouselHeight;
-  final double minDetailsWidth;
-  final double maxDetailsWidth;
+  final bool mobile;
 
   final ContentTheme contentTheme;
   final ColorScheme colorScheme;
 
   @override
-  State<PostDialogWide> createState() => _PostDialogWideState();
+  State<_VideoDialog> createState() => _VideoDialogState();
 }
 
-class _PostDialogWideState extends State<PostDialogWide> {
+class _VideoDialogState extends State<_VideoDialog> {
+  GlobalKey? embedKey;
+
+  HtmlWidget? embedVideo;
+  Size? embedSize;
+
+  bool showingPopup = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final maxPostWidth = widget.screenWidth - widget.minHorizontalMargin * 2.0;
-    final maxPostHeight = widget.screenHeight - widget.minVerticalMargin * 2.0;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (embedVideo == null) {
+        embedKey = GlobalKey();
+        embedVideo = HtmlWidget(
+          key: embedKey,
+          widget.controller.getVideoEmbed(widget.instanceIndex),
+          renderMode: RenderMode.column,
+        );
+        Debug.log("Created new embed", overrideColor: Colors.green);
+        setState(() {});
+      }
+      else if (embedSize == null) {
+        final RenderBox? box = embedKey!.currentContext?.findRenderObject() as RenderBox?;
+        if (box == null) return;
 
-    final postIndex = widget.controller.data[widget.instanceIndex]!.selectedPost;
+        embedSize = box.size;
+        Debug.log("Calculated embed size", overrideColor: Colors.green);
+        setState(() {});
+      }
+    });
 
-    final postImages = widget.controller.data[widget.instanceIndex]!.providers[postIndex];
-    final imagesAspect = postImages.fold<double>(0.0, (v, e) => math.max(v, (e.$1?? 1.0)));
+    double maxHeight = widget.screenHeight - (widget.mobile ? 135.0 : 140.0);
+    double? embedWidth;
 
-    double carouselWidth = 0.0;
-    double carouselHeight = 0.0;
-    double detailsWidth = 0.0;
-    double postWidth = 0.0;
-    double postHeight = 0.0;
-
-    carouselWidth = maxPostWidth - widget.minDetailsWidth;
-    carouselHeight = carouselWidth / imagesAspect;
-    if (carouselHeight > maxPostHeight) {
-      carouselHeight = maxPostHeight;
-      carouselWidth = carouselHeight * imagesAspect;
-      if (carouselWidth < widget.minCarouselWidth) {
-        carouselWidth = widget.minCarouselWidth;
+    if (embedSize != null) {
+      double embedHeight = embedSize!.height;
+      Debug.log("embedHeight: $embedHeight", overrideColor: Colors.green);
+      Debug.log("maxHeight: $maxHeight", overrideColor: Colors.green);
+      Debug.log("previous size: $embedSize", overrideColor: Colors.green);
+      embedWidth = embedSize!.width;
+      if (embedHeight > maxHeight) {
+        embedWidth = embedWidth * (maxHeight / embedHeight);
+        Debug.log("next size: ($embedWidth, $maxHeight)", overrideColor: Colors.green);
       }
     }
-    else if (carouselHeight < widget.minCarouselHeight) {
-      carouselHeight = widget.minCarouselHeight;
-    }
-    detailsWidth = math.min(maxPostWidth - carouselWidth, widget.maxDetailsWidth);
-
-    postWidth = carouselWidth + detailsWidth;
-    postHeight = carouselHeight;
-
-    double realHMargin = (widget.screenWidth - postWidth) * 0.5;
-    double realVMargin = (widget.screenHeight - postHeight) * 0.5;
-
-
-    String postTile = widget.controller.data[widget.instanceIndex]!.content?[postIndex].tile?? "";
-    String postDescription = widget.controller.data[widget.instanceIndex]!.content?[postIndex].description?? "";
 
     return Dialog(
       alignment: Alignment.topCenter,
       clipBehavior: Clip.antiAliasWithSaveLayer,
       elevation: 0.0,
-      insetPadding: EdgeInsets.all(0.0),
+      insetPadding: const EdgeInsets.all(0.0),
       insetAnimationCurve: Curves.easeInBack,
       backgroundColor: Colors.transparent,
       insetAnimationDuration: Durations.short1,
@@ -505,293 +473,228 @@ class _PostDialogWideState extends State<PostDialogWide> {
             onTap: () {Navigator.of(context).pop();},
             paddingAll: 0.0,
           ),
-          Container(
-            margin: EdgeInsets.fromLTRB(
-              realHMargin, realVMargin, realHMargin, realVMargin,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(5.0)),
-            ),
-            child: _wideLayout(carouselWidth, carouselHeight, detailsWidth, postTile, postDescription),
-          ),
-          if (widget.controller.hasPrevPost(widget.instanceIndex))
-            Align(
-              alignment: Alignment.centerLeft,
-              child: MyContainer.shadow(
-                width: 35.0,
-                height: 35.0,
-                margin: EdgeInsets.only(left: 25.0),
-                shape: BoxShape.circle,
-                color: Colors.white,
-                paddingAll: 0.0,
-                onTap: () {
-                  widget.controller.goPrevPost(widget.instanceIndex);
-                  widget.controller.resetCarousel(widget.instanceIndex, true);
-                  setState(() {});
-                },
-                child: Center(
-                  child: Icon(Icons.chevron_left, color:Colors.black, size: 30.0,),
-                ),
-              ),
-            ),
-          if (widget.controller.hasNextPost(widget.instanceIndex))
-            Align(
-              alignment: Alignment.centerRight,
-              child: MyContainer.shadow(
-                width: 35.0,
-                height: 35.0,
-                margin: EdgeInsets.only(right: 25.0),
-                shape: BoxShape.circle,
-                color: Colors.white,
-                paddingAll: 0.0,
-                onTap: () {
-                  widget.controller.goNextPost(widget.instanceIndex);
-                  widget.controller.resetCarousel(widget.instanceIndex, true);
-                  setState(() {});
-                },
-                child: Center(
-                  child: Icon(Icons.chevron_right, color:Colors.black, size: 30.0,),
-                ),
-              ),
-            ),
-
-          Align(
-            alignment: Alignment.topRight,
+          Center(
             child: Padding(
-              padding: EdgeInsetsGeometry.only(top: 20.0, right: 20.0,),
-              child: InkWell(
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-                child: Icon(Icons.close, size: 30.0, color: Colors.white,),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _wideLayout(double carouselWidth, double carouselHeight, double detailsWidth, String title, String description) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: carouselWidth,
-          child: _simpleCarousel(widget.controller.data[widget.instanceIndex]!.selectedPost, carouselHeight),
-        ),
-        Column(
-          children: [
-            SizedBox(
-              width: detailsWidth,
-              height: carouselHeight - 70.0,
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 0.0),
-                      child: MyText.titleMedium(title, fontWeight: 700,),
-                    ),
-                    Divider(indent: 10.0, endIndent: 10.0,),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20.0, 0.0, 20.0, 20.0),
-                      child: MyText.bodyMedium(description, fontWeight: 500,),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SizedBox(
-              width: detailsWidth,
-              height: 70.0,
+              padding: widget.mobile ?
+              const EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 5.0) :
+              const EdgeInsets.fromLTRB(80.0, 20.0, 80.0, 20.0),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Divider(indent: 10.0, endIndent: 10.0,),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(40.0, 10.0, 40.0, 10.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                    ),
+                    width: embedWidth,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        MyContainer.shadow(
-                          height: 30.0,
-                          color: widget.contentTheme.danger,
-                          borderRadiusAll: 10.0,
-                          padding: const EdgeInsets.fromLTRB(30.0, 8.0, 30.0, 8.0),
-                          shadowBlurRadius: 3.0,
-                          onTap: () {
-                            _showDeletePostDialog(() async {
-                              final errors = await widget.controller.removePost(widget.instanceIndex, widget.postIndex);
-                              if (errors != null) {
-                                if (!mounted) return;
-                                for (final e in errors.entries) {
-                                  if (e.key == "server") {
-                                    simpleSnackBar(context, e.value, widget.contentTheme.danger);
-                                  }
-                                }
-                                return;
-                              }
-
-                              await widget.controller.manager.getPremiumContentSubHeader(
-                                PremiumContentTypes.kVideos,
-                                widget.controller.data[widget.instanceIndex]!.currentHeader,
-                                widget.controller.data[widget.instanceIndex]!.currentSubHeader,
-                              );
-                              widget.controller.updateInfo(widget.instanceIndex);
-
-                              Get.back();
-                            });
-                          },
-                          child: Center(
-                            child: MyText.labelSmall(
-                              "Borrar", fontWeight: 700,
-                              color: widget.contentTheme.onDanger,
+                        Padding(
+                          padding: MySpacing.horizontal(10.0),
+                          child: SizedBox(
+                            height: widget.mobile ? 35.0 : 50.0,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: MyText.titleLarge(
+                                      widget.controller.getVideoTitle(widget.instanceIndex),
+                                      fontWeight: 800,
+                                      fontSize: widget.mobile ? 20.0 : null,
+                                    ),
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Icon(Icons.close, size: widget.mobile ? 25.0 : 30.0, color: Colors.black,),
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                        MyContainer.shadow(
-                          height: 30.0,
-                          color: widget.colorScheme.secondaryContainer,
-                          borderRadiusAll: 10.0,
-                          padding: const EdgeInsets.fromLTRB(30.0, 8.0, 30.0, 8.0),
-                          shadowBlurRadius: 3.0,
-                          onTap: () {
-                            Get.back();
-                            widget.controller.goEditPost(widget.instanceIndex, widget.postIndex);
-                          },
-                          child: Center(
-                            child: MyText.labelSmall(
-                              "Editar", fontWeight: 700,
-                              color: widget.colorScheme.onSecondaryContainer,
+                        if (embedVideo != null && !showingPopup) embedVideo!,
+                        Padding(
+                          padding: MySpacing.horizontal(20.0),
+                          child: SizedBox(
+                            height: 50.0,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                MyContainer.shadow(
+                                  height: 30.0,
+                                  color: widget.colorScheme.secondaryContainer,
+                                  borderRadiusAll: 10.0,
+                                  padding: const EdgeInsets.fromLTRB(30.0, 8.0, 30.0, 8.0),
+                                  shadowBlurRadius: 3.0,
+                                  onTap: () {
+                                    Get.back();
+                                    widget.controller.goEditVideo(widget.instanceIndex);
+                                  },
+                                  child: Center(
+                                    child: MyText.labelSmall(
+                                      "Editar", fontWeight: 700,
+                                      color: widget.colorScheme.onSecondaryContainer,
+                                    ),
+                                  ),
+                                ),
+                                MySpacing.width(40.0),
+                                MyContainer.shadow(
+                                  height: 30.0,
+                                  color: widget.contentTheme.danger,
+                                  borderRadiusAll: 10.0,
+                                  padding: const EdgeInsets.fromLTRB(30.0, 8.0, 30.0, 8.0),
+                                  shadowBlurRadius: 3.0,
+                                  onTap: () {
+                                    setState(() {
+                                      showingPopup = true;
+                                    });
+                                    _showDeleteVideoDialog(() async {
+                                      final errors = await widget.controller.removeVideo(widget.instanceIndex);
+                                      if (errors != null) {
+                                        if (!context.mounted) return;
+                                        for (final e in errors.entries) {
+                                          if (e.key == "server") {
+                                            simpleSnackBar(context, e.value, widget.contentTheme.danger);
+                                          }
+                                        }
+                                        return;
+                                      }
+
+                                      showingPopup = false;
+                                      Get.back();
+                                    }, () {
+                                        setState(() {
+                                          showingPopup = false;
+                                        });
+                                      },
+                                    );
+                                  },
+                                  child: Center(
+                                    child: MyText.labelSmall(
+                                      "Borrar", fontWeight: 700,
+                                      color: widget.contentTheme.onDanger,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 5.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (widget.controller.hasPrevPost(widget.instanceIndex))
+                          MyContainer.shadow(
+                            width: 30.0,
+                            height: 30.0,
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            paddingAll: 0.0,
+                            onTap: () {
+                              widget.controller.goPrevPost(widget.instanceIndex);
+                              embedVideo = null;
+                              embedKey = null;
+                              embedSize = null;
+                              setState(() {});
+                            },
+                            child: Center(
+                              child: Icon(Icons.chevron_left, color:Colors.black, size: 20.0,),
+                            ),
+                          )
+                        else
+                          MySpacing.width(30.0),
+                        MySpacing.width(40.0),
+                        if (widget.controller.hasNextPost(widget.instanceIndex))
+                          MyContainer.shadow(
+                            width: 30.0,
+                            height: 30.0,
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                            paddingAll: 0.0,
+                            onTap: () {
+                              widget.controller.goNextPost(widget.instanceIndex);
+                              embedVideo = null;
+                              embedKey = null;
+                              embedSize = null;
+                              setState(() {});
+                            },
+                            child: Center(
+                              child: Icon(Icons.chevron_right, color:Colors.black, size: 20.0,),
+                            ),
+                          )
+                        else
+                          MySpacing.width(30.0),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _indicator(bool isActive) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInToLinear,
-      margin: EdgeInsets.symmetric(horizontal: 4.0),
-      height: 8.0,
-      width: 8,
-      decoration: BoxDecoration(
-        color: isActive ? Colors.white : Colors.white.withAlpha(140),
-        borderRadius: BorderRadius.all(Radius.circular(4)),
+          ),
+          if (!widget.mobile)
+            Stack(
+              children: [
+                if (widget.controller.hasPrevPost(widget.instanceIndex))
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: MyContainer.shadow(
+                      width: 35.0,
+                      height: 35.0,
+                      margin: EdgeInsets.only(left: 25.0),
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      paddingAll: 0.0,
+                      onTap: () {
+                        widget.controller.goPrevPost(widget.instanceIndex);
+                        embedVideo = null;
+                        embedKey = null;
+                        embedSize = null;
+                        setState(() {});
+                      },
+                      child: Center(
+                        child: Icon(Icons.chevron_left, color:Colors.black, size: 30.0,),
+                      ),
+                    ),
+                  ),
+                if (widget.controller.hasNextPost(widget.instanceIndex))
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: MyContainer.shadow(
+                      width: 35.0,
+                      height: 35.0,
+                      margin: EdgeInsets.only(right: 25.0),
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                      paddingAll: 0.0,
+                      onTap: () {
+                        widget.controller.goNextPost(widget.instanceIndex);
+                        embedVideo = null;
+                        embedKey = null;
+                        embedSize = null;
+                        setState(() {});
+                      },
+                      child: Center(
+                        child: Icon(Icons.chevron_right, color:Colors.black, size: 30.0,),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+        ],
       ),
     );
   }
 
-  Widget _simpleCarousel(int postIndex, double height) {
-    final postImages = widget.controller.data[widget.instanceIndex]!.providers[postIndex];
-    List<Widget> buildPageIndicatorStatic() {
-      List<Widget> list = [];
-      for (int i = 0; i < postImages.length; i++) {
-        list.add(i == widget.controller.data[widget.instanceIndex]!.selectedPostCarousel ? _indicator(true) : _indicator(false));
-      }
-      return list;
-    }
-
-    return Stack(
-      alignment: AlignmentDirectional.center,
-      children: <Widget>[
-        Container(
-          height: height,
-          color: Colors.black,
-          child: PageView(
-            pageSnapping: true,
-            scrollBehavior: AppScrollBehavior(),
-            physics: ClampingScrollPhysics(),
-            controller: widget.controller.data[widget.instanceIndex]!.simplePageController,
-            onPageChanged: (value) {
-              widget.controller.onChangePostCarousel(widget.instanceIndex, value);
-              setState(() {});
-            },
-            children: postImages.map((e) {
-              return MyContainer(
-                color: Colors.transparent,
-                //borderRadiusAll: 5,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(5.0), bottomLeft: Radius.circular(5.0),
-                ),
-                clipBehavior: Clip.antiAliasWithSaveLayer,
-                paddingAll: 0,
-                child: Image(image: e.$2, fit: BoxFit.contain),
-              );
-            }).toList(),
-          ),
-        ),
-        Positioned(
-          bottom: 10,
-          child: Container(
-            padding: EdgeInsets.all(5.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-              color: Colors.black38,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: buildPageIndicatorStatic(),
-            ),
-          ),
-        ),
-        if (widget.controller.hasPrevImage(widget.instanceIndex))
-          Positioned(
-            left: 10,
-            child: MyContainer.shadow(
-              width: 25.0,
-              height: 25.0,
-              shape: BoxShape.circle,
-              color: Colors.white,
-              paddingAll: 0.0,
-              onTap: () {
-                widget.controller.goPrevCarouselImage(widget.instanceIndex, postIndex);
-                setState(() {});
-              },
-              child: Center(
-                child: Icon(Icons.arrow_left, color:Colors.black, size: 20.0,),
-              ),
-            ),
-          ),
-        if (widget.controller.hasNextImage(widget.instanceIndex, postIndex))
-          Positioned(
-            right: 10,
-            child: MyContainer.shadow(
-              width: 25.0,
-              height: 25.0,
-              shape: BoxShape.circle,
-              color: Colors.white,
-              paddingAll: 0.0,
-              onTap: () {
-                widget.controller.goNextCarouselImage(widget.instanceIndex, postIndex);
-                setState(() {});
-              },
-              child: Center(
-                child: Icon(Icons.arrow_right, color:Colors.black, size: 20.0,),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-
-  void _showDeletePostDialog(void Function() onConfirm) {
+  void _showDeleteVideoDialog(void Function() onConfirm, void Function() onCancel) {
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -812,7 +715,7 @@ class _PostDialogWideState extends State<PostDialogWide> {
                     child: Row(
                       children: [
                         Expanded(
-                            child: MyText.labelLarge('Borra Post',
+                            child: MyText.labelLarge('Borrar Video',
                                 fontWeight: 600)),
                         InkWell(
                           onTap: () => Navigator.pop(context),
@@ -828,8 +731,7 @@ class _PostDialogWideState extends State<PostDialogWide> {
                   Divider(height: 0, thickness: 1),
                   Padding(
                     padding: MySpacing.all(16),
-                    child: MyText.bodySmall("¿Seguro que quiere borrar este post?\n"
-                        "Todas las imágenes en este serán eliminados igualmente.",
+                    child: MyText.bodySmall("¿Seguro que quiere borrar este video?",
                         fontWeight: 600),
                   ),
                   Divider(height: 0, thickness: 1),
@@ -839,7 +741,10 @@ class _PostDialogWideState extends State<PostDialogWide> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         MyButton(
-                          onPressed: () => Get.back(),
+                          onPressed: () {
+                            onCancel();
+                            Get.back();
+                          },
                           elevation: 0,
                           borderRadiusAll: 8,
                           padding: MySpacing.xy(20, 16),
@@ -874,288 +779,5 @@ class _PostDialogWideState extends State<PostDialogWide> {
             ),
           );
         });
-  }
-}
-
-
-class PostDialogMobile extends StatefulWidget {
-  const PostDialogMobile({super.key,
-    required this.controller, required this.instanceIndex,
-    required this.screenWidth, required this.screenHeight,
-    required this.minHorizontalMargin, required this.minVerticalMargin,
-    required this.minCarouselWidth, required this.minCarouselHeight,
-    required this.titleHeight, required this.maxDetailsHeight,
-    required this.maxWidth,
-  });
-
-  final AdminPremiumVideosListController controller;
-  final int instanceIndex;
-
-  final double screenWidth;
-  final double screenHeight;
-  final double minHorizontalMargin;
-  final double minVerticalMargin;
-  final double minCarouselWidth;
-  final double minCarouselHeight;
-  final double titleHeight;
-  final double maxDetailsHeight;
-  final double maxWidth;
-
-  @override
-  State<PostDialogMobile> createState() => _PostDialogMobileState();
-}
-
-class _PostDialogMobileState extends State<PostDialogMobile> {
-  @override
-  Widget build(BuildContext context) {
-    final maxPostWidth = math.min(widget.screenWidth - widget.minHorizontalMargin * 2.0, widget.maxWidth);
-    final maxPostHeight = widget.screenHeight - widget.minVerticalMargin * 2.0;
-
-    final postIndex = widget.controller.data[widget.instanceIndex]!.selectedPost;
-
-    final postImages = widget.controller.data[widget.instanceIndex]!.providers[postIndex];
-    final imagesAspect = postImages.fold<double>(0.0, (v, e) => math.max(v, (e.$1?? 1.0)));
-
-    double carouselWidth = 0.0;
-    double carouselHeight = 0.0;
-    double detailsHeight = 0.0;
-    double postWidth = 0.0;
-    double postHeight = 0.0;
-
-    carouselHeight = maxPostHeight - widget.titleHeight;
-    carouselWidth = carouselHeight * imagesAspect;
-    if (carouselWidth > maxPostWidth) {
-      carouselWidth = maxPostWidth;
-      carouselHeight = carouselWidth / imagesAspect;
-      if (carouselHeight < widget.minCarouselHeight) {
-        carouselHeight = widget.minCarouselHeight;
-      }
-    }
-    if (carouselWidth < widget.minCarouselWidth) {
-      carouselWidth = widget.minCarouselWidth;
-    }
-    detailsHeight = math.min(maxPostHeight - carouselHeight - widget.titleHeight, widget.maxDetailsHeight);
-
-    postWidth = carouselWidth;
-    postHeight = widget.titleHeight + carouselHeight + detailsHeight;
-
-    double realHMargin = (widget.screenWidth - postWidth) * 0.5;
-    double realVMargin = (widget.screenHeight - postHeight) * 0.5;
-
-
-    String postTile = widget.controller.data[widget.instanceIndex]!.content?[postIndex].tile?? "";
-    String postDescription = widget.controller.data[widget.instanceIndex]!.content?[postIndex].description?? "";
-
-    return Dialog(
-      alignment: Alignment.topCenter,
-      clipBehavior: Clip.antiAliasWithSaveLayer,
-      elevation: 0.0,
-      insetPadding: EdgeInsets.all(0.0),
-      insetAnimationCurve: Curves.easeInBack,
-      backgroundColor: Colors.transparent,
-      insetAnimationDuration: Durations.short1,
-      child: Stack(
-        children: [
-          MyContainer(
-            color: Colors.black45,
-            onTap: () {Navigator.of(context).pop();},
-            paddingAll: 0.0,
-          ),
-          Container(
-            margin: EdgeInsets.fromLTRB(
-              realHMargin, realVMargin, realHMargin, realVMargin,
-            ),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(5.0)),
-            ),
-            child: _mobileLayout(carouselWidth, carouselHeight, postTile, postDescription),
-          ),
-          if (widget.controller.hasPrevPost(widget.instanceIndex))
-            Align(
-              alignment: Alignment.centerLeft,
-              child: MyContainer.shadow(
-                width: 35.0,
-                height: 35.0,
-                margin: EdgeInsets.only(left: 25.0),
-                shape: BoxShape.circle,
-                color: Colors.white,
-                paddingAll: 0.0,
-                onTap: () {
-                  widget.controller.goPrevPost(widget.instanceIndex);
-                  widget.controller.resetCarousel(widget.instanceIndex, true);
-                  setState(() {});
-                },
-                child: Center(
-                  child: Icon(Icons.chevron_left, color:Colors.black, size: 30.0,),
-                ),
-              ),
-            ),
-          if (widget.controller.hasNextPost(widget.instanceIndex))
-            Align(
-              alignment: Alignment.centerRight,
-              child: MyContainer.shadow(
-                width: 35.0,
-                height: 35.0,
-                margin: EdgeInsets.only(right: 25.0),
-                shape: BoxShape.circle,
-                color: Colors.white,
-                paddingAll: 0.0,
-                onTap: () {
-                  widget.controller.goNextPost(widget.instanceIndex);
-                  widget.controller.resetCarousel(widget.instanceIndex, true);
-                  setState(() {});
-                },
-                child: Center(
-                  child: Icon(Icons.chevron_right, color:Colors.black, size: 30.0,),
-                ),
-              ),
-            ),
-          
-          Align(
-            alignment: Alignment.topRight,
-            child: Padding(
-              padding: EdgeInsetsGeometry.only(top: 20.0, right: 20.0,),
-              child: InkWell(
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-                child: Icon(Icons.close, size: 30.0, color: Colors.white,),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _mobileLayout(double carouselWidth, double carouselHeight, String title, String description) {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
-            child: MyText.titleMedium(title, fontWeight: 700,),
-          ),
-          SizedBox(
-            width: carouselWidth,
-            child: _simpleCarousel(
-              widget.controller.data[widget.instanceIndex]!.selectedPost,
-              carouselHeight,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20.0, 20.0, 20.0, 20.0),
-            child: MyText.bodyMedium(description, fontWeight: 500,),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _indicator(bool isActive) {
-    return AnimatedContainer(
-      duration: Duration(milliseconds: 300),
-      curve: Curves.easeInToLinear,
-      margin: EdgeInsets.symmetric(horizontal: 4.0),
-      height: 8.0,
-      width: 8,
-      decoration: BoxDecoration(
-        color: isActive ? Colors.white : Colors.white.withAlpha(140),
-        borderRadius: BorderRadius.all(Radius.circular(4)),
-      ),
-    );
-  }
-
-  Widget _simpleCarousel(int postIndex, double height) {
-    final postImages = widget.controller.data[widget.instanceIndex]!.providers[postIndex];
-    List<Widget> buildPageIndicatorStatic() {
-      List<Widget> list = [];
-      for (int i = 0; i < postImages.length; i++) {
-        list.add(i == widget.controller.data[widget.instanceIndex]!.selectedPostCarousel ? _indicator(true) : _indicator(false));
-      }
-      return list;
-    }
-
-    return Stack(
-      alignment: AlignmentDirectional.center,
-      children: <Widget>[
-        Container(
-          height: height,
-          color: Colors.black,
-          child: PageView(
-            pageSnapping: true,
-            scrollBehavior: AppScrollBehavior(),
-            physics: ClampingScrollPhysics(),
-            controller: widget.controller.data[widget.instanceIndex]!.simplePageController,
-            onPageChanged: (value) {
-              widget.controller.onChangePostCarousel(widget.instanceIndex, value);
-              setState(() {});
-            },
-            children: postImages.map((e) {
-              return MyContainer(
-                color: Colors.transparent,
-                borderRadiusAll: 0,
-                clipBehavior: Clip.antiAliasWithSaveLayer,
-                paddingAll: 0,
-                child: Image(image: e.$2, fit: BoxFit.contain),
-              );
-            }).toList(),
-          ),
-        ),
-        Positioned(
-          bottom: 10,
-          child: Container(
-            padding: EdgeInsets.all(5.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(10.0)),
-              color: Colors.black38,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: buildPageIndicatorStatic(),
-            ),
-          ),
-        ),
-        if (widget.controller.hasPrevImage(widget.instanceIndex))
-          Positioned(
-            left: 10,
-            child: MyContainer.shadow(
-              width: 25.0,
-              height: 25.0,
-              shape: BoxShape.circle,
-              color: Colors.white,
-              paddingAll: 0.0,
-              onTap: () {
-                widget.controller.goPrevCarouselImage(widget.instanceIndex, postIndex);
-                setState(() {});
-              },
-              child: Center(
-                child: Icon(Icons.arrow_left, color:Colors.black, size: 20.0,),
-              ),
-            ),
-          ),
-        if (widget.controller.hasNextImage(widget.instanceIndex, postIndex))
-          Positioned(
-            right: 10,
-            child: MyContainer.shadow(
-              width: 25.0,
-              height: 25.0,
-              shape: BoxShape.circle,
-              color: Colors.white,
-              paddingAll: 0.0,
-              onTap: () {
-                widget.controller.goNextCarouselImage(widget.instanceIndex, postIndex);
-                setState(() {});
-              },
-              child: Center(
-                child: Icon(Icons.arrow_right, color:Colors.black, size: 20.0,),
-              ),
-            ),
-          ),
-      ],
-    );
   }
 }

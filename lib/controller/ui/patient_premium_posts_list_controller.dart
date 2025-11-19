@@ -1,9 +1,7 @@
 import 'dart:math' as math;
 import 'dart:async';
 
-import 'package:blix_essentials/blix_essentials.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:get/get.dart';
 
 import 'package:flutter/material.dart';
 import 'package:medicare/helpers/services/auth_services.dart';
@@ -19,7 +17,7 @@ import 'package:medicare/model/patient_list_model.dart';
 import 'package:medicare/db_manager.dart';
 
 class PatientPremiumPostsListInstanceData {
-  List<PremiumPostModel>? content;
+  List<PremiumPostModel>? posts;
   List<List<(double?, ImageProvider)>> providers = [];
   List<List<Completer<double>>> providersCompleter = [];
   String currentHeader = "";
@@ -70,14 +68,18 @@ class PatientPremiumPostsListController extends MyController {
       patientIsPremium = status?.$1 == SubscriptionStatus.kActive;
     }
 
-    data[instanceIndex]!.content =
+    data[instanceIndex]!.posts =
     (await manager.premiumContent[PremiumContentTypes.kPosts]
                                 [data[instanceIndex]!.currentHeader]
                                 [data[instanceIndex]!.currentSubHeader])
         ?.map<PremiumPostModel>((e) => e as PremiumPostModel).toList();
 
+    if (!patientIsPremium) {
+      data[instanceIndex]!.posts = data[instanceIndex]!.posts!.where((e) => e.free).toList();
+    }
+
     headerNotExist = false;
-    if (data[instanceIndex]!.content == null) {
+    if (data[instanceIndex]!.posts == null) {
       headerNotExist = true;
       contextInstance.doUpdate(instanceIndex);
       return;
@@ -85,8 +87,8 @@ class PatientPremiumPostsListController extends MyController {
 
     data[instanceIndex]!.providersCompleter = [];
     data[instanceIndex]!.providers = [];
-    for (int p = 0; p < data[instanceIndex]!.content!.length; ++p) {
-      final post = data[instanceIndex]!.content![p];
+    for (int p = 0; p < data[instanceIndex]!.posts!.length; ++p) {
+      final post = data[instanceIndex]!.posts![p];
       data[instanceIndex]!.providersCompleter.add(
         List.generate(
           post.images.length,
@@ -141,7 +143,7 @@ class PatientPremiumPostsListController extends MyController {
   void goNextPost(int instanceIndex) {
     data[instanceIndex]!.selectedPost = math.min(
       data[instanceIndex]!.selectedPost + 1,
-      (data[instanceIndex]!.content?.length?? 0) - 1,
+      (data[instanceIndex]!.posts?.length?? 0) - 1,
     );
     contextInstance.doUpdate(instanceIndex);
   }
@@ -152,7 +154,7 @@ class PatientPremiumPostsListController extends MyController {
 
   bool hasNextPost(int instanceIndex) {
     return (data[instanceIndex]!.selectedPost + 1) <
-        (data[instanceIndex]!.content?.length?? 0);
+        (data[instanceIndex]!.posts?.length?? 0);
   }
 
 
@@ -198,5 +200,10 @@ class PatientPremiumPostsListController extends MyController {
       );
     }
     data[instanceIndex]!.selectedPostCarousel = 0;
+  }
+
+
+  bool coverUpPost(int instanceIndex, int postIndex) {
+    return !data[instanceIndex]!.posts![postIndex].free && !patientIsPremium;
   }
 }

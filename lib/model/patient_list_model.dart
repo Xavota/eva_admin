@@ -114,7 +114,8 @@ class PatientListModel extends IdentifierModel {
   PatientListModel(super.id, this.owner, this.userNumber, this.fullName, this.age,
       this.sex, this.weight, this.height, this.waist, this.job, this.birthDate,
       this.phoneNumber, this.status, this.consultationReasons, this.pdfName,
-      this.weightGoal, this.waistGoal);
+      this.weightGoal, this.waistGoal,
+      this.diastolicPressureGoal, this.systolicPressureGoal, this.sugarGoal);
 
   final DoctorModel owner;
   final String userNumber;
@@ -135,6 +136,9 @@ class PatientListModel extends IdentifierModel {
 
   final double? weightGoal;
   final double? waistGoal;
+  final double? diastolicPressureGoal;
+  final double? systolicPressureGoal;
+  final double? sugarGoal;
 
 
   static Future<PatientListModel> fromJSON(Map<String, dynamic> json) async {
@@ -166,10 +170,19 @@ class PatientListModel extends IdentifierModel {
     weightGoal = weightGoal == 0.0 ? null : weightGoal;
     double? waistGoal = jsonDecoder.getDoubleOrNull('waistGoal');
     waistGoal = waistGoal == 0.0 ? null : waistGoal;
+    double? diastolicPressureGoal = jsonDecoder.getDoubleOrNull('diastolicPressureGoal');
+    diastolicPressureGoal = diastolicPressureGoal == 0.0 ? null : diastolicPressureGoal;
+    double? systolicPressureGoal = jsonDecoder.getDoubleOrNull('systolicPressureGoal');
+    systolicPressureGoal = systolicPressureGoal == 0.0 ? null : systolicPressureGoal;
+    double? sugarGoal = jsonDecoder.getDoubleOrNull('sugarGoal');
+    sugarGoal = sugarGoal == 0.0 ? null : sugarGoal;
 
-    return PatientListModel(jsonDecoder.getId, owner, userNumber, fullName, age,
+    return PatientListModel(
+      jsonDecoder.getId, owner, userNumber, fullName, age,
       sex, weight, height, waist, job, birthDate, phoneNumber, status,
-      consultationReasons, pdfName, weightGoal, waistGoal,);
+      consultationReasons, pdfName, weightGoal, waistGoal,
+      diastolicPressureGoal, systolicPressureGoal, sugarGoal,
+    );
   }
 
   static Future<List<PatientListModel>> listFromJSON(List<dynamic> list) async {

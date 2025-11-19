@@ -107,7 +107,7 @@ class _PatientDatesListScreenState extends State<PatientDatesListScreen> with UI
                     ),
                     MyBreadcrumb(
                       children: [
-                        MyBreadcrumbItem(name: 'Tratante'),
+                        MyBreadcrumbItem(name: 'Paciente'),
                         MyBreadcrumbItem(name: 'Lista Citas', active: true),
                       ],
                     ),

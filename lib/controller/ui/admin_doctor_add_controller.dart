@@ -1,45 +1,44 @@
-import 'package:medicare/helpers/utils/my_string_utils.dart';
 import 'package:medicare/helpers/widgets/my_form_validator.dart';
 import 'package:medicare/helpers/widgets/my_validators.dart';
+
+import 'package:medicare/helpers/utils/context_instance.dart';
+
 import 'package:medicare/views/my_controller.dart';
+
 import 'package:flutter/material.dart';
 
 import 'package:medicare/db_manager.dart';
 
-/*enum Gender {
-  male,
-  female;
+class AdminDoctorAddData {}
 
-  const Gender();
-}
-
-enum Department {
-  Orthopedic,
-  Radiology,
-  Dentist,
-  Neurology;
-
-  const Department();
-}*/
 
 class AdminDoctorAddController extends MyController {
   final manager = DBManager.instance!;
   List<GlobalKey<FormState>> formKeys = [];
 
-  //Gender gender = Gender.male;
-  //DateTime? selectedDate;
   MyFormValidator basicValidator = MyFormValidator();
   bool loading = false;
+
+  late final ContextInstance contextInstance = ContextInstance(
+    update,
+    onInstanceAdded: (index) {
+      data[index] = AdminDoctorAddData();
+      contextInstance.addFormKey(index, "form");
+      basicValidator.formKey = contextInstance.getFormKey(index, "form")!;
+    },
+    onInstanceRemoved: (index) {
+      if (data.containsKey(index)) data.remove(index);
+      contextInstance.removeFormKey(index, "form");
+      final prevFormKey = contextInstance.getPrevFormKey(index - 1, "form");
+      if (prevFormKey != null) basicValidator.formKey = prevFormKey;
+    },
+  );
+
+  Map<int, AdminDoctorAddData> data = {};
 
   @override
   void onInit() {
     calculateUserID();
-
-    /*basicValidator.addField(
-      'userNumber', required: true, label: "Número de usuario",
-      validators: [MyDoctorUserNumberValidator()],
-      controller: TextEditingController(),
-    );*/
 
     basicValidator.addField(
       'userNumber', required: true, label: "Número de Usuario",
@@ -88,11 +87,11 @@ class AdminDoctorAddController extends MyController {
     return basicValidator.formKey;
   }
 
-  void disposeFormKey(GlobalKey<FormState> key) {
+  void /**/disposeFormKey(GlobalKey<FormState> key) {
     if (formKeys.contains(key)) {
       formKeys.remove(key);
     }
-    basicValidator.formKey = formKeys.last;
+    basicValidator.formKey = formKeys.isNotEmpty ? formKeys.last : GlobalKey();
   }
 
 

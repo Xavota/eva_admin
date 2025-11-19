@@ -1,12 +1,12 @@
 import 'dart:math' as math;
 
-import 'package:blix_essentials/blix_essentials.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter_lucide/flutter_lucide.dart';
 
 import 'package:get/get.dart';
 
-import 'package:medicare/controller/ui/patient_premium_content_list_controller.dart';
+import 'package:medicare/controller/ui/patient_premium_posts_list_controller.dart';
 import 'package:medicare/helpers/theme/admin_theme.dart';
 
 import 'package:medicare/helpers/utils/utils.dart';
@@ -62,7 +62,7 @@ class _PatientPremiumPostsListScreenState extends State<PatientPremiumPostsListS
     final screenType = MyScreenMedia.getTypeFromWidth(screenSize.width);
 
     return Layout(
-      externalChild: controller.patientIsPremium ? null :
+      /*externalChild: controller.patientIsPremium ? null :
       MyContainer(
         color: Colors.black.withAlpha(200),
         paddingAll: 0,
@@ -88,7 +88,7 @@ class _PatientPremiumPostsListScreenState extends State<PatientPremiumPostsListS
             ),
           ),
         ),
-      ),
+      ),*/
       child: GetBuilder(
         init: controller,
         tag: 'patient_premium_posts_list_controller',
@@ -113,6 +113,36 @@ class _PatientPremiumPostsListScreenState extends State<PatientPremiumPostsListS
 
           double? titlesSize(double? width, double extraPadding) {
             return width == null ? null : width + extraPadding;
+          }
+
+
+          List<Widget> postsCards = controller.data[instanceIndex]!.providers.mapIndexed<Widget>((i, e) =>
+              _contentThumbnailCard(
+                cardsWidth, e[0].$2, false,
+                onTap: () {
+                  if (screenType.isMobile || screenType.isTablet) {
+                    _showPostMobile(
+                      i,
+                      screenWidth: screenSize.width, screenHeight: screenSize.height,
+                      minHorizontalMargin: 80.0, minVerticalMargin: 40.0,
+                      minCarouselWidth: 300.0, minCarouselHeight: 300.0,
+                      titleHeight: 50.0, maxDetailsHeight: 200.0, maxWidth: 500.0,
+                    );
+                  }
+                  else {
+                    _showPostWide(
+                      i,
+                      screenWidth: screenSize.width, screenHeight: screenSize.height,
+                      minHorizontalMargin: 80.0, minVerticalMargin: 40.0,
+                      minCarouselWidth: 500.0, minCarouselHeight: 500.0,
+                      minDetailsWidth: 350.0, maxDetailsWidth: 450.0,
+                    );
+                  }
+                },
+              ),
+          ).toList();
+          if (!controller.patientIsPremium) {
+            postsCards.add(_contentExtraPremiumCard(cardsWidth));
           }
 
 
@@ -143,7 +173,7 @@ class _PatientPremiumPostsListScreenState extends State<PatientPremiumPostsListS
                           ),
                           MyBreadcrumb(
                             children: [
-                              MyBreadcrumbItem(name: 'Tratante'),
+                              MyBreadcrumbItem(name: 'Paciente'),
                               MyBreadcrumbItem(name: 'Contenido Premium', active: true),
                             ],
                           ),
@@ -169,36 +199,14 @@ class _PatientPremiumPostsListScreenState extends State<PatientPremiumPostsListS
                             children: List.generate(70, (i) => MyContainer(width: 2.5, height: 2.5, shape: BoxShape.circle, color: Colors.black54,)),
                           ),
                           MySpacing.height(15),
-                          if (controller.data[instanceIndex]!.content != null && controller.data[instanceIndex]!.content!.isNotEmpty)
+                          if (controller.data[instanceIndex]!.posts != null && controller.data[instanceIndex]!.posts!.isNotEmpty)
                             Wrap(
                               spacing: 1.0,
                               runSpacing: 1.0,
-                              children: controller.data[instanceIndex]!.providers.mapIndexed<Widget>((i, e) =>
-                                _contentThumbnailCard(
-                                  cardsWidth, e[0].$2,
-                                  onTap: () {
-                                    if (screenType.isMobile || screenType.isTablet) {
-                                      _showPostMobile(
-                                        i,
-                                        screenWidth: screenSize.width, screenHeight: screenSize.height,
-                                        minHorizontalMargin: 80.0, minVerticalMargin: 40.0,
-                                        minCarouselWidth: 300.0, minCarouselHeight: 300.0,
-                                        titleHeight: 50.0, maxDetailsHeight: 200.0, maxWidth: 500.0,
-                                      );
-                                    }
-                                    else {
-                                      _showPostWide(
-                                        i,
-                                        screenWidth: screenSize.width, screenHeight: screenSize.height,
-                                        minHorizontalMargin: 80.0, minVerticalMargin: 40.0,
-                                        minCarouselWidth: 500.0, minCarouselHeight: 500.0,
-                                        minDetailsWidth: 350.0, maxDetailsWidth: 450.0,
-                                      );
-                                    }
-                                  },
-                                ),
-                              ).toList(),
+                              children: postsCards
                             )
+                          else if (!controller.patientIsPremium)
+                            _contentExtraPremiumCard(cardsWidth)
                           else
                             MyText.bodySmall("No hay posts aún en esta categoría. Regresa en otro momento para ver todo el contenido disponible."),
                           MySpacing.height(20),
@@ -229,19 +237,96 @@ class _PatientPremiumPostsListScreenState extends State<PatientPremiumPostsListS
     );
   }
 
-  Widget _contentThumbnailCard(double? width, ImageProvider image, {
+  Widget _contentThumbnailCard(double? width, ImageProvider image, bool coverUp, {
     void Function()? onTap
   }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        width: width,
-        height: width == null ? null : width * 1.4,
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: image,
-            fit: BoxFit.cover,
+    return Stack(
+      children: [
+        InkWell(
+          onTap: onTap,
+          child: Container(
+            width: width,
+            height: width == null ? null : width * 1.4,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: image,
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
+        ),
+        if (coverUp)
+          Container(
+            width: width,
+            height: width == null ? null : width * 1.4,
+            decoration: BoxDecoration(
+                color: Colors.black54
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        LucideIcons.crown,
+                        color: Colors.amber,
+                        size: math.min(width == null ? 50.0 : width * 0.2, 100.0),
+                      ),
+                      MySpacing.width(10.0),
+                      Icon(
+                        Icons.lock,
+                        color: Color.fromARGB(255, 200, 200, 200),
+                        size: math.min(width == null ? 50.0 : width * 0.2, 100.0),
+                      ),
+                    ],
+                  ),
+                  MySpacing.height(20.0),
+                  MyText.bodyLarge("Contacta con tu médico para activar tu suscripción", color: Colors.white, fontWeight: 800, textAlign: TextAlign.center,)
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _contentExtraPremiumCard(double? width) {
+    return Container(
+      width: width,
+      height: width == null ? null : width * 1.4,
+      decoration: BoxDecoration(
+          color: Colors.black87
+      ),
+      padding: EdgeInsets.all(10.0),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  LucideIcons.crown,
+                  color: Colors.amber,
+                  size: math.min(width == null ? 50.0 : width * 0.2, 100.0),
+                ),
+                MySpacing.width(10.0),
+                Icon(
+                  Icons.lock,
+                  color: Color.fromARGB(255, 200, 200, 200),
+                  size: math.min(width == null ? 50.0 : width * 0.2, 100.0),
+                ),
+              ],
+            ),
+            MySpacing.height(20.0),
+            MyText.bodyMedium(
+              "Contacta con tu médico para activar tu suscripción y poder ver"
+                  " el resto de contenido disponible",
+              color: Colors.white, fontWeight: 800, textAlign: TextAlign.center,
+            )
+          ],
         ),
       ),
     );
@@ -376,8 +461,8 @@ class _PostDialogWideState extends State<PostDialogWide> {
     double realVMargin = (widget.screenHeight - postHeight) * 0.5;
 
 
-    String postTile = widget.controller.data[widget.instanceIndex]!.content?[postIndex].tile?? "";
-    String postDescription = widget.controller.data[widget.instanceIndex]!.content?[postIndex].description?? "";
+    String postTile = widget.controller.data[widget.instanceIndex]!.posts?[postIndex].tile?? "";
+    String postDescription = widget.controller.data[widget.instanceIndex]!.posts?[postIndex].description?? "";
 
     return Dialog(
       alignment: Alignment.topCenter,
@@ -675,8 +760,8 @@ class _PostDialogMobileState extends State<PostDialogMobile> {
     double realVMargin = (widget.screenHeight - postHeight) * 0.5;
 
 
-    String postTile = widget.controller.data[widget.instanceIndex]!.content?[postIndex].tile?? "";
-    String postDescription = widget.controller.data[widget.instanceIndex]!.content?[postIndex].description?? "";
+    String postTile = widget.controller.data[widget.instanceIndex]!.posts?[postIndex].tile?? "";
+    String postDescription = widget.controller.data[widget.instanceIndex]!.posts?[postIndex].description?? "";
 
     return Dialog(
       alignment: Alignment.topCenter,

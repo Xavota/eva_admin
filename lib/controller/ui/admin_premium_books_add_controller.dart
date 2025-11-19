@@ -89,6 +89,8 @@ class AdminPremiumBooksAddController extends MyController {
   String _currentHeader = "";
   String _currentSubHeader = "";
 
+  bool free = false;
+
   _PostImage? _frontPage;
   ImageProvider? get frontPageProvider {
     return _frontPage?.provider;
@@ -126,6 +128,11 @@ class AdminPremiumBooksAddController extends MyController {
     contextInstance.doUpdate(instanceIndex);
   }
 
+  void onFreeCheckboxChange(int instanceIndex, bool newValue) {
+    free = newValue;
+    contextInstance.doUpdate(instanceIndex);
+  }
+
 
   GlobalKey<FormState> addNewFormKey() {
     formKeys.add(GlobalKey());
@@ -133,11 +140,11 @@ class AdminPremiumBooksAddController extends MyController {
     return basicValidator.formKey;
   }
 
-  void disposeFormKey(GlobalKey<FormState> key) {
+  void /**/disposeFormKey(GlobalKey<FormState> key) {
     if (formKeys.contains(key)) {
       formKeys.remove(key);
     }
-    basicValidator.formKey = formKeys.last;
+    basicValidator.formKey = formKeys.isNotEmpty ? formKeys.last : GlobalKey();
   }
 
   void loadFrontPage(int instanceIndex, String name, Uint8List data, String mime) {
@@ -194,7 +201,7 @@ class AdminPremiumBooksAddController extends MyController {
       }
 
       var errors = await manager.registerPremiumBook(
-        basicValidator.getData(), _currentHeader, _currentSubHeader, frontPageUpload.name.replaceAll('"', ''), bookUpload.name.replaceAll('"', '')
+        basicValidator.getData(), free, _currentHeader, _currentSubHeader, frontPageUpload.name.replaceAll('"', ''), bookUpload.name.replaceAll('"', '')
       );
       if (errors != null) {
         if (errors.containsKey("server")) {

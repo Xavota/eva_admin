@@ -211,7 +211,7 @@ class _AdminPremiumBooksListScreenState extends State<AdminPremiumBooksListScree
                               ),
                             )
                           else
-                            MyText.bodySmall("No hay libros aún en esta categoría, agrega libros para que los tratantes premium puedan ver."),
+                            MyText.bodySmall("No hay libros aún en esta categoría, agrega libros para que los pacientes premium puedan ver."),
                           MySpacing.height(20),
                         ],
                       ),

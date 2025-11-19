@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:medicare/app_constant.dart';
 
 import 'package:medicare/helpers/widgets/my_form_validator.dart';
+import 'package:medicare/helpers/widgets/my_validators.dart';
 import 'package:medicare/helpers/utils/my_utils.dart';
 import 'package:medicare/helpers/services/auth_services.dart';
 import 'package:medicare/views/my_controller.dart';
@@ -21,15 +22,10 @@ import 'package:medicare/db_manager.dart';
 
 
 enum TimeType {
-  kOneDay,
-  kTwoDays,
-  kFiveDays,
-  kOneWeek,
-  kTwoWeeks,
-  kOneMonth,
+  /*kOneMonth,
   kTwoMonths,
   kThreeMonths,
-  kSixMonths,
+  kSixMonths,*/
   kOneYear,
   kCustom
 }
@@ -39,24 +35,14 @@ enum TimeType {
 extension TimeTypeExtension on TimeType {
   String get name {
     switch (this) {
-      case TimeType.kOneDay:
-        return "Un día";
-      case TimeType.kTwoDays:
-        return "Dos días";
-      case TimeType.kFiveDays:
-        return "Cinco días";
-      case TimeType.kOneWeek:
-        return "Una semana";
-      case TimeType.kTwoWeeks:
-        return "Dos semanas";
-      case TimeType.kOneMonth:
+      /*case TimeType.kOneMonth:
         return "Un mes";
       case TimeType.kTwoMonths:
         return "Dos meses";
       case TimeType.kThreeMonths:
         return "Tres meses";
       case TimeType.kSixMonths:
-        return "Seis meses";
+        return "Seis meses";*/
       case TimeType.kOneYear:
         return "Un año";
       case TimeType.kCustom:
@@ -66,28 +52,35 @@ extension TimeTypeExtension on TimeType {
 
   Duration get realTime {
     switch (this) {
-      case TimeType.kOneDay:
-        return Duration(days: 1);
-      case TimeType.kTwoDays:
-        return Duration(days: 2);
-      case TimeType.kFiveDays:
-        return Duration(days: 5);
-      case TimeType.kOneWeek:
-        return Duration(days: 7);
-      case TimeType.kTwoWeeks:
-        return Duration(days: 14);
-      case TimeType.kOneMonth:
+      /*case TimeType.kOneMonth:
         return Duration(days: 30);
       case TimeType.kTwoMonths:
         return Duration(days: 61);
       case TimeType.kThreeMonths:
         return Duration(days: 91);
       case TimeType.kSixMonths:
-        return Duration(days: 182);
+        return Duration(days: 182);*/
       case TimeType.kOneYear:
         return Duration(days: 365);
       case TimeType.kCustom:
         return Duration();
+    }
+  }
+
+  int get monthsCount {
+    switch (this) {
+      /*case TimeType.kOneMonth:
+        return 1;
+      case TimeType.kTwoMonths:
+        return 2;
+      case TimeType.kThreeMonths:
+        return 3;
+      case TimeType.kSixMonths:
+        return 6;*/
+      case TimeType.kOneYear:
+        return 12;
+      case TimeType.kCustom:
+        return -1;
     }
   }
 }
@@ -96,6 +89,8 @@ extension TimeTypeExtension on TimeType {
 class SecretaryPatientDetailController extends MyController {
   final manager = DBManager.instance!;
   List<GlobalKey<FormState>> formKeys = [];
+  List<GlobalKey<FormState>> pinFormKeys = [];
+  MyFormValidator pinValidator = MyFormValidator();
   MyFormValidator basicValidator = MyFormValidator();
 
   bool loading = false;
@@ -111,12 +106,13 @@ class SecretaryPatientDetailController extends MyController {
 
   List<String> dummyTexts = List.generate(12, (index) => MyTextUtils.getDummyText(60));
   String cancelAlertText = "¿Segur@ que quiere cancelar la suscripción de este"
-      " tratante?";
+      " paciente?";
 
 
   DateTime subActivateStarts = DateTime.now();
-  TimeType? subDurationType = TimeType.kOneDay;
+  TimeType? subDurationType = TimeType.kOneYear;
   Duration? subCustomDuration;
+  int? subCustomMonthsCount;
 
   //Uint8List? pdfBytes;
 
@@ -125,16 +121,19 @@ class SecretaryPatientDetailController extends MyController {
   void onInit() {
     _loggedInSecretary = AuthService.loggedUserData as SecretaryModel?;
 
+    pinValidator.addField(
+      'pin', required: true, label: "NIP",
+      validators: [MyIntegerValidator(exactLength: 4)],
+      controller: TextEditingController(),
+    );
+
+
     basicValidator.addField(
       'startDate', required: true, label: "Fecha de Inicio",
       controller: TextEditingController(),
     );
     basicValidator.getController('startDate')!.text = dateFormatter.format(subActivateStarts);
 
-    basicValidator.addField(
-      'durationDays', label: "Duración en Días",
-      controller: TextEditingController(),
-    );
     basicValidator.addField(
       'durationMonths', label: "Duración en Meses",
       controller: TextEditingController(),
@@ -147,17 +146,35 @@ class SecretaryPatientDetailController extends MyController {
     super.onInit();
   }
 
+  GlobalKey<FormState> addNewPinFormKey() {
+    pinFormKeys.add(GlobalKey());
+    pinValidator.formKey = pinFormKeys.last;
+    return pinValidator.formKey;
+  }
+
+  void disposePinFormKey(GlobalKey<FormState> key) {
+    if (pinFormKeys.contains(key)) {
+      pinFormKeys.remove(key);
+    }
+    pinValidator.formKey = pinFormKeys.last;
+  }
+
   GlobalKey<FormState> addNewFormKey() {
     formKeys.add(GlobalKey());
     basicValidator.formKey = formKeys.last;
     return basicValidator.formKey;
   }
 
-  void disposeFormKey(GlobalKey<FormState> key) {
+  void /**/disposeFormKey(GlobalKey<FormState> key) {
     if (formKeys.contains(key)) {
       formKeys.remove(key);
     }
-    basicValidator.formKey = formKeys.last;
+    basicValidator.formKey = formKeys.isNotEmpty ? formKeys.last : GlobalKey();
+  }
+
+
+  void clearPin() {
+    pinValidator.getController('pin')!.text = "";
   }
 
 
@@ -203,13 +220,15 @@ class SecretaryPatientDetailController extends MyController {
     update();
   }
 
-  void changeCustomDuration(int days, int months, int years) {
-    if (days == 0 && months == 0 && years == 0) {
+  void changeCustomDuration(int months, int years) {
+    if (months == 0 && years == 0) {
       subCustomDuration = null;
+      subCustomMonthsCount = null;
       update();
       return;
     }
-    subCustomDuration = Duration(days: days + (months * (365 / 12)).round() + years * 365);
+    subCustomDuration = Duration(days: (months * (365 / 12)).round() + years * 365);
+    subCustomMonthsCount = months + years * 12;
     update();
   }
 
@@ -220,6 +239,39 @@ class SecretaryPatientDetailController extends MyController {
     }
     final duration = subDurationType == TimeType.kCustom ? subCustomDuration! : subDurationType!.realTime;
     return subActivateStarts.add(duration);
+  }
+
+
+  Future<String?> changePatientPin() async {
+    String? validationError;
+
+    if (pinValidator.validateForm()) {
+      loading = true;
+      update();
+
+      var errors = await DBManager.instance!.updatePatientPin(
+          selectedPatient!.userNumber, pinValidator.getController('pin')!.text,
+      );
+      if (errors != null) {
+        if (errors.containsKey("server")) {
+          validationError = errors["server"];
+          errors.remove("server");
+        }
+        if (errors.isNotEmpty) {
+          pinValidator.addErrors(errors);
+          pinValidator.validateForm();
+          pinValidator.clearErrors();
+          validationError = "Hay errores en algunos datos";
+        }
+      }
+      loading = false;
+      update();
+    }
+    else {
+      validationError = "Hay errores en algunos datos";
+    }
+
+    return validationError;
   }
 
 
@@ -248,8 +300,9 @@ class SecretaryPatientDetailController extends MyController {
       update();
 
       final duration = subDurationType == TimeType.kCustom ? subCustomDuration! : subDurationType!.realTime;
+      final monthsCount = subDurationType == TimeType.kCustom ? subCustomMonthsCount! : subDurationType!.monthsCount;
       var errors = await DBManager.instance!.activatePatientSub(
-        selectedPatient!.userNumber, subActivateStarts, subActivateStarts.add(duration)
+        selectedPatient!.userNumber, subActivateStarts, subActivateStarts.add(duration), monthsCount
       );
       if (errors != null) {
         if (errors.containsKey("server")) {

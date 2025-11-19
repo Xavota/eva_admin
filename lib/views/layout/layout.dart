@@ -35,6 +35,9 @@ class Layout extends StatefulWidget {
   State<Layout> createState() => _LayoutState();
 }
 
+
+bool _onAppStarted = true;
+
 class _LayoutState extends State<Layout> {
   final LayoutController controller = LayoutController();
 
@@ -43,6 +46,8 @@ class _LayoutState extends State<Layout> {
   final topBarTheme = AdminTheme.theme.topBarTheme;
 
   final contentTheme = AdminTheme.theme.contentTheme;
+
+  bool initStateFlag = true;
 
   @override
   void initState() {
@@ -57,6 +62,17 @@ class _LayoutState extends State<Layout> {
       return GetBuilder(
           init: controller,
           builder: (controller) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (initStateFlag) {
+                initStateFlag = false;
+                if (_onAppStarted && (controller.scaffoldKey.currentState?.hasDrawer?? false)) {
+                  controller.scaffoldKey.currentState?.openDrawer();
+                  Debug.log("_onAppStarted inside: $_onAppStarted");
+                }
+                _onAppStarted = false;
+                Debug.log("_onAppStarted outside: $_onAppStarted");
+              }
+            });
             return screenMT.isMobile ? mobileScreen() : largeScreen();
           });
     });
@@ -308,10 +324,10 @@ class _LayoutState extends State<Layout> {
             padding: MySpacing.xy(8, 8),
             child: MyButton(
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onPressed: () {
+              onPressed: () async {
                 Debug.log("layout logout", overrideColor: Colors.greenAccent);
                 //AuthService.logoutUser();
-                AuthService.logout();
+                await AuthService.logout();
                 Get.offAllNamed('/auth/login');
               },
               borderRadiusAll: AppStyle.buttonRadius.medium,

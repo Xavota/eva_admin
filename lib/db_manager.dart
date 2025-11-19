@@ -13,11 +13,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:medicare/app_constant.dart';
 
-import 'package:medicare/helpers/utils/my_string_utils.dart';
-import 'package:medicare/model/daily_record_model.dart';
+//import 'package:medicare/helpers/services/json_decoder.dart';
 
+import 'package:medicare/helpers/utils/my_string_utils.dart';
+
+import 'package:medicare/model/daily_record_model.dart';
 import 'package:medicare/model/doctor_model.dart';
 import 'package:medicare/model/prescription_model.dart';
+import 'package:medicare/model/study_model.dart';
 import 'package:medicare/model/secretary_model.dart';
 import 'package:medicare/model/patient_list_model.dart';
 import 'package:medicare/model/date_model.dart';
@@ -25,6 +28,7 @@ import 'package:medicare/model/premium_parent_model.dart';
 import 'package:medicare/model/premium_post_model.dart';
 import 'package:medicare/model/premium_book_model.dart';
 import 'package:medicare/model/premium_video_model.dart';
+import 'package:medicare/model/monthly_subs_model.dart';
 
 import 'package:blix_essentials/blix_essentials.dart';
 
@@ -57,8 +61,8 @@ Future<String> getLocalTimezone() async {
   }
 }*/
 
-@JS('Intl')
-external JSObject _intl;
+/*@JS('Intl')
+external JSObject _intl;*/
 
 /// Create a new Intl.DateTimeFormat()
 @JS('Intl.DateTimeFormat')
@@ -218,6 +222,84 @@ class PrescriptionsDocsMap {
 
   void setPrescriptionMap(String index, Map<String, List<PrescriptionModel>> list) {
     _prescriptions[index] = PrescriptionsPatientsMap(index, list);
+  }
+}
+
+class StudiesPatientsMap {
+  StudiesPatientsMap(this.doctorNumber, Map<String, List<StudyModel>> studies) : _studies = studies;
+
+  final String doctorNumber;
+  final Map<String, List<StudyModel>> _studies;
+  Map<String, List<StudyModel>> get all {
+    return _studies;
+  }
+  List<StudyModel> get allList {
+    return _studies.values.fold<List<StudyModel>>(<StudyModel>[], (f, e) => f..addAll(e)).toList();
+  }
+
+  Future<List<StudyModel>?> operator [](String index) async {
+    if (_studies.containsKey(index)) {
+      return _studies[index]!;
+    }
+    return await DBManager.instance!.getPatientStudies(index, doctorNumber);
+  }
+
+  void setStudyList(String index, List<StudyModel> list) {
+    _studies[index] = list;
+  }
+
+  Future<StudyModel?> getFromID(int id, [String? owner]) async {
+    if (owner != null) {
+      final pl = (await this[owner])?? [];
+      for (final p in pl) {
+        if (p.id == id) return p;
+      }
+      return null;
+    }
+
+    for (final pl in _studies.values) {
+      for (final p in pl) {
+        if (p.id == id) return p;
+      }
+    }
+    return null;
+  }
+}
+
+class StudiesDocsMap {
+  StudiesDocsMap();
+
+  final Map<String, StudiesPatientsMap> _studies = {};
+  Future<Map<String, List<StudyModel>>?> p(String index) async {
+    if (_studies.containsKey(index)) {
+      return _studies[index]!.all;
+    }
+    await DBManager.instance!.getDoctorStudies(index);
+    return _studies[index]?.all;
+  }
+
+  Map<String, Map<String, List<StudyModel>>> get all {
+    Map<String, Map<String, List<StudyModel>>> r = {};
+    for (final p in _studies.entries) {
+      r[p.key] = p.value.all;
+    }
+    return r;
+  }
+
+  List<StudyModel> get allList {
+    return _studies.values.fold<List<StudyModel>>(<StudyModel>[], (f, e) => f..addAll(e.allList)).toList();
+  }
+
+
+  StudiesPatientsMap operator [](String index) {
+    if (!_studies.containsKey(index)) {
+      _studies[index] = StudiesPatientsMap(index, {});
+    }
+    return _studies[index]!;
+  }
+
+  void setStudiesMap(String index, Map<String, List<StudyModel>> list) {
+    _studies[index] = StudiesPatientsMap(index, list);
   }
 }
 
@@ -451,6 +533,32 @@ class CachedPremiumStatus {
 
 }
 
+class DoctorsMonthlySubs {
+  DoctorsMonthlySubs();
+
+  final Map<DateTime, List<MonthlySubsModel>> _totalSubs = {};
+  Map<DateTime, List<MonthlySubsModel>> get all {
+    return _totalSubs;
+  }
+  List<List<MonthlySubsModel>> get allList {
+    return _totalSubs.values.toList();
+  }
+
+  Future<List<MonthlySubsModel>?> operator [](DateTime index) async {
+    DateTime yearMonthTime = DateTime(index.year, index.month);
+    if (_totalSubs.containsKey(yearMonthTime)) {
+      return _totalSubs[yearMonthTime]!;
+    }
+    return await DBManager.instance!.getMonthSubs(yearMonthTime);
+  }
+
+  void setTotalSubs(DateTime index, List<MonthlySubsModel> value) {
+    DateTime yearMonthTime = DateTime(index.year, index.month);
+    _totalSubs[yearMonthTime] = value;
+  }
+}
+
+
 class DBManager {
   static DBManager? _instance;
 
@@ -481,6 +589,10 @@ class DBManager {
   PrescriptionsDocsMap get prescription {
     return _prescription;
   }
+  final StudiesDocsMap _studies = StudiesDocsMap();
+  StudiesDocsMap get studies {
+    return _studies;
+  }
   final DailyRecordsDocsMap _dailyRecords = DailyRecordsDocsMap();
   DailyRecordsDocsMap get dailyRecords {
     return _dailyRecords;
@@ -488,6 +600,10 @@ class DBManager {
   final PremiumTypesMap _premiumContent = PremiumTypesMap();
   PremiumTypesMap get premiumContent {
     return _premiumContent;
+  }
+  final DoctorsMonthlySubs _doctorsMonthlySubs = DoctorsMonthlySubs();
+  DoctorsMonthlySubs get doctorsMonthlySubs {
+    return _doctorsMonthlySubs;
   }
 
   final CachedPremiumStatus _patientsPremiumStatus = CachedPremiumStatus();
@@ -518,7 +634,7 @@ class DBManager {
         "email": email,//"test@mail.com",
         "password": password,//"Blix1234",
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -535,7 +651,7 @@ class DBManager {
         "userNumber": userNumber,//"test@mail.com",
         "pin": pin,//"T3s7P4S5w0rd",
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       for (final e in response.errors) {
@@ -554,7 +670,7 @@ class DBManager {
   getLastDoctorID() async {
     final response = await BlixDBManager.httpPost(
       "fetch_last_doctor_id.php",
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -579,7 +695,7 @@ class DBManager {
         "fullName": data["fullName"],
         "speciality": data["speciality"],
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -612,7 +728,7 @@ class DBManager {
         "proNumber": data["professionalNumber"],
         "speciality": data["speciality"],
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -640,8 +756,8 @@ class DBManager {
       "fetch_doctors.php",
       params: {
         "number": userNumber,
-      }
-      //debug: true,
+      },
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -653,6 +769,60 @@ class DBManager {
     return newList;
   }
 
+  Future<Map<DateTime, List<MonthlySubsModel>>?> getMonthlySubs() async {
+    final response = await BlixDBManager.httpPost(
+      "fetch_monthly_subs.php",
+      params: {},
+      debug: false,
+    );
+    if (response.errors.isNotEmpty) {
+      return null;
+    }
+    final jsonResponse = cnv.jsonDecode(response.response) as Map<String, dynamic>;
+    final Map<DateTime, List<MonthlySubsModel>> r = {};
+    for (final v in jsonResponse.entries) {
+      DateTime time = DateTime.parse(v.key);
+      DateTime yearMonthTime = DateTime(time.year, time.month);
+      r[yearMonthTime] = MonthlySubsModel.listFromJSON(v.value as List<dynamic>);
+      _doctorsMonthlySubs.setTotalSubs(time, r[time]!);
+    }
+    return r;
+  }
+
+  Future<List<MonthlySubsModel>?> getMonthSubs(DateTime time) async {
+    final response = await BlixDBManager.httpPost(
+      "fetch_monthly_subs.php",
+      params: {
+        "time": dbDateFormatter.format(time),
+      },
+      debug: false,
+    );
+    if (response.errors.isNotEmpty) {
+      return null;
+    }
+    final jsonResponse = cnv.jsonDecode(response.response) as List<dynamic>;
+    final List<MonthlySubsModel> r = MonthlySubsModel.listFromJSON(jsonResponse);
+    _doctorsMonthlySubs.setTotalSubs(time, r);
+    return r;
+  }
+
+  Future<MonthlySubsModel?> getDoctorMonthSubs(DateTime time, String doctorNumber) async {
+    final response = await BlixDBManager.httpPost(
+      "fetch_monthly_subs.php",
+      params: {
+        "time": dbDateFormatter.format(time),
+        "doctorNumber": doctorNumber,
+      },
+      debug: false,
+    );
+    if (response.errors.isNotEmpty) {
+      return null;
+    }
+    final jsonResponse = cnv.jsonDecode(response.response) as Map<String, dynamic>;
+    final r = MonthlySubsModel.fromJSON(jsonResponse);
+    return r;
+  }
+
   Future<bool> changeDoctorStatus(String userNumber, bool newStatus) async {
     final response = await BlixDBManager.httpPost(
       "change_doctor_status.php",
@@ -660,7 +830,20 @@ class DBManager {
         "number": userNumber,
         "newStatus": newStatus ? "1" : "0",
       },
-      //debug: true,
+      debug: false,
+    );
+    return response.errors.isEmpty;
+  }
+
+  Future<bool> changeDoctorSubsPayedStatus(String userNumber, DateTime date, bool newStatus) async {
+    final response = await BlixDBManager.httpPost(
+      "change_doctor_subs_payed_status.php",
+      params: {
+        "number": userNumber,
+        "time": dbDateFormatter.format(date),
+        "status": newStatus ? "1" : "0",
+      },
+      debug: false,
     );
     return response.errors.isEmpty;
   }
@@ -676,7 +859,7 @@ class DBManager {
       params: {
         "owner": ownerID,
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -694,7 +877,7 @@ class DBManager {
         "pin": data["pin"],
         "fullName": data["fullName"],
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -725,7 +908,7 @@ class DBManager {
         "pin": data["pin"],
         "fullName": data["fullName"],
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -755,7 +938,7 @@ class DBManager {
         "number": userNumber,
         "owner": doctorOwnerID,
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -774,7 +957,7 @@ class DBManager {
       params: {
         "number": userNumber
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -787,15 +970,17 @@ class DBManager {
     return (status, starts, ends);
   }
 
-  Future<Map<String, String>?> activatePatientSub(String userNumber, DateTime start, DateTime end) async {
+  Future<Map<String, String>?> activatePatientSub(String userNumber, DateTime start, DateTime end, int monthsCount) async {
     final response = await BlixDBManager.httpPost(
       "activate_suscription_patient.php",
       params: {
         "number": userNumber,
         "timeToStart": dbDateTimeFormatter.format(start),
         "timeToEnd": dbDateTimeFormatter.format(end),
+        "today": dbDateTimeFormatter.format(DateTime.now()),
+        "monthsCount": monthsCount.toString(),
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -823,7 +1008,7 @@ class DBManager {
       params: {
         "number": userNumber,
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       for (final e in response.errors) {
@@ -846,7 +1031,7 @@ class DBManager {
   Future<String?> getLastPatientID() async {
     final response = await BlixDBManager.httpPost(
       "fetch_last_patient_id.php",
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -867,7 +1052,7 @@ class DBManager {
       params: {
         "owner": ownerID,
         "userNumber": data["userNumber"],
-        "pin": data["pin"],
+        //"pin": data["pin"],
         "fullName": data["fullName"],
         "age": data["age"],
         "weight": data["weight"],
@@ -879,7 +1064,7 @@ class DBManager {
         "phoneNumber": data["phoneNumber"],
         "consultReasons": (data["consultation"] as List<ConsultationReason>).map<int>((e) => e.dbid).toList().join(","),
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -907,7 +1092,7 @@ class DBManager {
       "update_patient.php",
       params: {
         "userNumber": data["userNumber"],
-        "pin": data["pin"],
+        //"pin": data["pin"],
         "fullName": data["fullName"],
         "age": data["age"],
         "weight": data["weight"],
@@ -919,7 +1104,7 @@ class DBManager {
         "phoneNumber": data["phoneNumber"],
         "consultReasons": (data["consultation"] as List<ConsultationReason>).map<int>((e) => e.dbid).toList().join(","),
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -942,6 +1127,36 @@ class DBManager {
   }
 
   Future<Map<String, String>?>
+  updatePatientPin(String userNumber, String newPin) async {
+    final response = await BlixDBManager.httpPost(
+      "update_patient_pin.php",
+      params: {
+        "userNumber": userNumber,
+        "pin": newPin,
+      },
+      debug: false,
+    );
+    if (response.errors.isNotEmpty) {
+      Map<String, String> r = {};
+      for (final e in response.errors) {
+        if (e == "Missing info") {
+          r.addAll({"server": "Información faltante"});
+        }
+        else if (e == "No user") {
+          r.addAll({"pin": "Número de usuario inexistente"});
+        }
+        else {
+          r.addAll({"server": "Hubo un error en el servidor."
+              " Intentalo de nuevo más tarde"});
+        }
+      }
+      return r;
+    }
+
+    return null;
+  }
+
+  Future<Map<String, String>?>
   updatePatientGoals(String userNumber, Map<String, dynamic> data) async {
     final response = await BlixDBManager.httpPost(
       "update_patient_goals.php",
@@ -949,8 +1164,11 @@ class DBManager {
         "userNumber": userNumber,
         "weightGoal": (data["weightGoal"]?? "") == "" ? "0.0" : data["weightGoal"],
         "waistGoal": (data["waistGoal"]?? "") == "" ? "0.0" : data["waistGoal"],
+        "systolicGoal": (data["systolicGoal"]?? "") == "" ? "0.0" : data["systolicGoal"],
+        "diastolicGoal": (data["diastolicGoal"]?? "") == "" ? "0.0" : data["diastolicGoal"],
+        "sugarGoal": (data["sugarGoal"]?? "") == "" ? "0.0" : data["sugarGoal"],
       },
-      debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -980,8 +1198,8 @@ class DBManager {
       params: {
         "number": userNumber,
         "owner": doctorOwnerID,
-      }
-      //debug: true,
+      },
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -1000,7 +1218,7 @@ class DBManager {
         "number": userNumber,
         "newStatus": newStatus ? "1" : "0",
       },
-      //debug: true,
+      debug: false,
     );
     return response.errors.isEmpty;
   }
@@ -1012,7 +1230,7 @@ class DBManager {
         "number": userNumber,
         "pdfName": pdfName,
       },
-      //debug: true,
+      debug: false,
     );
     return response.errors.isEmpty;
   }
@@ -1037,7 +1255,7 @@ class DBManager {
         "tempPhoneNumber": data["phoneNumber"]?? "",
         "tempConsultReasons": consultReasons?.map<int>((e) => e.dbid).toList().join(",")?? "",
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1079,7 +1297,7 @@ class DBManager {
         "timeZone": localTimeZoneName,
         "userNumber": userNumber,
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -1101,7 +1319,7 @@ class DBManager {
         "creationDate": dbDateFormatter.format(DateTime.now()),
         "plainText": data["plainText"]?.trim()?? "",
       },
-      debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1127,7 +1345,7 @@ class DBManager {
       params: {
         "owner": doctorOwnerID,
       },
-      debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -1149,7 +1367,7 @@ class DBManager {
       params: {
         "userNumber": userNumber,
       },
-      debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -1172,7 +1390,7 @@ class DBManager {
         "id": id.toString(),
         "plainText": data["plainText"]?.trim()?? "",
       },
-      debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1198,7 +1416,7 @@ class DBManager {
       params: {
         "id": id.toString(),
       },
-      debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1213,6 +1431,160 @@ class DBManager {
       }
       return r;
     }
+
+    return null;
+  }
+
+
+  void _preloadStudiesImages() {
+    final images = _studies.allList
+        .fold<List<String>>([], (s, e) => s..addAll(e.images));
+    for (final img in images) {
+      preloadImage("images/studies/$img");
+    }
+  }
+
+  Future<({int? id, Map<String, String>? errors})>
+  registerStudy(Map<String, dynamic> data, String ownerID, String pdfName, bool patientAdded) async {
+    final response = await BlixDBManager.httpPost(
+      "register_study.php",
+      params: {
+        "patientNumber": ownerID,
+        "creationDate": dbDateFormatter.format(DateTime.now()),
+        "description": data["description"]?.trim()?? "",
+        "pdf": pdfName,
+        "patientAdded": patientAdded ? "1" : "0",
+      },
+      debug: false,
+    );
+    if (response.errors.isNotEmpty) {
+      Map<String, String> r = {};
+      for (final e in response.errors) {
+        if (e == "Missing info") {
+          r.addAll({"server": "Información faltante"});
+        }
+        else {
+          r.addAll({"server": "Hubo un error en el servidor."
+              " Intentalo de nuevo más tarde"});
+        }
+      }
+      return (id: null, errors: r);
+    }
+
+    return (id: int.tryParse(response.response), errors: null);
+  }
+
+  Future<Map<String, String>?>
+  registerStudyImage(String imageName, int parent) async {
+    final response = await BlixDBManager.httpPost(
+      "register_study_image.php",
+      params: {
+        "name": imageName,
+        "studyID": parent.toString(),
+      },
+      debug: false,
+    );
+    if (response.errors.isNotEmpty) {
+      Map<String, String> r = {};
+      for (final e in response.errors) {
+        if (e == "Missing info") {
+          r.addAll({"server": "Información faltante"});
+        }
+        else {
+          r.addAll({"server": "Hubo un error en el servidor."
+              " Intentalo de nuevo más tarde"});
+        }
+      }
+      return r;
+    }
+
+    return null;
+  }
+
+  Future<Map<String, List<StudyModel>>?>
+  getDoctorStudies(String doctorOwnerID) async {
+    final response = await BlixDBManager.httpPost(
+      "fetch_studies.php",
+      params: {
+        "owner": doctorOwnerID,
+      },
+      debug: false,
+    );
+    if (response.errors.isNotEmpty) {
+      return null;
+    }
+    final jsonResponse = cnv.jsonDecode(response.response) as Map<String, dynamic>;
+    Map<String, List<StudyModel>> r = {};
+    for (final p in jsonResponse.entries) {
+      final newList = await StudyModel.listFromJSON(p.value);
+      r[p.key] = newList;
+    }
+
+    _studies.setStudiesMap(doctorOwnerID, r);
+    _preloadStudiesImages();
+
+    return r;
+  }
+
+  Future<List<StudyModel>?>
+  getPatientStudies(String userNumber, [String? doctorOwnerID]) async {
+    final response = await BlixDBManager.httpPost(
+      "fetch_studies.php",
+      params: {
+        "userNumber": userNumber,
+      },
+      debug: false,
+    );
+    if (response.errors.isNotEmpty) {
+      return null;
+    }
+    final jsonList = cnv.jsonDecode(response.response) as List;
+    if (jsonList.isEmpty) return [];
+
+    final newList = await StudyModel.listFromJSON(jsonList);
+    final docID = doctorOwnerID?? (jsonList[0]["owner"] as String?)?? "";
+
+    _studies[docID].setStudyList(userNumber, newList);
+    _preloadStudiesImages();
+
+    return newList;
+  }
+
+  Future<Map<String, String>?>
+  deleteStudy(int id) async {
+    final response = await BlixDBManager.httpPost(
+      "delete_study.php",
+      params: {
+        "id": id.toString(),
+      },
+      debug: false,
+    );
+    if (response.errors.isNotEmpty) {
+      Map<String, String> r = {};
+      for (final e in response.errors) {
+        if (e == "Missing info") {
+          r.addAll({"server": "Información faltante"});
+        }
+        else {
+          r.addAll({"server": "Hubo un error en el servidor."
+              " Intentalo de nuevo más tarde"});
+        }
+      }
+      return r;
+    }
+
+    final jsonResponse = cnv.jsonDecode(response.response) as Map<String, dynamic>;
+
+    final pdfName = jsonResponse["pdf"]! as String;
+    if (pdfName.isNotEmpty) {
+      await deleteFile(pdfName, "pdf/studies/");
+    }
+
+    final images = jsonResponse["images"]! as List<dynamic>;
+    await deleteFileBatch(images.map((e) => e as String).toList(), "images/studies/");
+    /*for (final String imgName in images) {
+      await deleteFile(imgName, "images/studies/");
+    }*/
 
     return null;
   }
@@ -1233,9 +1605,10 @@ class DBManager {
         "emotionalState": data["emotionalState"] == null ? "" : data["emotionalState"].index.toString(),
         "sleepTime": data["sleepTime"]?? "",
         "medications": data["medications"] == null ? "" : (data["medications"] ? "1" : "0"),
-        "exercise": data["exercise"] == null ? "" : (data["exercise"] ? "1" : "0"),
+        "weights": data["weights"] == null ? "" : (data["weights"] ? "1" : "0"),
+        "cardio": data["cardio"] == null ? "" : (data["cardio"] ? "1" : "0"),
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1262,7 +1635,7 @@ class DBManager {
         "owner": doctorOwnerID,
         if (ofToday) "date": dbDateFormatter.format(DateTime.now()),
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -1287,7 +1660,7 @@ class DBManager {
         "userNumber": userNumber,
         if (ofToday) "date": dbDateFormatter.format(DateTime.now()),
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -1314,7 +1687,7 @@ class DBManager {
         "name": name,
         "parent": parent?? "",
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1340,9 +1713,9 @@ class DBManager {
     final images = _premiumContent.allList
         .fold<List<(PremiumContentTypes, List<String>)>>([], (s, e) => s..add(
         switch (e) {
-          PremiumPostModel(:var id, :var tile, :var description, :var images) => (PremiumContentTypes.kPosts, images),
-          PremiumBookModel(:var id, :var tile, :var frontPage, :var book) => (PremiumContentTypes.kBooks, [frontPage]),
-          PremiumVideoModel(:var id, :var tile, :var description, :var images) => (PremiumContentTypes.kVideos, []),
+          PremiumPostModel(:var images) => (PremiumContentTypes.kPosts, images),
+          PremiumBookModel(:var frontPage) => (PremiumContentTypes.kBooks, [frontPage]),
+          PremiumVideoModel(:var frontPage) => (PremiumContentTypes.kVideos, [frontPage]),
           PremiumParentModel() => throw UnimplementedError(),
         }
     ));
@@ -1363,7 +1736,7 @@ class DBManager {
     final response = await BlixDBManager.httpPost(
       "fetch_premium_content.php",
       params: {},
-      debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -1404,7 +1777,7 @@ class DBManager {
         "type": type.index.toString(),
         "header": header,
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -1434,7 +1807,7 @@ class DBManager {
         "header": header,
         "subHeader": subHeader,
       },
-      debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       return null;
@@ -1463,7 +1836,7 @@ class DBManager {
         "name": name,
         "prevName": prevName,
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1490,7 +1863,7 @@ class DBManager {
         "name": name,
         if (parent != null) "parent": parent,
       },
-      debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1509,8 +1882,53 @@ class DBManager {
       return r;
     }
 
-    final jsonResponse = cnv.jsonDecode(response.response) as Map<String, dynamic>;
-    for (final fileName in jsonResponse.entries) {
+    //final jsonResponse = cnv.jsonDecode(response.response) as Map<String, dynamic>;
+    final jsonResponse = cnv.jsonDecode(response.response) as List<dynamic>;
+
+    // TODO: TERMINAR ESTO
+    Map<String, List<String>> files = jsonResponse
+        .fold<Map<String, List<String>>>(
+      <String, List<String>>{
+        "image": [], "frontPage": [], "pdf": [], "frontPageV": [],
+      }, (i, e) {
+        e as Map<String, dynamic>;
+        if (e.containsKey("image")) {
+          /*i["image"]!.addAll(e.entries.fold<List<String>>(<String>[], (ii, ee) {
+            if (ee.key == "image") ii.add(ee.value as String);
+            return ii;
+          }));*/
+          i["image"]!.add(e["image"]! as String);
+        }
+        if (e.containsKey("frontPage")) {
+          i["frontPage"]!.add(e["frontPage"]! as String);
+        }
+        if (e.containsKey("pdf")) {
+          i["pdf"]!.add(e["pdf"]! as String);
+        }
+        if (e.containsKey("frontPageV")) {
+          i["frontPageV"]!.add(e["frontPageV"]! as String);
+        }
+        return i;
+      },
+    );
+
+    List<Future<void>> deleteFutures = [];
+    if (files["image"]!.isNotEmpty) {
+      deleteFutures.add(deleteFileBatch(files["image"]!, "images/premium_posts/"));
+    }
+    if (files["frontPage"]!.isNotEmpty) {
+      deleteFutures.add(deleteFileBatch(files["frontPage"]!, "images/premium_books/"));
+    }
+    if (files["pdf"]!.isNotEmpty) {
+      deleteFutures.add(deleteFileBatch(files["pdf"]!, "pdf/premium_books/"));
+    }
+    if (files["frontPageV"]!.isNotEmpty) {
+      deleteFutures.add(deleteFileBatch(files["frontPageV"]!, "images/premium_videos/"));
+    }
+
+    await Future.wait(deleteFutures);
+
+    /*for (final fileName in jsonResponse.entries) {
       if (fileName.key == "image") {
         await deleteFile(fileName.value as String, "images/premium_posts/");
       }
@@ -1520,17 +1938,17 @@ class DBManager {
       else if (fileName.key == "pdf") {
         await deleteFile(fileName.value as String, "pdf/premium_books/");
       }
-      else if (fileName.key == "video") {
-        await deleteFile(fileName.value as String, "videos/premium_videos/");
+      else if (fileName.key == "frontPageV") {
+        await deleteFile(fileName.value as String, "images/premium_videos/");
       }
-    }
+    }*/
 
     return null;
   }
 
 
   Future<({int? id, Map<String, String>? errors})>
-  registerPremiumPost(Map<String, dynamic> data, String header, String subHeader) async {
+  registerPremiumPost(Map<String, dynamic> data, bool free, String header, String subHeader) async {
     final response = await BlixDBManager.httpPost(
       "register_premium_post.php",
       params: {
@@ -1538,8 +1956,9 @@ class DBManager {
         "subHeader": subHeader,
         "title": data["title"]?? "",
         "description": data["description"]?? "",
+        "free": free ? "1" : "0",
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1569,7 +1988,7 @@ class DBManager {
         "name": imageName,
         "postID": parent.toString(),
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1589,15 +2008,16 @@ class DBManager {
   }
 
   Future<Map<String, String>?>
-  editPremiumPost(Map<String, dynamic> data, int id) async {
+  editPremiumPost(Map<String, dynamic> data, int id, bool free) async {
     final response = await BlixDBManager.httpPost(
       "update_premium_post.php",
       params: {
         "id": id.toString(),
         "title": data["title"]?? "",
         "description": data["description"]?? "",
+        "free": free ? "1" : "0",
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1623,7 +2043,7 @@ class DBManager {
       params: {
         "id": id.toString(),
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1640,9 +2060,10 @@ class DBManager {
     }
 
     final jsonResponse = cnv.jsonDecode(response.response) as List<dynamic>;
-    for (final String imgName in jsonResponse) {
+    await deleteFileBatch(jsonResponse.map((e) => e as String).toList(), "images/premium_posts/");
+    /*for (final String imgName in jsonResponse) {
       await deleteFile(imgName, "images/premium_posts/");
-    }
+    }*/
 
     return null;
   }
@@ -1654,7 +2075,7 @@ class DBManager {
       params: {
         "name": imageName,
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1677,17 +2098,18 @@ class DBManager {
 
 
   Future<Map<String, String>?>
-  registerPremiumBook(Map<String, dynamic> data, String header, String subHeader, String frontPageName, String bookName) async {
+  registerPremiumBook(Map<String, dynamic> data, bool free, String header, String subHeader, String frontPageName, String bookName) async {
     final response = await BlixDBManager.httpPost(
       "register_premium_book.php",
       params: {
         "header": header,
         "subHeader": subHeader,
         "title": data["title"]?? "",
+        "free": free ? "1" : "0",
         "frontPageName": frontPageName,
         "bookName": bookName,
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1710,16 +2132,17 @@ class DBManager {
   }
 
   Future<Map<String, String>?>
-  editPremiumBook(Map<String, dynamic> data, int id, String frontPageName, String bookName) async {
+  editPremiumBook(Map<String, dynamic> data, int id, bool free, String frontPageName, String bookName) async {
     final response = await BlixDBManager.httpPost(
       "update_premium_book.php",
       params: {
         "id": id.toString(),
         "title": data["title"]?? "",
+        "free": free ? "1" : "0",
         "frontPageName": frontPageName,
         "bookName": bookName,
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1745,7 +2168,7 @@ class DBManager {
       params: {
         "id": id.toString(),
       },
-      //debug: true,
+      debug: false,
     );
     if (response.errors.isNotEmpty) {
       Map<String, String> r = {};
@@ -1769,6 +2192,100 @@ class DBManager {
   }
 
 
+  Future<Map<String, String>?>
+  registerPremiumVideo(Map<String, dynamic> data, bool free, String header, String subHeader, String frontPageName) async {
+    final response = await BlixDBManager.httpPost(
+      "register_premium_video.php",
+      params: {
+        "header": header,
+        "subHeader": subHeader,
+        "title": data["title"]?? "",
+        "free": free ? "1" : "0",
+        "frontPageName": frontPageName,
+        "embed": data["embed"]?? "",
+      },
+      debug: false,
+    );
+    if (response.errors.isNotEmpty) {
+      Map<String, String> r = {};
+      for (final e in response.errors) {
+        if (e == "Missing info") {
+          r.addAll({"server": "Información faltante"});
+        }
+        else if (e == "Parent") {
+          r.addAll({"server": "La categoría padre no existe"});
+        }
+        else {
+          r.addAll({"server": "Hubo un error en el servidor."
+              " Intentalo de nuevo más tarde"});
+        }
+      }
+      return r;
+    }
+
+    return null;
+  }
+
+  Future<Map<String, String>?>
+  editPremiumVideo(Map<String, dynamic> data, int id, bool free, String frontPageName) async {
+    final response = await BlixDBManager.httpPost(
+      "update_premium_video.php",
+      params: {
+        "id": id.toString(),
+        "title": data["title"]?? "",
+        "free": free ? "1" : "0",
+        "frontPageName": frontPageName,
+        "embed": data["embed"]?? "",
+      },
+      debug: false,
+    );
+    if (response.errors.isNotEmpty) {
+      Map<String, String> r = {};
+      for (final e in response.errors) {
+        if (e == "Missing info") {
+          r.addAll({"server": "Información faltante"});
+        }
+        else {
+          r.addAll({"server": "Hubo un error en el servidor."
+              " Intentalo de nuevo más tarde"});
+        }
+      }
+      return r;
+    }
+
+    return null;
+  }
+
+  Future<Map<String, String>?>
+  deletePremiumVideo(int id) async {
+    final response = await BlixDBManager.httpPost(
+      "delete_premium_video.php",
+      params: {
+        "id": id.toString(),
+      },
+      debug: false,
+    );
+    if (response.errors.isNotEmpty) {
+      Map<String, String> r = {};
+      for (final e in response.errors) {
+        if (e == "Missing info") {
+          r.addAll({"server": "Información faltante"});
+        }
+        else {
+          r.addAll({"server": "Hubo un error en el servidor."
+              " Intentalo de nuevo más tarde"});
+        }
+      }
+      return r;
+    }
+
+    final jsonResponse = cnv.jsonDecode(response.response) as Map<String, dynamic>;
+    await deleteFile(jsonResponse['frontPage'], "images/premium_videos/");
+
+    return null;
+  }
+
+
   // Base URL: ./uploads/
   Future<({bool success, String name})> uploadFile(String name, Uint8List fileData, parser.MediaType type, String pathToUpload) async {
     List<http.MultipartFile> files = [
@@ -1786,7 +2303,7 @@ class DBManager {
         "dir": pathToUpload,
         "type": "${type.type}/${type.subtype}",
       },
-      //debug: true,
+      debug: false,
     );
 
     if (response.errors.isNotEmpty) {
@@ -1804,7 +2321,23 @@ class DBManager {
         "path": path,
         "name": name,
       },
-      //debug: true,
+      debug: false,
+    );
+    if (response.errors.isNotEmpty) {
+      return response.errors[0];
+    }
+    return null;
+  }
+
+  // Base URL: ./uploads/
+  Future<String?> deleteFileBatch(List<String> names, String path) async {
+    final response = await BlixDBManager.httpPost(
+      "delete_file_batch.php",
+      params: {
+        "path": path,
+        "namesArray": names.join(","),
+      },
+      debug: true,
     );
     if (response.errors.isNotEmpty) {
       return response.errors[0];

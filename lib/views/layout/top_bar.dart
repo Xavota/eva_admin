@@ -216,7 +216,7 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
                                   AuthService.loginType == LoginType.kAdmin ?
                                   "Admin" : (AuthService.loginType == LoginType.kDoctor ?
                                   "Médico" : (AuthService.loginType == LoginType.kSecretary ?
-                                  "Secretaria" : "Tratante")),
+                                  "Secretaria" : "Paciente")),
                                 ),
                               )
                             ],
@@ -411,12 +411,12 @@ class _TopBarState extends State<TopBar> with SingleTickerProviderStateMixin, UI
             padding: MySpacing.xy(8, 8),
             child: MyButton(
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              onPressed: () {
+              onPressed: () async {
                 Debug.log("top_bar logout", overrideColor: Colors.greenAccent);
                 languageHideFn?.call();
                 /// TODO: Get.offAll(LoginScreen());
                 //AuthService.logoutUser();
-                AuthService.logout();
+                await AuthService.logout();
                 Get.offAllNamed('/auth/login');
               },
               borderRadiusAll: AppStyle.buttonRadius.medium,

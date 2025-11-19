@@ -217,10 +217,10 @@ class _LerpHelperValues {
 class DailyRecordModel extends IdentifierModel {
   DailyRecordModel.empty(super.id, this.owner, this.date) : weight = null, waist = null,
       systolicBloodPressure = null, diastolicBloodPressure = null, sugarLevel = null,
-      emotionalState = null, sleepTime = null, medications = null, exercise = null;
+      emotionalState = null, sleepTime = null, medications = null, weights = null, cardio = null;
   DailyRecordModel(super.id, this.owner, this.date, this.weight, this.waist,
       this.systolicBloodPressure, this.diastolicBloodPressure, this.sugarLevel,
-      this.emotionalState, this.sleepTime, this.medications, this.exercise);
+      this.emotionalState, this.sleepTime, this.medications, this.weights, this.cardio);
 
   final PatientListModel owner;
   final DateTime date;
@@ -232,7 +232,8 @@ class DailyRecordModel extends IdentifierModel {
   final EmotionalState? emotionalState;
   final double? sleepTime;
   final bool? medications;
-  final bool? exercise;
+  final bool? weights;
+  final bool? cardio;
 
 
   static Future<DailyRecordModel> fromJSON(Map<String, dynamic> json) async {
@@ -257,12 +258,14 @@ class DailyRecordModel extends IdentifierModel {
     sleepTime = sleepTime == 0.0 ? null : sleepTime;
     int? medicationsInt = jsonDecoder.getIntOrNull('medications');
     bool? medications = medicationsInt == null ? null : medicationsInt == 1;
-    int? exerciseInt = jsonDecoder.getIntOrNull('exercise');
-    bool? exercise = exerciseInt == null ? null : exerciseInt == 1;
+    int? weightsInt = jsonDecoder.getIntOrNull('weights');
+    bool? weights = weightsInt == null ? null : weightsInt == 1;
+    int? cardioInt = jsonDecoder.getIntOrNull('cardio');
+    bool? cardio = cardioInt == null ? null : cardioInt == 1;
 
     return DailyRecordModel(jsonDecoder.getId, owner, date, weight, waist,
         systolicBloodPressure, diastolicBloodPressure, sugarLevel,
-        emotionalState, sleepTime, medications, exercise);
+        emotionalState, sleepTime, medications, weights, cardio);
   }
 
   static Future<List<DailyRecordModel>> listFromJSON(List<dynamic> list) async {
@@ -352,13 +355,14 @@ class DailyRecordModel extends IdentifierModel {
     double? systolicBloodPressure = _getNextLerp(newDate, _lerpSysBP, (i) => lerpingList[i].$2.systolicBloodPressure);
     double? diastolicBloodPressure = _getNextLerp(newDate, _lerpDiaBP, (i) => lerpingList[i].$2.diastolicBloodPressure);
     double? sugarLevel = _getNextLerp(newDate, _lerpSugarLevel, (i) => lerpingList[i].$2.sugarLevel);
-    EmotionalState? emotionalState =  null;
+    EmotionalState? emotionalState;
     double? sleepTime = _getNextLerp(newDate, _lerpSleepTime, (i) => lerpingList[i].$2.sleepTime);
-    bool? medications = null;
-    bool? exercise = null;
+    bool? medications;
+    bool? weights;
+    bool? cardio;
 
     return DailyRecordModel(-1, owner, newDate, weight, waist,
     systolicBloodPressure, diastolicBloodPressure, sugarLevel,
-    emotionalState, sleepTime, medications, exercise);
+    emotionalState, sleepTime, medications, weights, cardio);
   }
 }

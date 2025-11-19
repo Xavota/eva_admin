@@ -72,7 +72,7 @@ class _AdminPremiumBooksAddScreenState extends State<AdminPremiumBooksAddScreen>
     return Layout(
       child: GetBuilder(
         init: controller,
-        tag: 'admin_premium_posts_add_controller',
+        tag: 'admin_premium_videos_add_controller',
         builder: (controller) {
           double contentPadding = 20.0;
 
@@ -148,6 +148,19 @@ class _AdminPremiumBooksAddScreenState extends State<AdminPremiumBooksAddScreen>
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  Theme(
+                                    data: ThemeData(colorScheme: colorScheme),
+                                    child: CheckboxListTile(
+                                      value: controller.free,
+                                      onChanged: (value) => controller.onFreeCheckboxChange(instanceIndex, value?? false),
+                                      controlAffinity: ListTileControlAffinity.leading,
+                                      contentPadding: MySpacing.x(0),
+                                      visualDensity: VisualDensity.compact,
+                                      dense: true,
+                                      title: MyText.bodySmall("Contenido Gratis", fontWeight: 600),
+                                    ),
+                                  ),
+                                  MySpacing.height(20.0),
                                   commonTextField(
                                     title: "Título", hintText: "Título del libro",
                                     teController: controller.basicValidator.getController("title"),

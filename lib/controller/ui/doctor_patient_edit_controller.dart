@@ -42,11 +42,11 @@ class DoctorPatientEditController extends MyController {
       controller: TextEditingController(),
     );
 
-    basicValidator.addField(
+    /*basicValidator.addField(
       'pin', label: "NIP",
       validators: [MyIntegerValidator(exactLength: 4)],
       controller: TextEditingController(),
-    );
+    );*/
 
     basicValidator.addField(
       'fullName', required: true, label: "Nombre completo",
@@ -119,10 +119,9 @@ class DoctorPatientEditController extends MyController {
   }
 
 
-  void clearPin() {
+  /*void clearPin() {
     basicValidator.getController('pin')!.text = "";
-  }
-
+  }*/
 
   GlobalKey<FormState> addNewFormKey() {
     formKeys.add(GlobalKey());
@@ -130,11 +129,11 @@ class DoctorPatientEditController extends MyController {
     return basicValidator.formKey;
   }
 
-  void disposeFormKey(GlobalKey<FormState> key) {
+  void /**/disposeFormKey(GlobalKey<FormState> key) {
     if (formKeys.contains(key)) {
       formKeys.remove(key);
     }
-    basicValidator.formKey = formKeys.last;
+    basicValidator.formKey = formKeys.isNotEmpty ? formKeys.last : GlobalKey();
   }
 
 
